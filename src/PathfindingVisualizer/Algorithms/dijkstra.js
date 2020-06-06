@@ -9,9 +9,19 @@ export const dijkstra = (grid, startNode, finishNode) => {
   while (unvisitedNodes.length) {
     sortNodesByDistance(unvisitedNodes);
     const closestNode = unvisitedNodes.shift();
+    if (closestNode.isWall) continue;
+    //need to find more elegant way to work on a copy of the array, maybe move grid to 1d array instead of 2d.
+    if (closestNode.distance === Infinity) {
+      visitedNodesInOrder.forEach((node) => (node.isVisited = false));
+      return visitedNodesInOrder;
+    }
     closestNode.isVisited = true;
     visitedNodesInOrder.push(closestNode);
-    if (closestNode === finishNode) return visitedNodesInOrder;
+    //need to find more elegant way to work on a copy of the array, maybe move grid to 1d array instead of 2d.
+    if (closestNode === finishNode) {
+      visitedNodesInOrder.forEach((node) => (node.isVisited = false));
+      return visitedNodesInOrder;
+    }
     updateUnvisitedNeighborsDistances(closestNode, grid);
   }
 };
@@ -41,12 +51,15 @@ const getUnvisitedNeighbours = (node, grid) => {
 };
 
 function getAllNodes(grid) {
-  const nodes = [];
-  for (const row of grid) {
-    for (const node of row) {
-      nodes.push(node);
-    }
-  }
-  return nodes;
-  //return [].concat(...grid);
+  return [].concat(...grid);
 }
+
+export const getShortestPathNodesInOrder = (finishNode) => {
+  const shortestPathInOrder = [];
+  let currentNode = finishNode;
+  while (currentNode !== null) {
+    shortestPathInOrder.unshift(currentNode);
+    currentNode = currentNode.previousNode;
+  }
+  return shortestPathInOrder;
+};
