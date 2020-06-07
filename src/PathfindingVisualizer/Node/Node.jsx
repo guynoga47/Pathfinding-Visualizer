@@ -1,59 +1,75 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 
 import "./Node.css";
 
-export default class Node extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
+/* const Node = React.memo((props) => {
+  const {
+    row,
+    col,
+    isStart,
+    isFinish,
+    isVisited,
+    isWall,
+    isShortestPath,
+    onMouseDown,
+    onMouseEnter,
+    onMouseUp,
+  } = props;
+  const extraClassName = isStart
+    ? "node-start"
+    : isFinish
+    ? "node-finish"
+    : isVisited
+    ? "node-visited"
+    : isWall
+    ? "node-wall"
+    : isShortestPath
+    ? "node-shortest-path"
+    : "";
+  return (
+    <div
+      id={`node-${row}-${col}`}
+      className={`node ${extraClassName}`}
+      onMouseDown={() => onMouseDown(row, col)}
+      onMouseUp={() => onMouseUp()}
+      onMouseEnter={() => onMouseEnter(row, col)}
+    ></div>
+  );
+});
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      nextProps.isVisited !== this.props.isVisited ||
-      nextProps.isWall !== this.props.isWall ||
-      nextProps.isShortestPath !== this.props.isShortestPath
-    );
-    /*  return true; */
-  }
+export default Node; */
 
+export default class Node extends PureComponent {
   render() {
     const {
       row,
       col,
       isStart,
       isFinish,
-      isVisited,
       isWall,
-      isShortestPath,
       onMouseDown,
       onMouseEnter,
+      onMouseLeave,
       onMouseUp,
     } = this.props;
     const extraClassName = isStart
       ? "node-start"
       : isFinish
       ? "node-finish"
-      : isVisited
-      ? "node-visited"
       : isWall
       ? "node-wall"
-      : isShortestPath
-      ? "node-shortest-path"
       : "";
+    console.log(`rerendering node [${row},${col}]`);
+
     return (
       <div
         id={`node-${row}-${col}`}
         className={`node ${extraClassName}`}
         onMouseDown={() => onMouseDown(row, col)}
-        onMouseUp={() => onMouseUp()}
+        onMouseUp={() => onMouseUp(row, col)}
         onMouseEnter={() => onMouseEnter(row, col)}
+        onMouseLeave={() => onMouseLeave(row, col)}
       ></div>
     );
   }
 }
-
-/* TODO:  */
-/* 
-1. Performance issues, find a way to reduce rerendering and copys on each operation.
-2. implement the shortest path highlighting after finishing the algorithm. */
