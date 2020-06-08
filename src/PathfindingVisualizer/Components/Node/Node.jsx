@@ -47,6 +47,7 @@ export default class Node extends PureComponent {
       isStart,
       isFinish,
       isWall,
+      isVisited,
       onMouseDown,
       onMouseEnter,
       onMouseLeave,
@@ -58,8 +59,10 @@ export default class Node extends PureComponent {
       ? "node-finish"
       : isWall
       ? "node-wall"
+      : isVisited
+      ? "node-visited"
       : "";
-    console.log(`rerendering node [${row},${col}]`);
+    /*     console.log(`rerendering node [${row},${col}]`); */
 
     return (
       <div

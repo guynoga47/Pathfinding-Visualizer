@@ -1,21 +1,32 @@
 import React, { PureComponent } from "react";
-import Node from "./Node/Node";
+import Node from "./Components/Node/Node";
+import SimpleSlider from "./Components/SimpleSlider/SimpleSlider";
+import RestrictedSlider from "./Components/RestrictedSlider/RestrictedSlider";
+import IconButton from "@material-ui/core/IconButton";
+import PlayCircleFilledWhiteIcon from "@material-ui/icons/PlayCircleFilledWhite";
 import "./PathfindingVisualizer.css";
 import { dijkstra, getShortestPathNodesInOrder } from "./Algorithms/dijkstra";
 import ReactDOM from "react-dom";
-/* 
-const START_NODE_ROW = 10;
-const START_NODE_COL = 15;
-const FINISH_NODE_ROW = 10;
-const FINISH_NODE_COL = 35; */
+
+const DEFAULT_GRID_HEIGHT = 25;
+const DEFAULT_GRID_WIDTH = 50;
 
 export default class PathfindingVisualizer extends PureComponent {
   constructor(props) {
     super(props);
+    this.speed = 20;
+    this.gridHeight = DEFAULT_GRID_HEIGHT;
+    this.gridWidth = DEFAULT_GRID_WIDTH;
+    this.startNode = {
+      row: Math.floor(DEFAULT_GRID_HEIGHT / 2),
+      col: Math.floor(DEFAULT_GRID_WIDTH / 5),
+    };
+    this.finishNode = {
+      row: Math.floor(DEFAULT_GRID_HEIGHT / 2),
+      col: Math.floor((DEFAULT_GRID_WIDTH * 4) / 5),
+    };
     this.state = {
       grid: [],
-      startNode: { row: 10, col: 15 },
-      finishNode: { row: 10, col: 35 },
     };
   }
   mouseIsPressed = false;
@@ -26,47 +37,68 @@ export default class PathfindingVisualizer extends PureComponent {
     this.setState({ grid });
   }
 
+  handleSpeedChange = (speed) => {
+    this.speed = speed;
+  };
+
+  handleGridSizeChange = (height) => {
+    console.log(height);
+    this.gridWidth = height * 2;
+    this.gridHeight = height;
+    const startNode = {};
+    startNode.row = Math.floor(this.gridHeight / 2);
+    startNode.col = Math.floor(this.gridWidth / 5);
+    const finishNode = {};
+    finishNode.row = Math.floor(this.gridHeight / 2);
+    finishNode.col = Math.floor((this.gridWidth * 4) / 5);
+    this.startNode = startNode;
+    this.finishNode = finishNode;
+    const grid = this.getInitialGrid();
+    this.setState({ grid });
+    //this.reset(); need to implement, need to reassign refs.
+  };
+
   handleMouseDown = (row, col) => {
     this.mouseIsPressed = true;
-    if (row === this.state.startNode.row && col === this.state.startNode.col) {
-      ReactDOM.findDOMNode(this.inputRefs[row * 50 + col]).classList.remove(
-        "node-start"
-      );
+    if (row === this.startNode.row && col === this.startNode.col) {
+      ReactDOM.findDOMNode(
+        this.inputRefs[row * this.gridWidth + col]
+      ).classList.remove("node-start");
       this.startNodePressed = true;
     } else {
-      if (row !== this.state.startNode.row || col !== this.state.startNode.col)
+      if (row !== this.startNode.row || col !== this.startNode.col)
         this.toggleNodeWall(row, col);
     }
   };
 
   handleMouseLeave = (row, col) => {
     if (this.startNodePressed) {
-      ReactDOM.findDOMNode(this.inputRefs[row * 50 + col]).classList.remove(
-        "node-start"
-      );
+      ReactDOM.findDOMNode(
+        this.inputRefs[row * this.gridWidth + col]
+      ).classList.remove("node-start");
     }
   };
 
   handleMouseEnter = (row, col) => {
-    //console.log("startNode dragged", this.state.startNodePressed);
+    //console.log("startNode dragged", this.startNodePressed);
     //console.log("mouse is pressed", this.state.mouseIsPressed);
     if (!this.mouseIsPressed) return;
     if (
       this.startNodePressed ||
-      (row === this.state.startNode.row && col === this.state.startNode.col)
+      (row === this.startNode.row && col === this.startNode.col)
     ) {
-      ReactDOM.findDOMNode(this.inputRefs[row * 50 + col]).classList.add(
-        "node-start"
-      );
+      ReactDOM.findDOMNode(
+        this.inputRefs[row * this.gridWidth + col]
+      ).classList.add("node-start");
     } else {
-      if (row !== this.state.startNode.row || col !== this.state.startNode.col)
+      if (row !== this.startNode.row || col !== this.startNode.col)
         this.toggleNodeWall(row, col);
     }
   };
 
   handleMouseUp = (row, col) => {
     if (this.startNodePressed) {
-      this.setState({ startNode: { ...this.state.startNode, row, col } });
+      this.startNode = { row, col };
       this.startNodePressed = false;
     }
     this.startNodePressed = false;
@@ -75,17 +107,17 @@ export default class PathfindingVisualizer extends PureComponent {
 
   toggleNodeWall = (row, col) => {
     const node = this.state.grid[row][col];
-    node.isWall = true;
-    ReactDOM.findDOMNode(this.inputRefs[row * 50 + col]).classList.add(
-      "node-wall"
-    );
+    node.isWall = !node.isWall;
+    ReactDOM.findDOMNode(
+      this.inputRefs[row * this.gridWidth + col]
+    ).classList.toggle("node-wall");
   };
 
   getInitialGrid = () => {
     const grid = [];
-    for (let row = 0; row < 20; row++) {
+    for (let row = 0; row < this.gridHeight; row++) {
       const currentRow = [];
-      for (let col = 0; col < 50; col++) {
+      for (let col = 0; col < this.gridWidth; col++) {
         currentRow.push(this.createNode(row, col));
       }
       grid.push(currentRow);
@@ -97,10 +129,8 @@ export default class PathfindingVisualizer extends PureComponent {
     return {
       row,
       col,
-      isStart:
-        row === this.state.startNode.row && col === this.state.startNode.col,
-      isFinish:
-        row === this.state.finishNode.row && col === this.state.finishNode.col,
+      isStart: row === this.startNode.row && col === this.startNode.col,
+      isFinish: row === this.finishNode.row && col === this.finishNode.col,
       distance: Infinity,
       isWall: false,
       previousNode: null,
@@ -112,15 +142,15 @@ export default class PathfindingVisualizer extends PureComponent {
       if (i === visitedNodesInOrder.length) {
         setTimeout(() => {
           this.animateShortestPath(nodesInShortestPathOrder);
-        }, 10 * i);
+        }, this.speed * i);
         return;
       }
       setTimeout(() => {
         const node = visitedNodesInOrder[i];
         ReactDOM.findDOMNode(
-          this.inputRefs[node.row * 50 + node.col]
+          this.inputRefs[node.row * this.gridWidth + node.col]
         ).className = "node node-visited";
-      }, 10 * i);
+      }, this.speed * i);
     }
   }
 
@@ -131,17 +161,16 @@ export default class PathfindingVisualizer extends PureComponent {
         /* document.getElementById(`node-${node.row}-${node.col}`).className =
           "node node-shortest-path"; */
         ReactDOM.findDOMNode(
-          this.inputRefs[node.row * 50 + node.col]
+          this.inputRefs[node.row * this.gridWidth + node.col]
         ).className = "node node-shortest-path";
-      }, 10 * i);
+      }, this.speed * i);
     }
   }
 
   visualizeDijkstra() {
     const { grid } = this.state;
-    const startNode = grid[this.state.startNode.row][this.state.startNode.col];
-    const finishNode =
-      grid[this.state.finishNode.row][this.state.finishNode.col];
+    const startNode = grid[this.startNode.row][this.startNode.col];
+    const finishNode = grid[this.finishNode.row][this.finishNode.col];
     const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
     const nodesInShortestPathOrder = getShortestPathNodesInOrder(finishNode);
     this.animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
@@ -161,20 +190,24 @@ export default class PathfindingVisualizer extends PureComponent {
             display: "flex",
             justifyContent: "center",
             marginBottom: "2em",
+            marginRight: "7.5em",
           }}
         >
-          <button onClick={() => this.visualizeDijkstra()}>
-            Visualize Dijkstra's Algorithm
-          </button>
-          <button
+          <RestrictedSlider onGridSizeChange={this.handleGridSizeChange} />
+          <IconButton color="primary" onClick={() => this.visualizeDijkstra()}>
+            <PlayCircleFilledWhiteIcon style={{ fontSize: "2em" }} />
+          </IconButton>
+          {/*           <button
             onClick={() => {
               console.log(`mouse is pressed: ${this.mouseIsPressed}`);
               console.log(`start node is pressed: ${this.startNodePressed}`);
-              console.log(this.state.startNode);
+              console.log(this.startNode);
+              console.log(this.finishNode);
             }}
           >
-            Press status
-          </button>
+            Status
+          </button> */}
+          <SimpleSlider onSpeedChange={this.handleSpeedChange} />
         </div>
         <div className="grid">
           {grid.map((row, rowIndex) => (
@@ -183,7 +216,7 @@ export default class PathfindingVisualizer extends PureComponent {
                 const { row, col, isWall, isStart, isFinish } = node;
                 return (
                   <Node
-                    key={rowIndex * 50 + nodeIndex}
+                    key={rowIndex * this.gridWidth + nodeIndex}
                     ref={this.setRef}
                     row={row}
                     col={col}
@@ -204,7 +237,6 @@ export default class PathfindingVisualizer extends PureComponent {
     );
   }
 }
-
 /* 
 TODOS:
 1. make grid responsive, using material ui grid container and grid item maybe? 
