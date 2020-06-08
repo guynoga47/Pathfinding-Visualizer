@@ -72,6 +72,8 @@ export default class Node extends PureComponent {
         onMouseUp={() => onMouseUp(row, col)}
         onMouseEnter={() => onMouseEnter(row, col)}
         onMouseLeave={() => onMouseLeave(row, col)}
+        onDragStart={false}
+        onDrop={false}
       ></div>
     );
   }

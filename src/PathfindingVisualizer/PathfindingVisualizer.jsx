@@ -55,15 +55,16 @@ export default class PathfindingVisualizer extends PureComponent {
     this.finishNode = finishNode;
     const grid = this.getInitialGrid();
     this.setState({ grid });
+
     //this.reset(); need to implement, need to reassign refs.
   };
 
   handleMouseDown = (row, col) => {
     this.mouseIsPressed = true;
     if (row === this.startNode.row && col === this.startNode.col) {
-      ReactDOM.findDOMNode(
-        this.inputRefs[row * this.gridWidth + col]
-      ).classList.remove("node-start");
+      ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
+        "node-start"
+      );
       this.startNodePressed = true;
     } else {
       if (row !== this.startNode.row || col !== this.startNode.col)
@@ -73,9 +74,9 @@ export default class PathfindingVisualizer extends PureComponent {
 
   handleMouseLeave = (row, col) => {
     if (this.startNodePressed) {
-      ReactDOM.findDOMNode(
-        this.inputRefs[row * this.gridWidth + col]
-      ).classList.remove("node-start");
+      ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
+        "node-start"
+      );
     }
   };
 
@@ -87,9 +88,9 @@ export default class PathfindingVisualizer extends PureComponent {
       this.startNodePressed ||
       (row === this.startNode.row && col === this.startNode.col)
     ) {
-      ReactDOM.findDOMNode(
-        this.inputRefs[row * this.gridWidth + col]
-      ).classList.add("node-start");
+      ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
+        "node-start"
+      );
     } else {
       if (row !== this.startNode.row || col !== this.startNode.col)
         this.toggleNodeWall(row, col);
@@ -108,9 +109,9 @@ export default class PathfindingVisualizer extends PureComponent {
   toggleNodeWall = (row, col) => {
     const node = this.state.grid[row][col];
     node.isWall = !node.isWall;
-    ReactDOM.findDOMNode(
-      this.inputRefs[row * this.gridWidth + col]
-    ).classList.toggle("node-wall");
+    ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.toggle(
+      "node-wall"
+    );
   };
 
   getInitialGrid = () => {
@@ -148,7 +149,7 @@ export default class PathfindingVisualizer extends PureComponent {
       setTimeout(() => {
         const node = visitedNodesInOrder[i];
         ReactDOM.findDOMNode(
-          this.inputRefs[node.row * this.gridWidth + node.col]
+          this.refs[`node-${node.row}-${node.col}`]
         ).className = "node node-visited";
       }, this.speed * i);
     }
@@ -161,7 +162,7 @@ export default class PathfindingVisualizer extends PureComponent {
         /* document.getElementById(`node-${node.row}-${node.col}`).className =
           "node node-shortest-path"; */
         ReactDOM.findDOMNode(
-          this.inputRefs[node.row * this.gridWidth + node.col]
+          this.refs[`node-${node.row}-${node.col}`]
         ).className = "node node-shortest-path";
       }, this.speed * i);
     }
@@ -176,12 +177,8 @@ export default class PathfindingVisualizer extends PureComponent {
     this.animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
   }
 
-  inputRefs = [];
-  setRef = (ref) => {
-    this.inputRefs.push(ref);
-  };
-
   render() {
+    console.log(this.state.grid);
     const { grid } = this.state;
     return (
       <>
@@ -197,16 +194,13 @@ export default class PathfindingVisualizer extends PureComponent {
           <IconButton color="primary" onClick={() => this.visualizeDijkstra()}>
             <PlayCircleFilledWhiteIcon style={{ fontSize: "2em" }} />
           </IconButton>
-          {/*           <button
+          <button
             onClick={() => {
-              console.log(`mouse is pressed: ${this.mouseIsPressed}`);
-              console.log(`start node is pressed: ${this.startNodePressed}`);
-              console.log(this.startNode);
-              console.log(this.finishNode);
+              console.log(this.refs);
             }}
           >
             Status
-          </button> */}
+          </button>
           <SimpleSlider onSpeedChange={this.handleSpeedChange} />
         </div>
         <div className="grid">
@@ -217,7 +211,9 @@ export default class PathfindingVisualizer extends PureComponent {
                 return (
                   <Node
                     key={rowIndex * this.gridWidth + nodeIndex}
-                    ref={this.setRef}
+                    ondragstart={false}
+                    ondrop={false}
+                    ref={`node-${row}-${col}`}
                     row={row}
                     col={col}
                     isStart={isStart}
