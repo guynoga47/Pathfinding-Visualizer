@@ -13,29 +13,11 @@
   background-color: red;
 }
 
-/* .node-wall {
-    background-color: rgb(12, 53, 71);
-    animation-name: wallAnimation;
-    animation-duration: 0.3s;
-    animation-timing-function: ease-out;
-    animation-delay: 0;
-    animation-direction: alternate;
-    animation-iteration-count: 1;
-    animation-fill-mode: forwards;
-    animation-play-state: running; 
-} */
-
 .node-wall {
   background-color: rgb(12, 53, 71);
   border-color: rgb(12, 53, 71);
   -webkit-animation: jello-horizontal 0.5s both;
   animation: jello-horizontal 0.5s both;
-}
-
-.non-draggable {
-  -webkit-user-drag: none;
-  padding: 0;
-  margin: 0;
 }
 
 /* ----------------------------------------------

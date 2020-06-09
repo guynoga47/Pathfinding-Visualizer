@@ -29,8 +29,16 @@ export default class PathfindingVisualizer extends PureComponent {
       grid: [],
     };
   }
-  mouseIsPressed = false;
-  startNodePressed = false;
+  mouseKeyDown = false;
+  endPointKeyDown = "";
+
+  isStartNode(row, col) {
+    return row === this.startNode.row && col === this.startNode.col;
+  }
+
+  isFinishNode(row, col) {
+    return row === this.finishNode.row && col === this.finishNode.col;
+  }
 
   componentDidMount() {
     const grid = this.getInitialGrid();
@@ -60,49 +68,50 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleMouseDown = (row, col) => {
-    this.mouseIsPressed = true;
-    if (row === this.startNode.row && col === this.startNode.col) {
+    this.mouseKeyDown = true;
+    if (this.isStartNode(row, col) || this.isFinishNode(row, col)) {
+      this.endPointKeyDown = this.isStartNode(row, col) ? "start" : "finish";
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
-        "node-start"
+        `node-${this.endPointKeyDown}`
       );
-      this.startNodePressed = true;
     } else {
-      if (row !== this.startNode.row || col !== this.startNode.col)
-        this.toggleNodeWall(row, col);
+      this.toggleNodeWall(row, col);
     }
   };
 
   handleMouseLeave = (row, col) => {
-    if (this.startNodePressed) {
+    if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
-        "node-start"
+        `node-${this.endPointKeyDown}`
       );
     }
   };
 
   handleMouseEnter = (row, col) => {
-    //console.log("startNode dragged", this.startNodePressed);
-    //console.log("mouse is pressed", this.state.mouseIsPressed);
-    if (!this.mouseIsPressed) return;
+    if (!this.mouseKeyDown) return;
     if (
-      this.startNodePressed ||
-      (row === this.startNode.row && col === this.startNode.col)
+      this.endPointKeyDown ||
+      this.isStartNode(row, col) ||
+      this.isFinishNode(row, col)
     ) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
-        "node-start"
+        `node-${this.endPointKeyDown}`
       );
     } else {
-      if (row !== this.startNode.row || col !== this.startNode.col)
+      if (!this.isStartNode(row, col) && !this.isFinishNode(row, col))
         this.toggleNodeWall(row, col);
     }
   };
 
   handleMouseUp = (row, col) => {
-    if (this.startNodePressed) {
-      this.startNode = { row, col };
+    if (this.endPointKeyDown) {
+      let endPoint =
+        this.endPointKeyDown === "start" ? this.startNode : this.finishNode;
+      endPoint.row = row;
+      endPoint.col = col;
     }
-    this.startNodePressed = false;
-    this.mouseIsPressed = false;
+    this.endPointKeyDown = false;
+    this.mouseKeyDown = false;
   };
 
   toggleNodeWall = (row, col) => {
@@ -129,8 +138,8 @@ export default class PathfindingVisualizer extends PureComponent {
     return {
       row,
       col,
-      isStart: row === this.startNode.row && col === this.startNode.col,
-      isFinish: row === this.finishNode.row && col === this.finishNode.col,
+      isStart: this.isStartNode(row, col),
+      isFinish: this.isFinishNode(row, col),
       distance: Infinity,
       isWall: false,
       previousNode: null,
