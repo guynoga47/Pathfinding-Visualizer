@@ -27,6 +27,8 @@ export default class PathfindingVisualizer extends PureComponent {
     };
     this.state = {
       grid: [],
+      forceRerender: false,
+      isRunning: false,
     };
   }
   mouseKeyDown = false;
@@ -89,11 +91,7 @@ export default class PathfindingVisualizer extends PureComponent {
 
   handleMouseEnter = (row, col) => {
     if (!this.mouseKeyDown) return;
-    if (
-      this.endPointKeyDown ||
-      this.isStartNode(row, col) ||
-      this.isFinishNode(row, col)
-    ) {
+    if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
         `node-${this.endPointKeyDown}`
       );
@@ -167,16 +165,16 @@ export default class PathfindingVisualizer extends PureComponent {
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
       setTimeout(() => {
         const node = nodesInShortestPathOrder[i];
-        /* document.getElementById(`node-${node.row}-${node.col}`).className =
-          "node node-shortest-path"; */
         ReactDOM.findDOMNode(
           this.refs[`node-${node.row}-${node.col}`]
         ).className = "node node-shortest-path";
       }, this.speed * i);
     }
+    this.setState({ isRunning: false });
   }
 
   visualizeDijkstra() {
+    this.setState({ isRunning: true });
     const { grid } = this.state;
     const startNode = grid[this.startNode.row][this.startNode.col];
     const finishNode = grid[this.finishNode.row][this.finishNode.col];
@@ -186,7 +184,7 @@ export default class PathfindingVisualizer extends PureComponent {
   }
 
   render() {
-    console.log(this.state.grid);
+    console.log("rerendering");
     const { grid } = this.state;
     return (
       <>
@@ -198,18 +196,24 @@ export default class PathfindingVisualizer extends PureComponent {
             marginRight: "7.5em",
           }}
         >
-          <RestrictedSlider onGridSizeChange={this.handleGridSizeChange} />
+          <RestrictedSlider
+            onGridSizeChange={this.handleGridSizeChange}
+            disabled={this.state.isRunning}
+          />
           <IconButton color="primary" onClick={() => this.visualizeDijkstra()}>
             <PlayCircleFilledWhiteIcon style={{ fontSize: "2em" }} />
           </IconButton>
           <button
             onClick={() => {
-              console.log(this.refs);
+              console.log(this.state.isRunning);
             }}
           >
             Status
           </button>
-          <SimpleSlider onSpeedChange={this.handleSpeedChange} />
+          <SimpleSlider
+            onSpeedChange={this.handleSpeedChange}
+            disabled={this.state.isRunning}
+          />
         </div>
         <div className="grid">
           {grid.map((row, rowIndex) => (
@@ -240,12 +244,14 @@ export default class PathfindingVisualizer extends PureComponent {
   }
 }
 /* 
-TODOS:
-1. make grid responsive, using material ui grid container and grid item maybe? 
-2. try to add functionality to drag start and end indicators.
-3. try to add functionality to change height and width of the grid. 
-4. deal with wall toggling when passing over it while mouse is pressed
-5. can't cancel walls.
+TODO
+1. Make grid responsive, using material ui grid container and grid item maybe? 
+2. Check edge cases when dragging end points (like when leaving grid and returning, or when dragging one endpoint over the other, 
+  or trying to put end point on a wall, or clicking on end point etc)
+3. Change icons for end points.
+4. Disable sliders when algorithm is running
+5. Add a reset button or reset functionality and invoke it at the correct times.
+6. Change Speed Slider values (Currently opposite of what it should)
 
-5. toggling walls on nodes works without recreating grid, maybe try to implement other attributes (mainly isvisited) as well.
+7. Add DFS, BFS
 */

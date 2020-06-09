@@ -15,7 +15,7 @@ const useStyles = makeStyles({
 export default function ContinuousSlider(props) {
   const classes = useStyles();
   const [value, setValue] = React.useState(20);
-
+  const { disabled } = props;
   const handleChange = (event, newValue) => {
     setValue(newValue);
     props.onSpeedChange(newValue);
@@ -33,6 +33,7 @@ export default function ContinuousSlider(props) {
             max={50}
             min={5}
             onChange={handleChange}
+            disabled={disabled}
             aria-labelledby="continuous-slider"
           />
         </Grid>
