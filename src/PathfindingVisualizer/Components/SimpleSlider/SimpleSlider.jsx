@@ -14,11 +14,14 @@ const useStyles = makeStyles({
 
 export default function ContinuousSlider(props) {
   const classes = useStyles();
-  const [value, setValue] = React.useState(20);
-  const { disabled } = props;
+  const [value, setValue] = React.useState(17);
+  const { disabled, min, max } = props;
   const handleChange = (event, newValue) => {
+    /* let calculatedValue = Math.floor((1 / newValue) * 150); */
+    let res = Math.abs(newValue - 35);
+    console.log(res);
     setValue(newValue);
-    props.onSpeedChange(newValue);
+    props.onSpeedChange(res);
   };
 
   return (
@@ -30,8 +33,8 @@ export default function ContinuousSlider(props) {
         <Grid item xs>
           <Slider
             value={value}
-            max={50}
-            min={5}
+            max={max}
+            min={min}
             onChange={handleChange}
             disabled={disabled}
             aria-labelledby="continuous-slider"

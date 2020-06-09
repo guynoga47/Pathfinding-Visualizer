@@ -1,9 +1,9 @@
-import React, { PureComponent } from "react";
+import React, { Component, PureComponent } from "react";
 import StartNodeIcon from "@material-ui/icons/KeyboardArrowRight";
 import FinishNodeIcon from "@material-ui/icons/TrackChanges";
 import "./Node.css";
 
-export default class Node extends PureComponent {
+export default class Node extends Component {
   render() {
     const {
       row,
@@ -20,6 +20,10 @@ export default class Node extends PureComponent {
       : isFinish
       ? "node-finish"
       : "";
+    if (isStart || isFinish) {
+      console.log(`rendering node-${row}-${col}`);
+      console.log(`${extraClassName}`);
+    }
     const nodeJSX = (
       <div
         id={`node-${row}-${col}`}
@@ -29,9 +33,7 @@ export default class Node extends PureComponent {
         onMouseEnter={() => onMouseEnter(row, col)}
         onMouseLeave={() => onMouseLeave(row, col)}
         onDragStart={(e) => e.preventDefault()}
-      >
-        {/* {isStart ? <StartNodeIcon /> : isFinish ? <FinishNodeIcon /> : ""*/}
-      </div>
+      ></div>
     );
     return nodeJSX;
   }

@@ -1,9 +1,10 @@
-import React, { PureComponent } from "react";
+import React, { Component, PureComponent } from "react";
 import Node from "./Components/Node/Node";
 import SimpleSlider from "./Components/SimpleSlider/SimpleSlider";
 import RestrictedSlider from "./Components/RestrictedSlider/RestrictedSlider";
 import IconButton from "@material-ui/core/IconButton";
-import PlayCircleFilledWhiteIcon from "@material-ui/icons/PlayCircleFilledWhite";
+import PlayIcon from "@material-ui/icons/PlayCircleFilledWhite";
+import ResetIcon from "@material-ui/icons/RotateLeftTwoTone";
 import "./PathfindingVisualizer.css";
 import { dijkstra, getShortestPathNodesInOrder } from "./Algorithms/dijkstra";
 import ReactDOM from "react-dom";
@@ -27,8 +28,9 @@ export default class PathfindingVisualizer extends PureComponent {
     };
     this.state = {
       grid: [],
-      forceRerender: false,
       isRunning: false,
+      isFinished: false,
+      forceRerender: false,
     };
   }
   mouseKeyDown = false;
@@ -52,9 +54,23 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleGridSizeChange = (height) => {
-    console.log(height);
     this.gridWidth = height * 2;
     this.gridHeight = height;
+    this.reset();
+  };
+
+  resetButtonClicked() {
+    let startNode = this.state.grid[this.startNode.row][this.startNode.col];
+    let finishNode = this.state.grid[this.finishNode.row][this.finishNode.col];
+    startNode.isStart = false;
+    startNode.isStart = true;
+    finishNode.isFinish = false;
+    finishNode.isFinish = true;
+    this.reset();
+  }
+
+  reset() {
+    this.setState({ isFinished: false });
     const startNode = {};
     startNode.row = Math.floor(this.gridHeight / 2);
     startNode.col = Math.floor(this.gridWidth / 5);
@@ -65,9 +81,18 @@ export default class PathfindingVisualizer extends PureComponent {
     this.finishNode = finishNode;
     const grid = this.getInitialGrid();
     this.setState({ grid });
+    this.resetNodeStyles();
+  }
 
-    //this.reset(); need to implement, need to reassign refs.
-  };
+  resetNodeStyles() {
+    for (let node in this.refs) {
+      ReactDOM.findDOMNode(this.refs[node]).classList.remove(
+        `node-visited`,
+        `node-shortest-path`,
+        `node-wall`
+      );
+    }
+  }
 
   handleMouseDown = (row, col) => {
     this.mouseKeyDown = true;
@@ -171,6 +196,7 @@ export default class PathfindingVisualizer extends PureComponent {
       }, this.speed * i);
     }
     this.setState({ isRunning: false });
+    this.setState({ isFinished: true });
   }
 
   visualizeDijkstra() {
@@ -200,17 +226,40 @@ export default class PathfindingVisualizer extends PureComponent {
             onGridSizeChange={this.handleGridSizeChange}
             disabled={this.state.isRunning}
           />
-          <IconButton color="primary" onClick={() => this.visualizeDijkstra()}>
-            <PlayCircleFilledWhiteIcon style={{ fontSize: "2em" }} />
-          </IconButton>
+          {this.state.isRunning || this.state.isFinished ? (
+            <IconButton
+              disabled={this.state.isRunning}
+              color="primary"
+              onClick={() => this.resetButtonClicked()}
+            >
+              <ResetIcon style={{ fontSize: "2em" }} />
+            </IconButton>
+          ) : (
+            <IconButton
+              color="primary"
+              onClick={() => this.visualizeDijkstra()}
+            >
+              <PlayIcon style={{ fontSize: "2em" }} />
+            </IconButton>
+          )}
+
           <button
             onClick={() => {
-              console.log(this.state.isRunning);
+              console.log(
+                this.state.grid[this.startNode.row][this.startNode.col]
+              );
+              console.log(
+                ReactDOM.findDOMNode(
+                  this.refs[`node-${this.startNode.row}-${this.startNode.col}`]
+                )
+              );
             }}
           >
             Status
           </button>
           <SimpleSlider
+            min={5}
+            max={30}
             onSpeedChange={this.handleSpeedChange}
             disabled={this.state.isRunning}
           />
@@ -249,9 +298,11 @@ TODO
 2. Check edge cases when dragging end points (like when leaving grid and returning, or when dragging one endpoint over the other, 
   or trying to put end point on a wall, or clicking on end point etc)
 3. Change icons for end points.
-4. Disable sliders when algorithm is running
 5. Add a reset button or reset functionality and invoke it at the correct times.
 6. Change Speed Slider values (Currently opposite of what it should)
 
 7. Add DFS, BFS
+
+
+Need to make start and finish node reenable styles after reset
 */

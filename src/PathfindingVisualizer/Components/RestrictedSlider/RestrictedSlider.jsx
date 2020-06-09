@@ -3,6 +3,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
 
+const MIN = 15;
+const MAX = 35;
+
 const useStyles = makeStyles({
   root: {
     width: 300,
@@ -63,8 +66,8 @@ export default function DiscreteSlider(props) {
         onChange={handleChange}
         disabled={disabled}
         step={null}
-        min={15}
-        max={35}
+        min={MIN}
+        max={MAX}
         valueLabelDisplay="auto"
         marks={marks}
       />
