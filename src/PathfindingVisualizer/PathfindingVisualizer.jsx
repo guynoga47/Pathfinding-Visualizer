@@ -100,7 +100,6 @@ export default class PathfindingVisualizer extends PureComponent {
   handleMouseUp = (row, col) => {
     if (this.startNodePressed) {
       this.startNode = { row, col };
-      this.startNodePressed = false;
     }
     this.startNodePressed = false;
     this.mouseIsPressed = false;
@@ -211,8 +210,6 @@ export default class PathfindingVisualizer extends PureComponent {
                 return (
                   <Node
                     key={rowIndex * this.gridWidth + nodeIndex}
-                    ondragstart={false}
-                    ondrop={false}
                     ref={`node-${row}-${col}`}
                     row={row}
                     col={col}

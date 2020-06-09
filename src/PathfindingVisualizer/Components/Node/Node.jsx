@@ -67,13 +67,19 @@ export default class Node extends PureComponent {
     return (
       <div
         id={`node-${row}-${col}`}
-        className={`node ${extraClassName}`}
+        /*         draggable={true} */
+        className={`node ${extraClassName} non-draggable`}
         onMouseDown={() => onMouseDown(row, col)}
         onMouseUp={() => onMouseUp(row, col)}
         onMouseEnter={() => onMouseEnter(row, col)}
         onMouseLeave={() => onMouseLeave(row, col)}
-        onDragStart={false}
-        onDrop={false}
+        onDragStart={(e) => e.preventDefault()}
+        /*         onDragStart={() => console.log("drag start")}
+        onDragEnter={() => console.log("dragging entered")}
+        onDragLeave={() => console.log("drag leaves")}
+        onDragEnd={() => {
+          console.log("dropped");
+        }} */
       ></div>
     );
   }
