@@ -32,8 +32,9 @@ export default class PathfindingVisualizer extends PureComponent {
   }
   mouseKeyDown = false;
   endPointKeyDown = "";
-  keys = [];
   endPointsPropsToggle = true;
+  /* used to toggle the prop of isStart and isFinished after every reset function. (grid change and reset button currently)
+  so the corresponding node component will "feel" a change to it's prop and will rerender with the relevant style. */
 
   isStartNode = (row, col) => {
     return row === this.startNode.row && col === this.startNode.col;
@@ -56,7 +57,6 @@ export default class PathfindingVisualizer extends PureComponent {
     if (height === this.gridHeight) return;
     this.gridWidth = height * 2;
     this.gridHeight = height;
-    this.keys = this.generateRandomUniqueKeys();
     this.reset();
   };
 
@@ -159,19 +159,6 @@ export default class PathfindingVisualizer extends PureComponent {
     return grid;
   };
 
-  generateRandomUniqueKeys = () => {
-    let keys = [];
-    while (keys.length < this.gridHeight * this.gridWidth) {
-      let key = this.generateRandomKey() + 1;
-      if (keys.indexOf(key) === -1) keys.push(key);
-    }
-    return keys;
-  };
-
-  generateRandomKey = () => {
-    return Math.floor(Math.random() * this.gridHeight * this.gridWidth) + 1;
-  };
-
   createNode = (row, col) => {
     return {
       row,
@@ -264,15 +251,6 @@ export default class PathfindingVisualizer extends PureComponent {
                 //console.log(`reevaluating node-${row}-${col}`);
                 return (
                   <Node
-                    /* generating random key for isStart and isFinish every time grid changes (after every reset operation)
-                        so the component will be remounted, and it's style will re-apply, apperantly changing prop alone doesnt
-                        work and styles only apply when component is mount for the first time, so ew hack it using the key, and
-                        keeping it this way only for the principle. */
-                    /*                     key={
-                      isStart || isFinish
-                        ? this.generateRandomKey()
-                        : rowIndex * this.gridWidth + nodeIndex
-                    } */
                     key={`node-${row}-${col}`}
                     ref={`node-${row}-${col}`}
                     row={row}
@@ -299,12 +277,7 @@ TODO
 2. Check edge cases when dragging end points (like when leaving grid and returning, or when dragging one endpoint over the other, 
   or trying to put end point on a wall, or clicking on end point etc)
 3. Change icons for end points.
-4. Possible bug: when running algorithm, resetting and changing grid size, grid might not display correctly.
-5. Styles sometimes not resetting as they should after algorithm run.
 5. Clicking on end point node disable styling.
 
 7. Add DFS, BFS
-
-
-Need to make start and finish node reenable styles after reset
 */
