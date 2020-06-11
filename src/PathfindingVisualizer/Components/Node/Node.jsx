@@ -1,9 +1,12 @@
-import React, { Component, PureComponent } from "react";
+import React, { PureComponent } from "react";
 import StartNodeIcon from "@material-ui/icons/KeyboardArrowRight";
 import FinishNodeIcon from "@material-ui/icons/TrackChanges";
 import "./Node.css";
 
-export default class Node extends Component {
+/* using class component because we are using refs in the Pathfinding component, and refs can only be applied to
+class components */
+
+export default class Node extends PureComponent {
   render() {
     const {
       row,

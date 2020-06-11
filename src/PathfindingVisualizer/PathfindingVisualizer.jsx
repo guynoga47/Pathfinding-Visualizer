@@ -1,4 +1,4 @@
-import React, { Component, PureComponent } from "react";
+import React, { PureComponent } from "react";
 import Node from "./Components/Node/Node";
 import SimpleSlider from "./Components/SimpleSlider/SimpleSlider";
 import RestrictedSlider from "./Components/RestrictedSlider/RestrictedSlider";
@@ -298,11 +298,10 @@ TODO
 2. Check edge cases when dragging end points (like when leaving grid and returning, or when dragging one endpoint over the other, 
   or trying to put end point on a wall, or clicking on end point etc)
 3. Change icons for end points.
-5. Add a reset button or reset functionality and invoke it at the correct times.
-6. Change Speed Slider values (Currently opposite of what it should)
+5. Add a reset button or reset functionality and invoke it at the correct times. bug: doesnt reset styling on start and finish node, might need to reset
+change the appropriate keys to make them rerender.
 
 7. Add DFS, BFS
 
 
-Need to make start and finish node reenable styles after reset
 */
