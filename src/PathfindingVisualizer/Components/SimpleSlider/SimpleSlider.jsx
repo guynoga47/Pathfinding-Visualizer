@@ -14,10 +14,9 @@ const useStyles = makeStyles({
 
 export default function ContinuousSlider(props) {
   const classes = useStyles();
-  const [value, setValue] = React.useState(17);
+  const [value, setValue] = React.useState(35);
   const { disabled, min, max } = props;
   const handleChange = (event, newValue) => {
-    /* let calculatedValue = Math.floor((1 / newValue) * 150); */
     let res = Math.abs(newValue - 35);
     console.log(res);
     setValue(newValue);

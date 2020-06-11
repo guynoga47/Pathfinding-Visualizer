@@ -14,8 +14,8 @@
 }
 
 .node-wall {
-  background-color: rgb(12, 53, 71);
-  border-color: rgb(12, 53, 71);
+  background-color: rgba(12, 53, 71, 1);
+  border-color: rgba(12, 53, 71, 1);
   -webkit-animation: jello-horizontal 0.5s both;
   animation: jello-horizontal 0.5s both;
 }

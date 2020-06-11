@@ -1,10 +1,7 @@
-import React, { PureComponent } from "react";
+import React, { Component, PureComponent } from "react";
 import Node from "./Components/Node/Node";
-import SimpleSlider from "./Components/SimpleSlider/SimpleSlider";
-import RestrictedSlider from "./Components/RestrictedSlider/RestrictedSlider";
-import IconButton from "@material-ui/core/IconButton";
-import PlayIcon from "@material-ui/icons/PlayCircleFilledWhite";
-import ResetIcon from "@material-ui/icons/RotateLeftTwoTone";
+import Controls from "./Components/Controls/Controls";
+
 import "./PathfindingVisualizer.css";
 import { dijkstra, getShortestPathNodesInOrder } from "./Algorithms/dijkstra";
 import ReactDOM from "react-dom";
@@ -15,7 +12,7 @@ const DEFAULT_GRID_WIDTH = 50;
 export default class PathfindingVisualizer extends PureComponent {
   constructor(props) {
     super(props);
-    this.speed = 20;
+    this.speed = 5;
     this.gridHeight = DEFAULT_GRID_HEIGHT;
     this.gridWidth = DEFAULT_GRID_WIDTH;
     this.startNode = {
@@ -35,14 +32,16 @@ export default class PathfindingVisualizer extends PureComponent {
   }
   mouseKeyDown = false;
   endPointKeyDown = "";
+  keys = [];
+  endPointsPropsToggle = true;
 
-  isStartNode(row, col) {
+  isStartNode = (row, col) => {
     return row === this.startNode.row && col === this.startNode.col;
-  }
+  };
 
-  isFinishNode(row, col) {
+  isFinishNode = (row, col) => {
     return row === this.finishNode.row && col === this.finishNode.col;
-  }
+  };
 
   componentDidMount() {
     const grid = this.getInitialGrid();
@@ -54,37 +53,36 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleGridSizeChange = (height) => {
+    if (height === this.gridHeight) return;
     this.gridWidth = height * 2;
     this.gridHeight = height;
+    this.keys = this.generateRandomUniqueKeys();
     this.reset();
   };
 
-  resetButtonClicked() {
-    let startNode = this.state.grid[this.startNode.row][this.startNode.col];
-    let finishNode = this.state.grid[this.finishNode.row][this.finishNode.col];
-    startNode.isStart = false;
-    startNode.isStart = true;
-    finishNode.isFinish = false;
-    finishNode.isFinish = true;
+  handleResetButtonClicked = () => {
     this.reset();
-  }
+  };
 
-  reset() {
+  remountEndpoints = () => {};
+
+  reset = () => {
     this.setState({ isFinished: false });
-    const startNode = {};
-    startNode.row = Math.floor(this.gridHeight / 2);
-    startNode.col = Math.floor(this.gridWidth / 5);
-    const finishNode = {};
-    finishNode.row = Math.floor(this.gridHeight / 2);
-    finishNode.col = Math.floor((this.gridWidth * 4) / 5);
-    this.startNode = startNode;
-    this.finishNode = finishNode;
-    const grid = this.getInitialGrid();
-    this.setState({ grid });
+    this.startNode = {
+      row: Math.floor(this.gridHeight / 2),
+      col: Math.floor(this.gridWidth / 5),
+    };
+    this.finishNode = {
+      row: Math.floor(this.gridHeight / 2),
+      col: Math.floor((this.gridWidth * 4) / 5),
+    };
     this.resetNodeStyles();
-  }
+    const grid = this.getInitialGrid();
+    this.endPointsPropsToggle = true;
+    this.setState({ grid });
+  };
 
-  resetNodeStyles() {
+  resetNodeStyles = () => {
     for (let node in this.refs) {
       ReactDOM.findDOMNode(this.refs[node]).classList.remove(
         `node-visited`,
@@ -92,9 +90,10 @@ export default class PathfindingVisualizer extends PureComponent {
         `node-wall`
       );
     }
-  }
+  };
 
   handleMouseDown = (row, col) => {
+    if (this.state.isFinished) return;
     this.mouseKeyDown = true;
     if (this.isStartNode(row, col) || this.isFinishNode(row, col)) {
       this.endPointKeyDown = this.isStartNode(row, col) ? "start" : "finish";
@@ -107,6 +106,7 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleMouseLeave = (row, col) => {
+    if (this.state.isFinished) return;
     if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-${this.endPointKeyDown}`
@@ -115,7 +115,7 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleMouseEnter = (row, col) => {
-    if (!this.mouseKeyDown) return;
+    if (this.state.isFinished || !this.mouseKeyDown) return;
     if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
         `node-${this.endPointKeyDown}`
@@ -127,11 +127,13 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleMouseUp = (row, col) => {
+    if (this.state.isFinished) return;
     if (this.endPointKeyDown) {
       let endPoint =
         this.endPointKeyDown === "start" ? this.startNode : this.finishNode;
       endPoint.row = row;
       endPoint.col = col;
+      this.endPointsPropsToggle = false;
     }
     this.endPointKeyDown = false;
     this.mouseKeyDown = false;
@@ -157,6 +159,19 @@ export default class PathfindingVisualizer extends PureComponent {
     return grid;
   };
 
+  generateRandomUniqueKeys = () => {
+    let keys = [];
+    while (keys.length < this.gridHeight * this.gridWidth) {
+      let key = this.generateRandomKey() + 1;
+      if (keys.indexOf(key) === -1) keys.push(key);
+    }
+    return keys;
+  };
+
+  generateRandomKey = () => {
+    return Math.floor(Math.random() * this.gridHeight * this.gridWidth) + 1;
+  };
+
   createNode = (row, col) => {
     return {
       row,
@@ -169,7 +184,8 @@ export default class PathfindingVisualizer extends PureComponent {
     };
   };
 
-  animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder) {
+  animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
+    this.endPointsPropsToggle = false;
     for (let i = 0; i <= visitedNodesInOrder.length; i++) {
       if (i === visitedNodesInOrder.length) {
         setTimeout(() => {
@@ -184,9 +200,9 @@ export default class PathfindingVisualizer extends PureComponent {
         ).className = "node node-visited";
       }, this.speed * i);
     }
-  }
+  };
 
-  animateShortestPath(nodesInShortestPathOrder) {
+  animateShortestPath = (nodesInShortestPathOrder) => {
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
       setTimeout(() => {
         const node = nodesInShortestPathOrder[i];
@@ -195,11 +211,10 @@ export default class PathfindingVisualizer extends PureComponent {
         ).className = "node node-shortest-path";
       }, this.speed * i);
     }
-    this.setState({ isRunning: false });
-    this.setState({ isFinished: true });
-  }
+    this.setState({ isRunning: false, isFinished: true });
+  };
 
-  visualizeDijkstra() {
+  visualizeDijkstra = () => {
     this.setState({ isRunning: true });
     const { grid } = this.state;
     const startNode = grid[this.startNode.row][this.startNode.col];
@@ -207,77 +222,63 @@ export default class PathfindingVisualizer extends PureComponent {
     const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
     const nodesInShortestPathOrder = getShortestPathNodesInOrder(finishNode);
     this.animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
-  }
+  };
 
   render() {
     console.log("rerendering");
     const { grid } = this.state;
     return (
       <>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginBottom: "2em",
-            marginRight: "7.5em",
+        <Controls
+          isFinished={this.state.isFinished}
+          isRunning={this.state.isRunning}
+          resetButtonClicked={this.handleResetButtonClicked}
+          visualizeDijkstra={this.visualizeDijkstra}
+          handleSpeedChange={this.handleSpeedChange}
+          handleGridSizeChange={this.handleGridSizeChange}
+        />
+
+        <button
+          onClick={() => {
+            console.log(grid[this.startNode.row][this.startNode.col]);
+            console.log(grid[this.finishNode.row][this.finishNode.col]);
+            console.log(
+              ReactDOM.findDOMNode(
+                this.refs[`node-${this.startNode.row}-${this.startNode.col}`]
+              )
+            );
+            console.log(
+              ReactDOM.findDOMNode(
+                this.refs[`node-${this.finishNode.row}-${this.finishNode.col}`]
+              )
+            );
           }}
         >
-          <RestrictedSlider
-            onGridSizeChange={this.handleGridSizeChange}
-            disabled={this.state.isRunning}
-          />
-          {this.state.isRunning || this.state.isFinished ? (
-            <IconButton
-              disabled={this.state.isRunning}
-              color="primary"
-              onClick={() => this.resetButtonClicked()}
-            >
-              <ResetIcon style={{ fontSize: "2em" }} />
-            </IconButton>
-          ) : (
-            <IconButton
-              color="primary"
-              onClick={() => this.visualizeDijkstra()}
-            >
-              <PlayIcon style={{ fontSize: "2em" }} />
-            </IconButton>
-          )}
-
-          <button
-            onClick={() => {
-              console.log(
-                this.state.grid[this.startNode.row][this.startNode.col]
-              );
-              console.log(
-                ReactDOM.findDOMNode(
-                  this.refs[`node-${this.startNode.row}-${this.startNode.col}`]
-                )
-              );
-            }}
-          >
-            Status
-          </button>
-          <SimpleSlider
-            min={5}
-            max={30}
-            onSpeedChange={this.handleSpeedChange}
-            disabled={this.state.isRunning}
-          />
-        </div>
+          Status
+        </button>
         <div className="grid">
           {grid.map((row, rowIndex) => (
             <div key={rowIndex} className="row">
               {row.map((node, nodeIndex) => {
-                const { row, col, isWall, isStart, isFinish } = node;
+                const { row, col, isStart, isFinish } = node;
+                //console.log(`reevaluating node-${row}-${col}`);
                 return (
                   <Node
-                    key={rowIndex * this.gridWidth + nodeIndex}
+                    /* generating random key for isStart and isFinish every time grid changes (after every reset operation)
+                        so the component will be remounted, and it's style will re-apply, apperantly changing prop alone doesnt
+                        work and styles only apply when component is mount for the first time, so ew hack it using the key, and
+                        keeping it this way only for the principle. */
+                    /*                     key={
+                      isStart || isFinish
+                        ? this.generateRandomKey()
+                        : rowIndex * this.gridWidth + nodeIndex
+                    } */
+                    key={`node-${row}-${col}`}
                     ref={`node-${row}-${col}`}
                     row={row}
                     col={col}
-                    isStart={isStart}
-                    isFinish={isFinish}
-                    isWall={isWall}
+                    isStart={isStart && this.endPointsPropsToggle}
+                    isFinish={isFinish && this.endPointsPropsToggle}
                     onMouseDown={this.handleMouseDown}
                     onMouseEnter={this.handleMouseEnter}
                     onMouseLeave={this.handleMouseLeave}
@@ -298,10 +299,12 @@ TODO
 2. Check edge cases when dragging end points (like when leaving grid and returning, or when dragging one endpoint over the other, 
   or trying to put end point on a wall, or clicking on end point etc)
 3. Change icons for end points.
-5. Add a reset button or reset functionality and invoke it at the correct times. bug: doesnt reset styling on start and finish node, might need to reset
-change the appropriate keys to make them rerender.
+4. Possible bug: when running algorithm, resetting and changing grid size, grid might not display correctly.
+5. Styles sometimes not resetting as they should after algorithm run.
+5. Clicking on end point node disable styling.
 
 7. Add DFS, BFS
 
 
+Need to make start and finish node reenable styles after reset
 */
