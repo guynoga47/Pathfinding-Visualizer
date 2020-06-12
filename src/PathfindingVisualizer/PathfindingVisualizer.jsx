@@ -44,7 +44,7 @@ export default class PathfindingVisualizer extends PureComponent {
   }
   mouseKeyDown = false;
   endPointKeyDown = "";
-  endPointsPropsToggle = true;
+  endPointsRerenderToggle = true;
   /* used to toggle the prop of isStart and isFinished after every reset function. (grid change and reset button currently)
   so the corresponding node component will "feel" a change to it's prop and will rerender with the relevant style. */
 
@@ -88,7 +88,7 @@ export default class PathfindingVisualizer extends PureComponent {
     this.setState({ isFinished: false });
     this.resetNodeStyles();
     const grid = this.getInitialGrid();
-    this.endPointsPropsToggle = true;
+    this.endPointsRerenderToggle = true;
     this.setState({ grid });
   };
 
@@ -144,9 +144,7 @@ export default class PathfindingVisualizer extends PureComponent {
         this.endPointKeyDown === "start" ? this.startNode : this.finishNode;
       endPoint.row = row;
       endPoint.col = col;
-      console.log(this.startNode);
-      console.log(this.finishNode);
-      this.endPointsPropsToggle = false;
+      this.endPointsRerenderToggle = false;
     }
     this.endPointKeyDown = false;
     this.mouseKeyDown = false;
@@ -161,9 +159,6 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   getInitialGrid = () => {
-    console.log("creating new grid...");
-    console.log("start node: ", this.startNode);
-    console.log("finish node: ", this.finishNode);
     const grid = [];
     for (let row = 0; row < this.gridHeight; row++) {
       const currentRow = [];
@@ -188,7 +183,15 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
-    this.endPointsPropsToggle = false;
+    console.log(
+      "endpointsPropsToggle in animateDijkstra:before toggle",
+      this.endPointsRerenderToggle
+    );
+    this.endPointsRerenderToggle = !this.endPointsRerenderToggle;
+    console.log(
+      "endpointsPropsToggle in animateDijkstra: after toggle",
+      this.endPointsRerenderToggle
+    );
     for (let i = 0; i <= visitedNodesInOrder.length; i++) {
       if (i === visitedNodesInOrder.length) {
         setTimeout(() => {
@@ -200,7 +203,7 @@ export default class PathfindingVisualizer extends PureComponent {
         const node = visitedNodesInOrder[i];
         ReactDOM.findDOMNode(
           this.refs[`node-${node.row}-${node.col}`]
-        ).className = "node node-visited";
+        ).classList.add("node-visited");
       }, this.speed * i);
     }
   };
@@ -211,7 +214,7 @@ export default class PathfindingVisualizer extends PureComponent {
         const node = nodesInShortestPathOrder[i];
         ReactDOM.findDOMNode(
           this.refs[`node-${node.row}-${node.col}`]
-        ).className = "node node-shortest-path";
+        ).classList.add("node-shortest-path");
       }, this.speed * i);
     }
     this.setState({ isRunning: false, isFinished: true });
@@ -262,6 +265,10 @@ export default class PathfindingVisualizer extends PureComponent {
           Status
         </button>
         <div className="grid">
+          {console.log(
+            "endpointsPropsToggle in render",
+            this.endPointsRerenderToggle
+          )}
           {grid.map((row, rowIndex) => (
             <div key={rowIndex} className="row">
               {row.map((node, nodeIndex) => {
@@ -273,8 +280,8 @@ export default class PathfindingVisualizer extends PureComponent {
                     ref={`node-${row}-${col}`}
                     row={row}
                     col={col}
-                    isStart={isStart && this.endPointsPropsToggle}
-                    isFinish={isFinish && this.endPointsPropsToggle}
+                    isStart={isStart && this.endPointsRerenderToggle}
+                    isFinish={isFinish && this.endPointsRerenderToggle}
                     onMouseDown={this.handleMouseDown}
                     onMouseEnter={this.handleMouseEnter}
                     onMouseLeave={this.handleMouseLeave}
@@ -295,7 +302,12 @@ TODO
 2. Check edge cases when dragging end points (like when leaving grid and returning, or when dragging one endpoint over the other, 
   or trying to put end point on a wall, or clicking on end point etc)
 3. Change icons for end points.
-5. Clicking on end point node disable styling.
+
 
 7. Add DFS, BFS
+
+BUG:
+
+1. Clicking on end point node disable styling.
+
 */
