@@ -45,8 +45,15 @@ export default class PathfindingVisualizer extends PureComponent {
   mouseKeyDown = false;
   endPointKeyDown = "";
   endPointsRerenderToggle = true;
-  /* used to toggle the prop of isStart and isFinished after every reset function. (grid change and reset button currently)
-  so the corresponding node component will "feel" a change to it's prop and will rerender with the relevant style. */
+  /* endPointsRerenderToggle:
+  used to toggle the prop of isStart and isFinished after every time they need to update their style, to correspond
+  to the correct nodes in the grid. 
+  cases: 
+  1. if we didn't change neither endpoint position then it goes true -> false(animateDijkstra) -> false(render) so no rerender because not needed. 
+  2. if we changed either endpoint position then it goes true -> false (handleMouseUp) -> true (animateDijkstra) -> true(render) 
+  and together with isStart or isFinish now becomes true for the new endPoint (because of the calculation in the map) the node knows it's
+  prop changed and it need to rerender and apply styles. 
+  */
 
   isStartNode = (row, col) => {
     return row === this.startNode.row && col === this.startNode.col;
@@ -145,6 +152,9 @@ export default class PathfindingVisualizer extends PureComponent {
       endPoint.row = row;
       endPoint.col = col;
       this.endPointsRerenderToggle = false;
+      ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
+        `node-${this.endPointKeyDown}`
+      );
     }
     this.endPointKeyDown = false;
     this.mouseKeyDown = false;
@@ -210,14 +220,18 @@ export default class PathfindingVisualizer extends PureComponent {
 
   animateShortestPath = (nodesInShortestPathOrder) => {
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
+      if (i === nodesInShortestPathOrder.length - 1) {
+        setTimeout(() => {
+          this.setState({ isRunning: false, isFinished: true });
+        }, (this.speed + 50) * i);
+      }
       setTimeout(() => {
         const node = nodesInShortestPathOrder[i];
         ReactDOM.findDOMNode(
           this.refs[`node-${node.row}-${node.col}`]
         ).classList.add("node-shortest-path");
-      }, this.speed * i);
+      }, (this.speed + 50) * i);
     }
-    this.setState({ isRunning: false, isFinished: true });
   };
 
   visualizeDijkstra = () => {
@@ -302,9 +316,17 @@ TODO
 2. Check edge cases when dragging end points (like when leaving grid and returning, or when dragging one endpoint over the other, 
   or trying to put end point on a wall, or clicking on end point etc)
 3. Change icons for end points.
+4. Animation on wall nodes sometimes leaves some kind of "trail", like the border stays on the wall color.
+5. When resetting without changing either endpoint position, endpoints styles are not showing when visualizing.
+
 
 
 7. Add DFS, BFS
+8. Generate random terrain feature?
+9. Settings Button.
+10. find better animation gradients and colors.
+11. After algorithm finishes to run, change start and end node so
+
 
 BUG:
 

@@ -7,15 +7,17 @@
 
 .node-start {
   background-color: green;
+  border-color: green
 }
 
 .node-finish {
   background-color: red;
+  border-color: red;
 }
 
 .node-wall {
-  background-color: rgba(12, 53, 71, 1);
-  border-color: rgba(12, 53, 71, 1);
+  background-color: rgba(12, 53, 71);
+  border-color: rgba(12, 53, 71);
   -webkit-animation: jello-horizontal 0.5s both;
   animation: jello-horizontal 0.5s both;
 }
@@ -108,7 +110,7 @@
 
 .node-visited {
   animation-name: visitedAnimation;
-  animation-duration: 1.5s;
+  animation-duration: 1.0s;
   animation-timing-function: ease-out;
   animation-delay: 0;
   animation-direction: alternate;
@@ -121,26 +123,29 @@
   0% {
     transform: scale(0.3);
     background-color: rgba(0, 0, 66, 0.75);
+    border-color: rgba(0, 0, 66, 0.75);
     border-radius: 100%;
   }
 
   50% {
     background-color: rgba(17, 104, 217, 0.75);
+    border-color: rgba(17, 104, 217, 0.75);
   }
 
   75% {
     transform: scale(1.2);
     background-color: rgba(0, 217, 159, 0.75);
+    border-color: rgba(0, 217, 159, 0.75);
   }
 
   100% {
     transform: scale(1);
     background-color: rgba(0, 190, 218, 0.75);
+    border-color: rgba(0, 190, 218, 0.75);
   }
 }
 
 .node-shortest-path {
-  background-color: black;
   animation-name: shortestPath;
   animation-duration: 1.5s;
   animation-timing-function: ease-out;
@@ -155,15 +160,18 @@
   0% {
     transform: scale(0.6);
     background-color: rgb(255, 254, 106);
+    border-color: rgb(255, 254, 106);
   }
 
   50% {
     transform: scale(1.2);
     background-color: rgb(255, 254, 106);
+    border-color: rgb(255, 254, 106);
   }
 
   100% {
     transform: scale(1);
     background-color: rgb(255, 254, 106);
+    border-color: rgb(255, 254, 106);
   }
 }
