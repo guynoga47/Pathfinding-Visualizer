@@ -4,6 +4,7 @@ import RestrictedSlider from "../RestrictedSlider/RestrictedSlider";
 import IconButton from "@material-ui/core/IconButton";
 import PlayIcon from "@material-ui/icons/PlayCircleFilledWhite";
 import ResetIcon from "@material-ui/icons/RotateLeftTwoTone";
+import Spinner from "../Spinner/Spinner";
 
 const Controls = (props) => {
   const {
@@ -27,7 +28,11 @@ const Controls = (props) => {
         onGridSizeChange={handleGridSizeChange}
         disabled={isRunning}
       />
-      {isRunning || isFinished ? (
+      {isRunning ? (
+        <IconButton disabled={isRunning}>
+          <Spinner />
+        </IconButton>
+      ) : isFinished ? (
         <IconButton
           disabled={isRunning}
           color="primary"
@@ -40,6 +45,19 @@ const Controls = (props) => {
           <PlayIcon style={{ fontSize: "2em" }} />
         </IconButton>
       )}
+      {/* {isRunning || isFinished ? (
+        <IconButton
+          disabled={isRunning}
+          color="primary"
+          onClick={() => resetButtonClicked()}
+        >
+          <ResetIcon style={{ fontSize: "2em" }} />
+        </IconButton>
+      ) : (
+        <IconButton color="primary" onClick={() => visualizeDijkstra()}>
+          <PlayIcon style={{ fontSize: "2em" }} />
+        </IconButton>
+      )} */}
       <SimpleSlider
         min={5}
         max={30}
