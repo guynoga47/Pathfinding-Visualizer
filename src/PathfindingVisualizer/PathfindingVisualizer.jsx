@@ -9,20 +9,32 @@ import ReactDOM from "react-dom";
 const DEFAULT_GRID_HEIGHT = 25;
 const DEFAULT_GRID_WIDTH = 50;
 
+const calculateDefaultGridEndPointsLocations = (height, width) => {
+  const defaultStartNode = {
+    row: Math.floor(height / 2),
+    col: Math.floor(width / 5),
+  };
+  const defaultFinishNode = {
+    row: Math.floor(height / 2),
+    col: Math.floor((width * 4) / 5),
+  };
+  return { defaultStartNode, defaultFinishNode };
+};
+
 export default class PathfindingVisualizer extends PureComponent {
   constructor(props) {
     super(props);
     this.speed = 5;
     this.gridHeight = DEFAULT_GRID_HEIGHT;
     this.gridWidth = DEFAULT_GRID_WIDTH;
-    this.startNode = {
-      row: Math.floor(DEFAULT_GRID_HEIGHT / 2),
-      col: Math.floor(DEFAULT_GRID_WIDTH / 5),
-    };
-    this.finishNode = {
-      row: Math.floor(DEFAULT_GRID_HEIGHT / 2),
-      col: Math.floor((DEFAULT_GRID_WIDTH * 4) / 5),
-    };
+    const {
+      defaultStartNode,
+      defaultFinishNode,
+    } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
+    this.startNode = defaultStartNode;
+    this.finishNode = defaultFinishNode;
+    console.log(defaultStartNode);
+    console.log(defaultFinishNode);
     this.state = {
       grid: [],
       isRunning: false,
@@ -55,8 +67,15 @@ export default class PathfindingVisualizer extends PureComponent {
 
   handleGridSizeChange = (height) => {
     if (height === this.gridHeight) return;
-    this.gridWidth = height * 2;
     this.gridHeight = height;
+    this.gridWidth = height * 2;
+    const {
+      defaultStartNode,
+      defaultFinishNode,
+    } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
+    this.startNode = defaultStartNode;
+    this.finishNode = defaultFinishNode;
+
     this.reset();
   };
 
@@ -64,18 +83,9 @@ export default class PathfindingVisualizer extends PureComponent {
     this.reset();
   };
 
-  remountEndpoints = () => {};
-
   reset = () => {
+    console.log("resetting");
     this.setState({ isFinished: false });
-    this.startNode = {
-      row: Math.floor(this.gridHeight / 2),
-      col: Math.floor(this.gridWidth / 5),
-    };
-    this.finishNode = {
-      row: Math.floor(this.gridHeight / 2),
-      col: Math.floor((this.gridWidth * 4) / 5),
-    };
     this.resetNodeStyles();
     const grid = this.getInitialGrid();
     this.endPointsPropsToggle = true;
@@ -133,6 +143,8 @@ export default class PathfindingVisualizer extends PureComponent {
         this.endPointKeyDown === "start" ? this.startNode : this.finishNode;
       endPoint.row = row;
       endPoint.col = col;
+      console.log(this.startNode);
+      console.log(this.finishNode);
       this.endPointsPropsToggle = false;
     }
     this.endPointKeyDown = false;
@@ -148,6 +160,9 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   getInitialGrid = () => {
+    console.log("creating new grid...");
+    console.log("start node: ", this.startNode);
+    console.log("finish node: ", this.finishNode);
     const grid = [];
     for (let row = 0; row < this.gridHeight; row++) {
       const currentRow = [];
@@ -239,6 +254,8 @@ export default class PathfindingVisualizer extends PureComponent {
                 this.refs[`node-${this.finishNode.row}-${this.finishNode.col}`]
               )
             );
+            console.log(grid[12][11]);
+            console.log(grid[12][41]);
           }}
         >
           Status
