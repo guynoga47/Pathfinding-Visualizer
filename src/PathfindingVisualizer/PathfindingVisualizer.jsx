@@ -103,7 +103,7 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleMouseDown = (row, col) => {
-    if (this.state.isFinished) return;
+    if (this.state.isFinished || this.state.isRunning) return;
     this.mouseKeyDown = true;
     if (this.isStartNode(row, col) || this.isFinishNode(row, col)) {
       this.endPointKeyDown = this.isStartNode(row, col) ? "start" : "finish";
@@ -116,7 +116,7 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleMouseLeave = (row, col) => {
-    if (this.state.isFinished) return;
+    if (this.state.isFinished || this.state.isRunning) return;
     if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-${this.endPointKeyDown}`
@@ -125,7 +125,8 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleMouseEnter = (row, col) => {
-    if (this.state.isFinished || !this.mouseKeyDown) return;
+    if (this.state.isFinished || !this.mouseKeyDown || this.state.isRunning)
+      return;
     if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
         `node-${this.endPointKeyDown}`
@@ -137,7 +138,7 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleMouseUp = (row, col) => {
-    if (this.state.isFinished) return;
+    if (this.state.isFinished || this.state.isRunning) return;
     if (this.endPointKeyDown) {
       let endPoint =
         this.endPointKeyDown === "start" ? this.startNode : this.finishNode;
