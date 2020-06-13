@@ -1,9 +1,10 @@
-import React, { Component, PureComponent } from "react";
+import React, { PureComponent } from "react";
 import Node from "./Components/Node/Node";
 import Controls from "./Components/Controls/Controls";
 
 import "./PathfindingVisualizer.css";
 import { dijkstra, getShortestPathNodesInOrder } from "./Algorithms/dijkstra";
+import { dfs } from "./Algorithms/dfs";
 import ReactDOM from "react-dom";
 
 const DEFAULT_GRID_HEIGHT = 25;
@@ -39,20 +40,12 @@ export default class PathfindingVisualizer extends PureComponent {
       forceRerender: false,
       startNode: defaultStartNode,
       finishNode: defaultFinishNode,
+      activeAlgorithm: null,
     };
   }
   mouseKeyDown = false;
   endPointKeyDown = "";
 
-  /* endPointsRerenderToggle:
-  used to toggle the prop of isStart and isFinished after every time they need to update their style, to correspond
-  to the correct nodes in the grid. 
-  cases: 
-  1. if we didn't change neither endpoint position then it goes true -> false(animateDijkstra) -> false(render) so no rerender because not needed. 
-  2. if we changed either endpoint position then it goes true -> false (handleMouseUp) -> true (animateDijkstra) -> true(render) 
-  and together with isStart or isFinish now becomes true for the new endPoint (because of the calculation in the map) the node knows it's
-  prop changed and it need to rerender and apply styles. 
-  */
   isStartNode = (row, col) => {
     return row === this.state.startNode.row && col === this.state.startNode.col;
   };
@@ -91,7 +84,6 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   reset = () => {
-    console.log("resetting");
     this.setState({ isFinished: false });
     const grid = this.getInitialGrid();
     this.setState({ grid }, () => {
@@ -215,11 +207,11 @@ export default class PathfindingVisualizer extends PureComponent {
     };
   };
 
-  animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
+  visualize = (visitedNodesInOrder, nodesInShortestPathOrder) => {
     for (let i = 0; i <= visitedNodesInOrder.length; i++) {
       if (i === visitedNodesInOrder.length) {
         setTimeout(() => {
-          this.animateShortestPath(nodesInShortestPathOrder);
+          this.visualizeShortestPath(nodesInShortestPathOrder);
         }, this.speed * i);
         return;
       }
@@ -232,7 +224,7 @@ export default class PathfindingVisualizer extends PureComponent {
     }
   };
 
-  animateShortestPath = (nodesInShortestPathOrder) => {
+  visualizeShortestPath = (nodesInShortestPathOrder) => {
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
       if (i === nodesInShortestPathOrder.length - 1) {
         setTimeout(() => {
@@ -248,15 +240,16 @@ export default class PathfindingVisualizer extends PureComponent {
     }
   };
 
-  visualizeDijkstra = () => {
+  runActiveAlgorithm = () => {
     this.setState({ isRunning: true });
     const { grid } = this.state;
     const startNode = grid[this.state.startNode.row][this.state.startNode.col];
     const finishNode =
       grid[this.state.finishNode.row][this.state.finishNode.col];
-    const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
+    const visitedNodesInOrder = dfs(grid, startNode, finishNode);
+    //const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
     const nodesInShortestPathOrder = getShortestPathNodesInOrder(finishNode);
-    this.animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
+    this.visualize(visitedNodesInOrder, nodesInShortestPathOrder);
   };
 
   render() {
@@ -268,7 +261,7 @@ export default class PathfindingVisualizer extends PureComponent {
           isFinished={this.state.isFinished}
           isRunning={this.state.isRunning}
           resetButtonClicked={this.handleResetButtonClicked}
-          visualizeDijkstra={this.visualizeDijkstra}
+          runActiveAlgorithm={this.runActiveAlgorithm}
           handleSpeedChange={this.handleSpeedChange}
           handleGridSizeChange={this.handleGridSizeChange}
         />
@@ -309,7 +302,6 @@ TODO
   or trying to put end point on a wall, or clicking on end point etc)
 3. Change icons for end points.
 4. Animation on wall nodes sometimes leaves some kind of "trail", like the border stays on the wall color.
-5. When resetting without changing either endpoint position, endpoints styles are not showing when visualizing.
 
 
 

@@ -18,6 +18,7 @@ export default function ContinuousSlider(props) {
   const { disabled, min, max } = props;
   const handleChange = (event, newValue) => {
     let res = Math.abs(newValue - 35);
+    console.log(newValue);
     console.log(res);
     setValue(newValue);
     props.onSpeedChange(res);

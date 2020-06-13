@@ -50,9 +50,9 @@ const getUnvisitedNeighbours = (node, grid) => {
   return neighbors.filter((neighbor) => !neighbor.isVisited);
 };
 
-function getAllNodes(grid) {
+const getAllNodes = (grid) => {
   return [].concat(...grid);
-}
+};
 
 export const getShortestPathNodesInOrder = (finishNode) => {
   const shortestPathInOrder = [];

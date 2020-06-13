@@ -11,7 +11,7 @@ const Controls = (props) => {
     isFinished,
     isRunning,
     resetButtonClicked,
-    visualizeDijkstra,
+    runActiveAlgorithm,
     handleSpeedChange,
     handleGridSizeChange,
   } = props;
@@ -41,7 +41,7 @@ const Controls = (props) => {
           <ResetIcon style={{ fontSize: "2em" }} />
         </IconButton>
       ) : (
-        <IconButton color="primary" onClick={() => visualizeDijkstra()}>
+        <IconButton color="primary" onClick={() => runActiveAlgorithm()}>
           <PlayIcon style={{ fontSize: "2em" }} />
         </IconButton>
       )}
