@@ -21,8 +21,7 @@ export default class Node extends PureComponent {
       ? "node-finish"
       : "";
 
-    console.log(`rendering node-${row}-${col}`);
-
+    //console.log(`rendering node-${row}-${col}`);
     const nodeJSX = (
       <div
         id={`node-${row}-${col}`}

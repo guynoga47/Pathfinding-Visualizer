@@ -31,20 +31,19 @@ export default class PathfindingVisualizer extends PureComponent {
       defaultStartNode,
       defaultFinishNode,
     } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
-    this.startNode = defaultStartNode;
-    this.finishNode = defaultFinishNode;
-    console.log(defaultStartNode);
-    console.log(defaultFinishNode);
+
     this.state = {
       grid: [],
       isRunning: false,
       isFinished: false,
       forceRerender: false,
+      startNode: defaultStartNode,
+      finishNode: defaultFinishNode,
     };
   }
   mouseKeyDown = false;
   endPointKeyDown = "";
-  endPointsRerenderToggle = true;
+
   /* endPointsRerenderToggle:
   used to toggle the prop of isStart and isFinished after every time they need to update their style, to correspond
   to the correct nodes in the grid. 
@@ -54,13 +53,14 @@ export default class PathfindingVisualizer extends PureComponent {
   and together with isStart or isFinish now becomes true for the new endPoint (because of the calculation in the map) the node knows it's
   prop changed and it need to rerender and apply styles. 
   */
-
   isStartNode = (row, col) => {
-    return row === this.startNode.row && col === this.startNode.col;
+    return row === this.state.startNode.row && col === this.state.startNode.col;
   };
 
   isFinishNode = (row, col) => {
-    return row === this.finishNode.row && col === this.finishNode.col;
+    return (
+      row === this.state.finishNode.row && col === this.state.finishNode.col
+    );
   };
 
   componentDidMount() {
@@ -80,10 +80,10 @@ export default class PathfindingVisualizer extends PureComponent {
       defaultStartNode,
       defaultFinishNode,
     } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
-    this.startNode = defaultStartNode;
-    this.finishNode = defaultFinishNode;
-
-    this.reset();
+    this.setState(
+      { startNode: defaultStartNode, finishNode: defaultFinishNode },
+      () => this.reset()
+    );
   };
 
   handleResetButtonClicked = () => {
@@ -93,10 +93,11 @@ export default class PathfindingVisualizer extends PureComponent {
   reset = () => {
     console.log("resetting");
     this.setState({ isFinished: false });
-    this.resetNodeStyles();
     const grid = this.getInitialGrid();
-    this.endPointsRerenderToggle = true;
-    this.setState({ grid });
+    this.setState({ grid }, () => {
+      console.log(this.state.grid);
+      this.resetNodeStyles();
+    });
   };
 
   resetNodeStyles = () => {
@@ -148,10 +149,11 @@ export default class PathfindingVisualizer extends PureComponent {
     if (this.state.isFinished || this.state.isRunning) return;
     if (this.endPointKeyDown) {
       let endPoint =
-        this.endPointKeyDown === "start" ? this.startNode : this.finishNode;
+        this.endPointKeyDown === "start"
+          ? this.state.startNode
+          : this.state.finishNode;
       endPoint.row = row;
       endPoint.col = col;
-      this.endPointsRerenderToggle = false;
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
         `node-${this.endPointKeyDown}`
       );
@@ -174,6 +176,8 @@ export default class PathfindingVisualizer extends PureComponent {
       const currentRow = [];
       for (let col = 0; col < this.gridWidth; col++) {
         currentRow.push(this.createNode(row, col));
+        if (currentRow[col].isStart || currentRow[col].isFinish) {
+        }
       }
       grid.push(currentRow);
     }
@@ -193,15 +197,6 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   animateDijkstra = (visitedNodesInOrder, nodesInShortestPathOrder) => {
-    console.log(
-      "endpointsPropsToggle in animateDijkstra:before toggle",
-      this.endPointsRerenderToggle
-    );
-    this.endPointsRerenderToggle = !this.endPointsRerenderToggle;
-    console.log(
-      "endpointsPropsToggle in animateDijkstra: after toggle",
-      this.endPointsRerenderToggle
-    );
     for (let i = 0; i <= visitedNodesInOrder.length; i++) {
       if (i === visitedNodesInOrder.length) {
         setTimeout(() => {
@@ -223,7 +218,7 @@ export default class PathfindingVisualizer extends PureComponent {
       if (i === nodesInShortestPathOrder.length - 1) {
         setTimeout(() => {
           this.setState({ isRunning: false, isFinished: true });
-        }, (this.speed + 50) * i);
+        }, (this.speed + 65) * i);
       }
       setTimeout(() => {
         const node = nodesInShortestPathOrder[i];
@@ -237,12 +232,41 @@ export default class PathfindingVisualizer extends PureComponent {
   visualizeDijkstra = () => {
     this.setState({ isRunning: true });
     const { grid } = this.state;
-    const startNode = grid[this.startNode.row][this.startNode.col];
-    const finishNode = grid[this.finishNode.row][this.finishNode.col];
+    const startNode = grid[this.state.startNode.row][this.state.startNode.col];
+    const finishNode =
+      grid[this.state.finishNode.row][this.state.finishNode.col];
     const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
     const nodesInShortestPathOrder = getShortestPathNodesInOrder(finishNode);
     this.animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
   };
+
+  componentDidUpdate() {
+    console.log("componentDidUpdate");
+    for (let node in this.refs) {
+      /* console.log(node);
+      console.log(node.split("-")[2]); */
+      if (
+        !this.isStartNode(
+          parseInt(node.split("-")[1]),
+          parseInt(node.split("-")[2])
+        )
+      )
+        ReactDOM.findDOMNode(this.refs[node]).classList.remove(`node-start`);
+      else {
+        console.log(node);
+      }
+      if (
+        !this.isFinishNode(
+          parseInt(node.split("-")[1]),
+          parseInt(node.split("-")[2])
+        )
+      )
+        ReactDOM.findDOMNode(this.refs[node]).classList.remove(`node-finish`);
+      else {
+        console.log(node);
+      }
+    }
+  }
 
   render() {
     console.log("rerendering");
@@ -260,16 +284,24 @@ export default class PathfindingVisualizer extends PureComponent {
 
         <button
           onClick={() => {
-            console.log(grid[this.startNode.row][this.startNode.col]);
-            console.log(grid[this.finishNode.row][this.finishNode.col]);
+            console.log(
+              grid[this.state.startNode.row][this.state.startNode.col]
+            );
+            console.log(
+              grid[this.state.finishNode.row][this.state.finishNode.col]
+            );
             console.log(
               ReactDOM.findDOMNode(
-                this.refs[`node-${this.startNode.row}-${this.startNode.col}`]
+                this.refs[
+                  `node-${this.state.startNode.row}-${this.state.startNode.col}`
+                ]
               )
             );
             console.log(
               ReactDOM.findDOMNode(
-                this.refs[`node-${this.finishNode.row}-${this.finishNode.col}`]
+                this.refs[
+                  `node-${this.state.finishNode.row}-${this.state.finishNode.col}`
+                ]
               )
             );
             console.log(grid[12][11]);
@@ -279,10 +311,6 @@ export default class PathfindingVisualizer extends PureComponent {
           Status
         </button>
         <div className="grid">
-          {console.log(
-            "endpointsPropsToggle in render",
-            this.endPointsRerenderToggle
-          )}
           {grid.map((row, rowIndex) => (
             <div key={rowIndex} className="row">
               {row.map((node, nodeIndex) => {
@@ -294,8 +322,8 @@ export default class PathfindingVisualizer extends PureComponent {
                     ref={`node-${row}-${col}`}
                     row={row}
                     col={col}
-                    isStart={isStart && this.endPointsRerenderToggle}
-                    isFinish={isFinish && this.endPointsRerenderToggle}
+                    isStart={isStart}
+                    isFinish={isFinish}
                     onMouseDown={this.handleMouseDown}
                     onMouseEnter={this.handleMouseEnter}
                     onMouseLeave={this.handleMouseLeave}
