@@ -95,7 +95,6 @@ export default class PathfindingVisualizer extends PureComponent {
     this.setState({ isFinished: false });
     const grid = this.getInitialGrid();
     this.setState({ grid }, () => {
-      console.log(this.state.grid);
       this.resetNodeStyles();
     });
   };
@@ -107,6 +106,26 @@ export default class PathfindingVisualizer extends PureComponent {
         `node-shortest-path`,
         `node-wall`
       );
+      if (
+        !this.isStartNode(
+          parseInt(node.split("-")[1]),
+          parseInt(node.split("-")[2])
+        )
+      )
+        ReactDOM.findDOMNode(this.refs[node]).classList.remove(`node-start`);
+      else {
+        console.log(node);
+      }
+      if (
+        !this.isFinishNode(
+          parseInt(node.split("-")[1]),
+          parseInt(node.split("-")[2])
+        )
+      )
+        ReactDOM.findDOMNode(this.refs[node]).classList.remove(`node-finish`);
+      else {
+        console.log(node);
+      }
     }
   };
 
@@ -240,34 +259,6 @@ export default class PathfindingVisualizer extends PureComponent {
     this.animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
   };
 
-  componentDidUpdate() {
-    console.log("componentDidUpdate");
-    for (let node in this.refs) {
-      /* console.log(node);
-      console.log(node.split("-")[2]); */
-      if (
-        !this.isStartNode(
-          parseInt(node.split("-")[1]),
-          parseInt(node.split("-")[2])
-        )
-      )
-        ReactDOM.findDOMNode(this.refs[node]).classList.remove(`node-start`);
-      else {
-        console.log(node);
-      }
-      if (
-        !this.isFinishNode(
-          parseInt(node.split("-")[1]),
-          parseInt(node.split("-")[2])
-        )
-      )
-        ReactDOM.findDOMNode(this.refs[node]).classList.remove(`node-finish`);
-      else {
-        console.log(node);
-      }
-    }
-  }
-
   render() {
     console.log("rerendering");
     const { grid } = this.state;
@@ -282,34 +273,7 @@ export default class PathfindingVisualizer extends PureComponent {
           handleGridSizeChange={this.handleGridSizeChange}
         />
 
-        <button
-          onClick={() => {
-            console.log(
-              grid[this.state.startNode.row][this.state.startNode.col]
-            );
-            console.log(
-              grid[this.state.finishNode.row][this.state.finishNode.col]
-            );
-            console.log(
-              ReactDOM.findDOMNode(
-                this.refs[
-                  `node-${this.state.startNode.row}-${this.state.startNode.col}`
-                ]
-              )
-            );
-            console.log(
-              ReactDOM.findDOMNode(
-                this.refs[
-                  `node-${this.state.finishNode.row}-${this.state.finishNode.col}`
-                ]
-              )
-            );
-            console.log(grid[12][11]);
-            console.log(grid[12][41]);
-          }}
-        >
-          Status
-        </button>
+        <button onClick={() => {}}>Status</button>
         <div className="grid">
           {grid.map((row, rowIndex) => (
             <div key={rowIndex} className="row">
