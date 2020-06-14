@@ -21,7 +21,8 @@ export default class Node extends PureComponent {
       ? "node-finish"
       : "";
 
-    //console.log(`rendering node-${row}-${col}`);
+    /* this pattern of sending the handlers for div from the parent could be costly performance wise, because
+    the functions recreates on each re-render. luckily we barely do any rerenders of the divs. */
     const nodeJSX = (
       <div
         id={`node-${row}-${col}`}

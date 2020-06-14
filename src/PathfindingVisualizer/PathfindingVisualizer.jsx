@@ -3,8 +3,11 @@ import Node from "./Components/Node/Node";
 import Controls from "./Components/Controls/Controls";
 
 import "./PathfindingVisualizer.css";
-import { dijkstra, getShortestPathNodesInOrder } from "./Algorithms/dijkstra";
-import { dfs } from "./Algorithms/dfs";
+import {
+  bfs,
+  dfs,
+  getShortestPathNodesInOrder,
+} from "./Algorithms/unweightedAlgorithms.js";
 import ReactDOM from "react-dom";
 
 const DEFAULT_GRID_HEIGHT = 25;
@@ -37,10 +40,8 @@ export default class PathfindingVisualizer extends PureComponent {
       grid: [],
       isRunning: false,
       isFinished: false,
-      forceRerender: false,
       startNode: defaultStartNode,
       finishNode: defaultFinishNode,
-      activeAlgorithm: null,
     };
   }
   mouseKeyDown = false;
@@ -241,19 +242,26 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   runActiveAlgorithm = () => {
+    //need to disable toolbar before choosing and then display error message accordingly.
+    if (!this.props.activeAlgorithm) return;
+    //maybe move this state up to App component and use a handler from app to set the state?
     this.setState({ isRunning: true });
     const { grid } = this.state;
     const startNode = grid[this.state.startNode.row][this.state.startNode.col];
     const finishNode =
       grid[this.state.finishNode.row][this.state.finishNode.col];
-    const visitedNodesInOrder = dfs(grid, startNode, finishNode);
-    //const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
+    console.log(this.props.activeAlgorithm);
+    const visitedNodesInOrder = this.props.activeAlgorithm(
+      grid,
+      startNode,
+      finishNode
+    );
     const nodesInShortestPathOrder = getShortestPathNodesInOrder(finishNode);
     this.visualize(visitedNodesInOrder, nodesInShortestPathOrder);
   };
 
   render() {
-    console.log("rerendering");
+    console.log("PathfindingVisualizer component is rerendering...");
     const { grid } = this.state;
     return (
       <>
@@ -265,12 +273,10 @@ export default class PathfindingVisualizer extends PureComponent {
           handleSpeedChange={this.handleSpeedChange}
           handleGridSizeChange={this.handleGridSizeChange}
         />
-
-        <button onClick={() => {}}>Status</button>
         <div className="grid">
           {grid.map((row, rowIndex) => (
             <div key={rowIndex} className="row">
-              {row.map((node, nodeIndex) => {
+              {row.map((node) => {
                 const { row, col, isStart, isFinish } = node;
                 //console.log(`reevaluating node-${row}-${col}`);
                 return (
@@ -301,19 +307,20 @@ TODO
 2. Check edge cases when dragging end points (like when leaving grid and returning, or when dragging one endpoint over the other, 
   or trying to put end point on a wall, or clicking on end point etc)
 3. Change icons for end points.
-4. Animation on wall nodes sometimes leaves some kind of "trail", like the border stays on the wall color.
 
 
 
-7. Add DFS, BFS
+
 8. Generate random terrain feature?
 9. Settings Button.
 10. find better animation gradients and colors.
-11. After algorithm finishes to run, change start and end node so
-
-
-BUG:
-
-1. Clicking on end point node disable styling.
+11. Adjust speed so it will fit dfs as well. (current max speed is too fast)
+12. Adjust speed so it will reflect on the shortest path visualization as well.
+13. Move color to theme and style all components with material ui.
+14. Playback control to material ui speed dial?
+15. Extend menu functionality to figure out how to style it better.
+16. Move part of the state from PathfindingVisualizer to App, to make the code more
+    modular for future feature implementations.
+18. change visiting colors to better fit the theme.
 
 */

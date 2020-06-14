@@ -1,7 +1,7 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
-import Slider from "@material-ui/core/Slider";
+import Slider from "../Sliders/Base";
 
 const MIN = 15;
 const MAX = 35;
@@ -48,7 +48,7 @@ function valueLabelFormat(value) {
 export default function DiscreteSlider(props) {
   const classes = useStyles();
   const [value, setValue] = React.useState(25);
-  const { disabled } = props;
+  const { isDisabled } = props;
   const handleChange = (event, newValue) => {
     setValue(newValue);
     props.onGridSizeChange(newValue);
@@ -64,7 +64,7 @@ export default function DiscreteSlider(props) {
         getAriaValueText={valuetext}
         aria-labelledby="discrete-slider-restrict"
         onChange={handleChange}
-        disabled={disabled}
+        disabled={isDisabled}
         step={null}
         min={MIN}
         max={MAX}
