@@ -8,7 +8,6 @@ import ListItemText from "@material-ui/core/ListItemText";
 import MenuItem from "@material-ui/core/MenuItem";
 import { withStyles } from "@material-ui/core/styles";
 import Menu from "@material-ui/core/Menu";
-import { dfs, bfs } from "../../Algorithms/unweightedAlgorithms";
 
 const useStyles = makeStyles((theme) => ({
   btnSelectAlgorithm: {
@@ -87,11 +86,8 @@ const StyledMenu = withStyles({
 const Nav = (props) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const classes = useStyles();
-  const { activeAlgorithm, setActiveAlgorithm } = props;
-  const algorithms = [
-    { name: "Depth-first Search", function: dfs },
-    { name: "Breadth-first Search", function: bfs },
-  ];
+  const { algorithms, activeAlgorithm, setActiveAlgorithm } = props;
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -114,11 +110,7 @@ const Nav = (props) => {
           variant="contained"
           onClick={handleClick}
         >
-          {activeAlgorithm === "Depth-first Search"
-            ? "DFS"
-            : activeAlgorithm === "Breadth-first Search"
-            ? "BFS"
-            : "Select"}
+          {activeAlgorithm ? activeAlgorithm.shortened : "select"}
         </Button>
         <StyledMenu
           className={classes.menu}
@@ -133,10 +125,7 @@ const Nav = (props) => {
               key={algorithm.name}
               className={classes.menuItem}
               onClick={() => {
-                setActiveAlgorithm({
-                  name: algorithm.name,
-                  function: algorithm.function,
-                });
+                setActiveAlgorithm(algorithm);
                 handleClose();
               }}
             >

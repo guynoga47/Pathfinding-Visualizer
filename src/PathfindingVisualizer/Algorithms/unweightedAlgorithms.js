@@ -1,4 +1,4 @@
-export const bfs = (grid, startNode, finishNode) => {
+const bfs = (grid, startNode, finishNode) => {
   if (!startNode || !finishNode || startNode === finishNode) {
     console.log("Bad parameters, can't find path!");
     return false;
@@ -40,17 +40,7 @@ const updateUnvisitedNeighborsDistances = (node, grid) => {
   }
 };
 
-/*   const getUnvisitedNeighbours = (node, grid) => {
-    const neighbors = [];
-    const { col, row } = node;
-    if (row > 0) neighbors.push(grid[row - 1][col]);
-    if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-    if (col > 0) neighbors.push(grid[row][col - 1]);
-    if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-    return neighbors.filter((neighbor) => !neighbor.isVisited);
-  }; */
-
-export const dfs = (grid, startNode, finishNode) => {
+const dfs = (grid, startNode, finishNode) => {
   if (!startNode || !finishNode || startNode === finishNode) {
     console.log("Bad parameters, can't find path!");
     return false;
@@ -89,16 +79,6 @@ const getAllNodes = (grid) => {
   return [].concat(...grid);
 };
 
-export const getShortestPathNodesInOrder = (finishNode) => {
-  const shortestPathInOrder = [];
-  let currentNode = finishNode;
-  while (currentNode !== null) {
-    shortestPathInOrder.unshift(currentNode);
-    currentNode = currentNode.previousNode;
-  }
-  return shortestPathInOrder;
-};
-
 class Stack {
   constructor() {
     this.items = [];
@@ -119,3 +99,16 @@ class Stack {
     this.items.forEach((item) => console.log(item));
   }
 }
+
+export const data = [
+  {
+    name: "Depth-first Search",
+    shortened: "DFS",
+    func: dfs,
+  },
+  {
+    name: "Breadth-first Search",
+    shortened: "BFS",
+    func: bfs,
+  },
+];
