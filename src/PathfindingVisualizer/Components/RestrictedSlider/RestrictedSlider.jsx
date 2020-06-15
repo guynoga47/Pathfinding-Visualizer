@@ -48,7 +48,7 @@ function valueLabelFormat(value) {
 export default function DiscreteSlider(props) {
   const classes = useStyles();
   const [value, setValue] = React.useState(25);
-  const { isDisabled } = props;
+  const { disabled } = props;
   const handleChange = (event, newValue) => {
     setValue(newValue);
     props.onGridSizeChange(newValue);
@@ -64,7 +64,7 @@ export default function DiscreteSlider(props) {
         getAriaValueText={valuetext}
         aria-labelledby="discrete-slider-restrict"
         onChange={handleChange}
-        disabled={isDisabled}
+        disabled={disabled}
         step={null}
         min={MIN}
         max={MAX}

@@ -17,6 +17,8 @@ const useStyles = makeStyles((theme) => ({
     textTransform: "uppercase",
     textDecoration: "none",
     background: "#1F2833",
+    width: "7em",
+    textAlign: "center",
     padding: "10px",
     border: "2px solid #66FCF1 !important",
     display: "inline-block",
@@ -30,16 +32,13 @@ const useStyles = makeStyles((theme) => ({
   },
   listItemTxt: {
     textDecoration: "none",
-    color: theme.palette.primary.dark,
-  },
-  icon: {
-    color: "#FFE81F",
   },
   menuItem: {
     backgroundColor: "#1F2833",
     color: "white",
     "&:hover": {
-      backgroundColor: "#333333",
+      backgroundColor: "#1f2833",
+      color: "#66FCF1",
     },
   },
   toolbar: {
@@ -88,7 +87,7 @@ const StyledMenu = withStyles({
 const Nav = (props) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const classes = useStyles();
-  const { setActiveAlgorithm } = props;
+  const { activeAlgorithm, setActiveAlgorithm } = props;
   const algorithms = [
     { name: "Depth-first Search", function: dfs },
     { name: "Breadth-first Search", function: bfs },
@@ -115,7 +114,11 @@ const Nav = (props) => {
           variant="contained"
           onClick={handleClick}
         >
-          Select
+          {activeAlgorithm === "Depth-first Search"
+            ? "DFS"
+            : activeAlgorithm === "Breadth-first Search"
+            ? "BFS"
+            : "Select"}
         </Button>
         <StyledMenu
           className={classes.menu}
@@ -135,9 +138,6 @@ const Nav = (props) => {
                   function: algorithm.function,
                 });
                 handleClose();
-                console.log(
-                  `change active algorithm state to: ${algorithm.name}`
-                );
               }}
             >
               <ListItemText primary={algorithm.name} />

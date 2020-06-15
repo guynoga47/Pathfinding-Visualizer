@@ -1,7 +1,14 @@
+/*
+in css we can bring custom assets from urls using relative path.
+in jsx we can only bring those items by importing them, and then using string interpolation:
+cursor: `url(${importAssetName}, auto` for example.
+*/
+
 .node {
   width: 23px;
   height: 23px;
   border: 1px solid rgba(0, 0, 0, 0.15);
+  cursor: url('../../../assets/cursors/cross.cur'), pointer;
   /* border: 1px solid rgb(175, 216, 248); */
   border-width: thin;
   display: inline-block;
@@ -10,11 +17,13 @@
 .node-start {
   background-color: green;
   border-color: green;
+  cursor: url('../../../assets/cursors/move.cur'), pointer;
 }
 
 .node-finish {
   background-color: red;
   border-color: red;
+  cursor: url('../../../assets/cursors/move.cur'), pointer;
 }
 
 .node-wall {

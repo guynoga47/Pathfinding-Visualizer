@@ -3,11 +3,7 @@ import Node from "./Components/Node/Node";
 import Controls from "./Components/Controls/Controls";
 
 import "./PathfindingVisualizer.css";
-import {
-  bfs,
-  dfs,
-  getShortestPathNodesInOrder,
-} from "./Algorithms/unweightedAlgorithms.js";
+import { getShortestPathNodesInOrder } from "./Algorithms/unweightedAlgorithms.js";
 import ReactDOM from "react-dom";
 
 const DEFAULT_GRID_HEIGHT = 25;
@@ -38,8 +34,6 @@ export default class PathfindingVisualizer extends PureComponent {
 
     this.state = {
       grid: [],
-      isRunning: false,
-      isFinished: false,
       startNode: defaultStartNode,
       finishNode: defaultFinishNode,
     };
@@ -85,7 +79,7 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   reset = () => {
-    this.setState({ isFinished: false });
+    this.props.setIsFinished(false);
     const grid = this.getInitialGrid();
     this.setState({ grid }, () => {
       this.resetNodeStyles();
@@ -123,7 +117,7 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleMouseDown = (row, col) => {
-    if (this.state.isFinished || this.state.isRunning) return;
+    if (this.props.isFinished || this.props.isRunning) return;
     this.mouseKeyDown = true;
     if (this.isStartNode(row, col) || this.isFinishNode(row, col)) {
       this.endPointKeyDown = this.isStartNode(row, col) ? "start" : "finish";
@@ -136,7 +130,7 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleMouseLeave = (row, col) => {
-    if (this.state.isFinished || this.state.isRunning) return;
+    if (this.props.isFinished || this.props.isRunning) return;
     if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-${this.endPointKeyDown}`
@@ -145,7 +139,7 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleMouseEnter = (row, col) => {
-    if (this.state.isFinished || !this.mouseKeyDown || this.state.isRunning)
+    if (this.props.isFinished || !this.mouseKeyDown || this.props.isRunning)
       return;
     if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
@@ -158,7 +152,7 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   handleMouseUp = (row, col) => {
-    if (this.state.isFinished || this.state.isRunning) return;
+    if (this.props.isFinished || this.props.isRunning) return;
     if (this.endPointKeyDown) {
       let endPoint =
         this.endPointKeyDown === "start"
@@ -229,7 +223,8 @@ export default class PathfindingVisualizer extends PureComponent {
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
       if (i === nodesInShortestPathOrder.length - 1) {
         setTimeout(() => {
-          this.setState({ isRunning: false, isFinished: true });
+          this.props.setIsRunning(false);
+          this.props.setIsFinished(true);
         }, (this.speed + 65) * i);
       }
       setTimeout(() => {
@@ -241,11 +236,11 @@ export default class PathfindingVisualizer extends PureComponent {
     }
   };
 
-  runActiveAlgorithm = () => {
+  handlePlayButtonClicked = () => {
     //need to disable toolbar before choosing and then display error message accordingly.
     if (!this.props.activeAlgorithm) return;
     //maybe move this state up to App component and use a handler from app to set the state?
-    this.setState({ isRunning: true });
+    this.props.setIsRunning(true);
     const { grid } = this.state;
     const startNode = grid[this.state.startNode.row][this.state.startNode.col];
     const finishNode =
@@ -266,10 +261,11 @@ export default class PathfindingVisualizer extends PureComponent {
     return (
       <>
         <Controls
-          isFinished={this.state.isFinished}
-          isRunning={this.state.isRunning}
+          isFinished={this.props.isFinished}
+          isRunning={this.props.isRunning}
+          isAlgorithmSelected={this.props.activeAlgorithm}
           resetButtonClicked={this.handleResetButtonClicked}
-          runActiveAlgorithm={this.runActiveAlgorithm}
+          playButtonClicked={this.handlePlayButtonClicked}
           handleSpeedChange={this.handleSpeedChange}
           handleGridSizeChange={this.handleGridSizeChange}
         />

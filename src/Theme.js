@@ -1,6 +1,26 @@
 import { createMuiTheme } from "@material-ui/core/styles";
+import handPointer from "./assets/cursors/link.cur";
 
 export default createMuiTheme({
+  overrides: {
+    MuiSlider: {
+      root: {
+        cursor: `url(${handPointer}), auto`,
+      },
+    },
+    MuiIconButton: {
+      root: {
+        "&:hover": {
+          backgroundColor: "transparent",
+        },
+      },
+    },
+    MuiButtonBase: {
+      root: {
+        cursor: `url(${handPointer}), auto`,
+      },
+    },
+  },
   typography: {
     fontFamily: "Orbitron",
     h2: {

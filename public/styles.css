@@ -1,0 +1,5 @@
+body {
+    /* cursor: url('/src/assets/material_design_cursors_dark/pointer.cur'), pointer; */
+    /* cursor: url('pointer.cur'), pointer; */
+    cursor: url('../src/assets/material_design_cursors_dark/pointer.cur'), pointer;
+}

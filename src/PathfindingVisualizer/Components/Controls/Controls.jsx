@@ -8,12 +8,7 @@ import Spinner from "../Spinner/Spinner";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
-  controls: {
-    color: "#1F2833",
-  },
-  btnRunAlgorithm: {
-    /*     backgroundColor: "#1F2833",
-    borderColor: "#1F2833", */
+  button: {
     color: "#1F2833",
   },
 }));
@@ -23,8 +18,9 @@ const Controls = (props) => {
   const {
     isFinished,
     isRunning,
+    isAlgorithmSelected,
     resetButtonClicked,
-    runActiveAlgorithm,
+    playButtonClicked,
     handleSpeedChange,
     handleGridSizeChange,
   } = props;
@@ -42,21 +38,18 @@ const Controls = (props) => {
         disabled={isRunning}
       />
       {isRunning ? (
-        <IconButton disabled={isRunning}>
+        <IconButton disabled>
           <Spinner />
         </IconButton>
       ) : isFinished ? (
-        <IconButton
-          disabled={isRunning}
-          color="secondary"
-          onClick={() => resetButtonClicked()}
-        >
+        <IconButton className={classes.button} onClick={resetButtonClicked}>
           <ResetIcon style={{ fontSize: "2em" }} />
         </IconButton>
       ) : (
         <IconButton
-          className={classes.btnRunAlgorithm}
-          onClick={() => runActiveAlgorithm()}
+          className={classes.button}
+          onClick={playButtonClicked}
+          disabled={!isAlgorithmSelected}
         >
           <PlayIcon style={{ fontSize: "2em" }} />
         </IconButton>
@@ -65,10 +58,15 @@ const Controls = (props) => {
         min={5}
         max={30}
         onSpeedChange={handleSpeedChange}
-        disabled={isRunning}
+        disabled={isRunning || !isAlgorithmSelected}
       />
     </div>
   );
 };
 
 export default Controls;
+
+/*
+TODO
+1. Centralize styles
+*/
