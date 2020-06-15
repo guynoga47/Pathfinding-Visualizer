@@ -224,14 +224,14 @@ export default class Visualizer extends PureComponent {
         setTimeout(() => {
           this.props.setIsRunning(false);
           this.props.setIsFinished(true);
-        }, (this.speed + 65) * i);
+        }, (this.speed + 30) * i);
       }
       setTimeout(() => {
         const node = nodesInShortestPathOrder[i];
         ReactDOM.findDOMNode(
           this.refs[`node-${node.row}-${node.col}`]
         ).classList.add("node-shortest-path");
-      }, (this.speed + 50) * i);
+      }, (this.speed + 30) * i);
     }
   };
 
@@ -302,6 +302,9 @@ TODO
 2. Check edge cases when dragging end points (like when leaving grid and returning, or when dragging one endpoint over the other, 
   or trying to put end point on a wall, or clicking on end point etc)
 3. Change icons for end points.
+4. Deal with no path found case.
+5. Shortest path draw is a bit choppy.
+6. Add functionality to add weights, to support weighted search algorithms.
 
 
 
