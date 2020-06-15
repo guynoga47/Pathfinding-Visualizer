@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import PathfindingVisualizer from "./PathfindingVisualizer/PathfindingVisualizer";
+import Visualizer from "./PathfindingVisualizer/Components/Visualizer/Visualizer";
 import NavBar from "./PathfindingVisualizer/Components/Navbar/NavBar.jsx";
 import * as unweightedAlgorithms from "./PathfindingVisualizer/Algorithms/unweightedAlgorithms";
 import * as weightedAlgorithms from "./PathfindingVisualizer/Algorithms/weightedAlgorithms";
@@ -21,7 +21,7 @@ const App = () => {
           activeAlgorithm={activeAlgorithm}
           setActiveAlgorithm={setActiveAlgorithm}
         />
-        <PathfindingVisualizer
+        <Visualizer
           activeAlgorithm={activeAlgorithm ? activeAlgorithm.func : undefined}
           isRunning={isRunning}
           isFinished={isFinished}

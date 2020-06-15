@@ -45,7 +45,7 @@ function valueLabelFormat(value) {
   return marks.findIndex((mark) => mark.value === value) + 1;
 }
 
-export default function DiscreteSlider(props) {
+export default function RestrictedSlider(props) {
   const classes = useStyles();
   const [value, setValue] = React.useState(25);
   const { disabled } = props;

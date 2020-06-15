@@ -14,14 +14,14 @@ const useStyles = makeStyles({
 
 export default function ContinuousSlider(props) {
   const classes = useStyles();
-  const [value, setValue] = React.useState(35);
   const { disabled, min, max } = props;
-  const handleChange = (event, newValue) => {
-    let res = Math.abs(newValue - 35);
-    console.log(newValue);
-    console.log(res);
-    setValue(newValue);
-    props.onSpeedChange(res);
+  const [value, setValue] = React.useState((max + min) / 2);
+  const handleChange = (event, sliderValue) => {
+    let calculatedSpeed = Math.abs(sliderValue - (max + min));
+    console.log(sliderValue);
+    console.log(calculatedSpeed);
+    setValue(sliderValue);
+    props.onSpeedChange(calculatedSpeed);
   };
 
   return (

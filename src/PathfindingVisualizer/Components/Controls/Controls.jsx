@@ -1,6 +1,6 @@
 import React from "react";
-import SimpleSlider from "../SimpleSlider/SimpleSlider";
-import RestrictedSlider from "../RestrictedSlider/RestrictedSlider";
+import SpeedSlider from "../SliderContinuous/ContinuousSlider";
+import GridSizeSlider from "../SliderRestricted/RestrictedSlider";
 import IconButton from "@material-ui/core/IconButton";
 import PlayIcon from "@material-ui/icons/PlayCircleFilledWhite";
 import ResetIcon from "@material-ui/icons/RotateLeftTwoTone";
@@ -33,7 +33,7 @@ const Controls = (props) => {
         marginRight: "7.5em",
       }}
     >
-      <RestrictedSlider
+      <GridSizeSlider
         onGridSizeChange={handleGridSizeChange}
         disabled={isRunning}
       />
@@ -54,9 +54,9 @@ const Controls = (props) => {
           <PlayIcon style={{ fontSize: "2em" }} />
         </IconButton>
       )}
-      <SimpleSlider
-        min={5}
-        max={30}
+      <SpeedSlider
+        min={20}
+        max={40}
         onSpeedChange={handleSpeedChange}
         disabled={isRunning || !isAlgorithmSelected}
       />

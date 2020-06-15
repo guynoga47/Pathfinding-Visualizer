@@ -1,9 +1,8 @@
 import React, { PureComponent } from "react";
-import Node from "./Components/Node/Node";
-import Controls from "./Components/Controls/Controls";
-
-import "./PathfindingVisualizer.css";
-import { getShortestPathNodesInOrder } from "./Algorithms/algorithmUtils.js";
+import Node from "../Node/Node";
+import Controls from "../Controls/Controls";
+import "./Visualizer.css";
+import { getShortestPathNodesInOrder } from "../../Algorithms/algorithmUtils.js";
 import ReactDOM from "react-dom";
 
 const DEFAULT_GRID_HEIGHT = 25;
@@ -21,7 +20,7 @@ const calculateDefaultGridEndPointsLocations = (height, width) => {
   return { defaultStartNode, defaultFinishNode };
 };
 
-export default class PathfindingVisualizer extends PureComponent {
+export default class Visualizer extends PureComponent {
   constructor(props) {
     super(props);
     this.speed = 5;
@@ -256,7 +255,7 @@ export default class PathfindingVisualizer extends PureComponent {
   };
 
   render() {
-    console.log("PathfindingVisualizer component is rendering...");
+    console.log("Visualizer component is rendering...");
     const { grid } = this.state;
     return (
       <>
