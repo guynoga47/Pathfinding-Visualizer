@@ -7,6 +7,8 @@ import ResetIcon from "@material-ui/icons/RotateLeftTwoTone";
 import Spinner from "../Spinner/Spinner";
 import { makeStyles } from "@material-ui/core/styles";
 
+export const DEFAULT_SPEED = 20;
+
 const useStyles = makeStyles((theme) => ({
   button: {
     color: "#1F2833",

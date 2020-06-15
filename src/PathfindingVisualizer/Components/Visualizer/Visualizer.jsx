@@ -1,6 +1,6 @@
 import React, { PureComponent } from "react";
 import Node from "../Node/Node";
-import Controls from "../Controls/Controls";
+import Controls, { DEFAULT_SPEED } from "../Controls/Controls";
 import "./Visualizer.css";
 import { getShortestPathNodesInOrder } from "../../Algorithms/algorithmUtils.js";
 import ReactDOM from "react-dom";
@@ -23,7 +23,7 @@ const calculateDefaultGridEndPointsLocations = (height, width) => {
 export default class Visualizer extends PureComponent {
   constructor(props) {
     super(props);
-    this.speed = 5;
+    this.speed = DEFAULT_SPEED;
     this.gridHeight = DEFAULT_GRID_HEIGHT;
     this.gridWidth = DEFAULT_GRID_WIDTH;
     const {
