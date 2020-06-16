@@ -74,7 +74,26 @@ export default class Visualizer extends PureComponent {
   };
 
   handleResetButtonClicked = () => {
-    this.reset();
+    this.props.setIsFinished(false);
+    const grid = this.resetGridKeepWalls();
+    console.log(grid);
+    this.setState({ grid }, () => {
+      this.resetNodeStyles({ resetWalls: false });
+    });
+  };
+
+  resetGridKeepWalls = () => {
+    const grid = [];
+    for (let row = 0; row < this.gridHeight; row++) {
+      const currentRow = [];
+      for (let col = 0; col < this.gridWidth; col++) {
+        currentRow.push(
+          this.createNode(row, col, this.state.grid[row][col].isWall)
+        );
+      }
+      grid.push(currentRow);
+    }
+    return grid;
   };
 
   reset = () => {
@@ -85,12 +104,13 @@ export default class Visualizer extends PureComponent {
     });
   };
 
-  resetNodeStyles = () => {
+  resetNodeStyles = ({ resetWalls, resetVisited, resetShortestPath }) => {
+    const wallsStyle = resetWalls ? `node-walls` : undefined;
     for (let node in this.refs) {
       ReactDOM.findDOMNode(this.refs[node]).classList.remove(
         `node-visited`,
         `node-shortest-path`,
-        `node-wall`
+        `${wallsStyle}`
       );
       if (
         !this.isStartNode(
@@ -181,22 +201,20 @@ export default class Visualizer extends PureComponent {
       const currentRow = [];
       for (let col = 0; col < this.gridWidth; col++) {
         currentRow.push(this.createNode(row, col));
-        if (currentRow[col].isStart || currentRow[col].isFinish) {
-        }
       }
       grid.push(currentRow);
     }
     return grid;
   };
 
-  createNode = (row, col) => {
+  createNode = (row, col, isWall = false) => {
     return {
       row,
       col,
       isStart: this.isStartNode(row, col),
       isFinish: this.isFinishNode(row, col),
       distance: Infinity,
-      isWall: false,
+      isWall: isWall,
       previousNode: null,
     };
   };
@@ -254,6 +272,29 @@ export default class Visualizer extends PureComponent {
     this.visualize(visitedNodesInOrder, nodesInShortestPathOrder);
   };
 
+  handleClearWalls = () => {
+    console.log("handle clear walls");
+    const { setClearWallsRequest } = this.props;
+    for (let row = 0; row < this.gridHeight; row++) {
+      for (let col = 0; col < this.gridWidth; col++) {
+        if (!this.isStartNode(row, col) && !this.isFinishNode(row, col)) {
+          if (this.state.grid[row][col].isWall) {
+            this.toggleNodeWall(row, col);
+          }
+        }
+      }
+    }
+    setClearWallsRequest({ requested: false, cleared: true });
+  };
+
+  componentDidUpdate() {
+    console.log("in visualizer component did update");
+    if (this.props.isClearWallsRequested.requested === true) {
+      console.log("removing walls");
+      this.handleClearWalls();
+    }
+  }
+
   render() {
     console.log("Visualizer component is rendering...");
     const { grid } = this.state;
@@ -263,12 +304,13 @@ export default class Visualizer extends PureComponent {
           isFinished={this.props.isFinished}
           isRunning={this.props.isRunning}
           isAlgorithmSelected={this.props.activeAlgorithm}
-          resetButtonClicked={this.handleResetButtonClicked}
-          playButtonClicked={this.handlePlayButtonClicked}
-          handleSpeedChange={this.handleSpeedChange}
-          handleGridSizeChange={this.handleGridSizeChange}
+          onResetButtonClicked={this.handleResetButtonClicked}
+          onPlayButtonClicked={this.handlePlayButtonClicked}
+          onSpeedChange={this.handleSpeedChange}
+          onGridSizeChange={this.handleGridSizeChange}
         />
         <div className="grid">
+          {console.log(grid.map)}
           {grid.map((row, rowIndex) => (
             <div key={rowIndex} className="row">
               {row.map((node) => {

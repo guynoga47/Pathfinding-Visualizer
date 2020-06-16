@@ -21,10 +21,10 @@ const Controls = (props) => {
     isFinished,
     isRunning,
     isAlgorithmSelected,
-    resetButtonClicked,
-    playButtonClicked,
-    handleSpeedChange,
-    handleGridSizeChange,
+    onResetButtonClicked,
+    onPlayButtonClicked,
+    onSpeedChange,
+    onGridSizeChange,
   } = props;
   return (
     <div
@@ -36,7 +36,7 @@ const Controls = (props) => {
       }}
     >
       <GridSizeSlider
-        onGridSizeChange={handleGridSizeChange}
+        onGridSizeChange={onGridSizeChange}
         disabled={isRunning}
       />
       {isRunning ? (
@@ -44,13 +44,13 @@ const Controls = (props) => {
           <Spinner />
         </IconButton>
       ) : isFinished ? (
-        <IconButton className={classes.button} onClick={resetButtonClicked}>
+        <IconButton className={classes.button} onClick={onResetButtonClicked}>
           <ResetIcon style={{ fontSize: "2em" }} />
         </IconButton>
       ) : (
         <IconButton
           className={classes.button}
-          onClick={playButtonClicked}
+          onClick={onPlayButtonClicked}
           disabled={!isAlgorithmSelected}
         >
           <PlayIcon style={{ fontSize: "2em" }} />
@@ -59,7 +59,7 @@ const Controls = (props) => {
       <SpeedSlider
         min={20}
         max={40}
-        onSpeedChange={handleSpeedChange}
+        onSpeedChange={onSpeedChange}
         disabled={isRunning || !isAlgorithmSelected}
       />
     </div>

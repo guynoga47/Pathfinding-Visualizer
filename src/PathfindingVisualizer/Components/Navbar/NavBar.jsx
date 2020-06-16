@@ -10,22 +10,25 @@ import { withStyles } from "@material-ui/core/styles";
 import Menu from "@material-ui/core/Menu";
 
 const useStyles = makeStyles((theme) => ({
-  btnSelectAlgorithm: {
+  navButton: {
     color: "white !important",
-    fontFamily: "Orbitron",
+    fontSize: "14px",
     textTransform: "uppercase",
-    textDecoration: "none",
     background: "#1F2833",
-    width: "7em",
+    width: "12em",
     textAlign: "center",
-    padding: "10px",
+    padding: "10",
     border: "2px solid #66FCF1 !important",
-    display: "inline-block",
     transition: "all 0.4s ease 0s",
     "&:hover": {
       color: "black !important",
       background: "#66FCF1",
       borderColor: "black !important",
+      transition: "all 0.4s ease 0s",
+    },
+    "&:disabled": {
+      color: "#C5C6C7 !important",
+      borderColor: "#C5C6C7 !important",
       transition: "all 0.4s ease 0s",
     },
   },
@@ -35,6 +38,7 @@ const useStyles = makeStyles((theme) => ({
   menuItem: {
     backgroundColor: "#1F2833",
     color: "white",
+    fontSize: "4px",
     "&:hover": {
       backgroundColor: "#1f2833",
       color: "#66FCF1",
@@ -86,10 +90,20 @@ const StyledMenu = withStyles({
 const Nav = (props) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const classes = useStyles();
-  const { algorithms, activeAlgorithm, setActiveAlgorithm } = props;
+  const {
+    algorithms,
+    activeAlgorithm,
+    setActiveAlgorithm,
+    setClearWallsRequest,
+    isRunning,
+  } = props;
 
-  const handleClick = (event) => {
+  const handleAlgorithmSelectionClicked = (event) => {
     setAnchorEl(event.currentTarget);
+  };
+
+  const handleClearWallsRequested = () => {
+    setClearWallsRequest({ cleared: false, requested: true });
   };
 
   const handleClose = () => {
@@ -104,13 +118,22 @@ const Nav = (props) => {
           Pathfinder
         </Typography>
         <Button
-          className={classes.btnSelectAlgorithm}
+          className={classes.navButton}
           aria-controls="customized-menu"
           aria-haspopup="true"
           variant="contained"
-          onClick={handleClick}
+          onClick={handleAlgorithmSelectionClicked}
         >
           {activeAlgorithm ? activeAlgorithm.shortened : "select"}
+        </Button>
+        <Button
+          className={classes.navButton}
+          aria-haspopup="true"
+          disabled={isRunning}
+          variant="contained"
+          onClick={handleClearWallsRequested}
+        >
+          Clear Walls
         </Button>
         <StyledMenu
           className={classes.menu}
@@ -129,7 +152,10 @@ const Nav = (props) => {
                 handleClose();
               }}
             >
-              <ListItemText primary={algorithm.name} />
+              <ListItemText
+                primary={algorithm.name}
+                className={classes.menuItemText}
+              />
             </MenuItem>
           ))}
         </StyledMenu>
@@ -139,3 +165,9 @@ const Nav = (props) => {
 };
 
 export default Nav;
+/* 
+TODO:
+
+1. Move some styling to theme.js.
+2. Make select button glow to indicate the user to choose an algorithm in order to unlock the playback controls. 
+ */

@@ -15,6 +15,14 @@ export default createMuiTheme({
         },
       },
     },
+    MuiButton: {
+      root: {
+        margin: "1em",
+        "&:disabled": {
+          backgroundColor: "#FFFF",
+        },
+      },
+    },
     MuiButtonBase: {
       root: {
         cursor: `url(${handPointer}), auto`,
