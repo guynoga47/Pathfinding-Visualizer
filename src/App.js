@@ -15,6 +15,7 @@ const App = () => {
     cleared: true,
     requested: false,
   });
+  const [drawingMode, setDrawingMode] = useState("free");
   const algorithms = unweightedAlgorithms.data.concat(weightedAlgorithms.data);
   console.log("App rendering");
 
@@ -27,6 +28,8 @@ const App = () => {
           activeAlgorithm={activeAlgorithm}
           setActiveAlgorithm={setActiveAlgorithm}
           setClearWallsRequest={setClearWallsRequest}
+          drawingMode={drawingMode}
+          setDrawingMode={setDrawingMode}
         />
         <Visualizer
           activeAlgorithm={activeAlgorithm ? activeAlgorithm.func : undefined}
@@ -36,6 +39,7 @@ const App = () => {
           setClearWallsRequest={setClearWallsRequest}
           setIsRunning={setIsRunning}
           setIsFinished={setIsFinished}
+          drawingMode={drawingMode}
         />
       </ThemeProvider>
     </div>

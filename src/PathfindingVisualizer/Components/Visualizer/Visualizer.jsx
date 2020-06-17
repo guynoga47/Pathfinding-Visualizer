@@ -136,63 +136,117 @@ export default class Visualizer extends PureComponent {
   };
 
   handleMouseDown = (row, col) => {
-    if (this.props.isFinished || this.props.isRunning) return;
+    const { isFinished, isRunning, drawingMode } = this.props;
+    console.log(drawingMode);
+    if (isFinished || isRunning) return;
     this.mouseKeyDown = true;
     if (this.isStartNode(row, col) || this.isFinishNode(row, col)) {
       this.endPointKeyDown = this.isStartNode(row, col) ? "start" : "finish";
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-${this.endPointKeyDown}`
       );
-    } else {
-      this.toggleNodeWall(row, col);
     }
+    if (drawingMode === "rectangle") {
+      this.rectLocStart = { row, col };
+    }
+    this.changeNodeWall(row, col, { toggle: true });
   };
 
   handleMouseLeave = (row, col) => {
-    if (this.props.isFinished || this.props.isRunning) return;
+    const { isFinished, isRunning, drawingMode } = this.props;
+    if (isFinished || isRunning) return;
     if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-${this.endPointKeyDown}`
       );
     }
+    if (drawingMode === "rectangle") {
+      if (this.mouseKeyDown) {
+        const rectangleNodes = this.calculateRectangleNodes(row, col);
+        console.log(rectangleNodes);
+        rectangleNodes.forEach((node) =>
+          this.changeNodeWall(node.row, node.col, { toggle: true })
+        );
+      }
+    }
   };
 
   handleMouseEnter = (row, col) => {
-    if (this.props.isFinished || !this.mouseKeyDown || this.props.isRunning)
-      return;
+    const { isFinished, isRunning, drawingMode } = this.props;
+    if (isFinished || !this.mouseKeyDown || isRunning) return;
     if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
         `node-${this.endPointKeyDown}`
       );
-    } else {
-      if (!this.isStartNode(row, col) && !this.isFinishNode(row, col))
-        this.toggleNodeWall(row, col);
+    }
+    if (drawingMode === "rectangle") {
+      const rectangleNodes = this.calculateRectangleNodes(row, col);
+      console.log(rectangleNodes);
+      rectangleNodes.forEach((node) =>
+        this.changeNodeWall(node.row, node.col, { add: true })
+      );
+    } else if (drawingMode === "free") {
+      this.changeNodeWall(row, col, { toggle: true });
     }
   };
 
   handleMouseUp = (row, col) => {
-    if (this.props.isFinished || this.props.isRunning) return;
+    const { isFinished, isRunning } = this.props;
+    const { startNode, finishNode } = this.state;
+    if (isFinished || isRunning) return;
     if (this.endPointKeyDown) {
-      let endPoint =
-        this.endPointKeyDown === "start"
-          ? this.state.startNode
-          : this.state.finishNode;
+      let endPoint = this.endPointKeyDown === "start" ? startNode : finishNode;
       endPoint.row = row;
       endPoint.col = col;
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
         `node-${this.endPointKeyDown}`
       );
+    } else if (this.mouseKeyDown) {
+      //initially was here as part of create wall rectangle feature...
+      //need to think if still relevant
     }
     this.endPointKeyDown = false;
     this.mouseKeyDown = false;
   };
 
-  toggleNodeWall = (row, col) => {
+  calculateRectangleNodes = (row, col) => {
+    const rectangleNodes = [];
+    const startPoint = this.rectLocStart;
+    const endPoint = { row, col };
+    const upperPoint = startPoint.row < endPoint.row ? startPoint : endPoint;
+    const leftPoint = startPoint.col < endPoint.col ? startPoint : endPoint;
+    const rowDiff = Math.abs(startPoint.row - endPoint.row);
+    const colDiff = Math.abs(startPoint.col - endPoint.col);
+    for (let i = upperPoint.row; i <= rowDiff + upperPoint.row; i++) {
+      for (let j = leftPoint.col; j <= colDiff + leftPoint.col; j++) {
+        if (
+          (j === startPoint.col ||
+            j === endPoint.col ||
+            i === startPoint.row ||
+            i === endPoint.row) &&
+          !this.isStartNode(i, j) &&
+          !this.isFinishNode(i, j)
+        ) {
+          rectangleNodes.push({ row: i, col: j });
+        }
+      }
+    }
+    return rectangleNodes;
+  };
+
+  changeNodeWall = (row, col, { toggle, add }) => {
     const node = this.state.grid[row][col];
-    node.isWall = !node.isWall;
-    ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.toggle(
-      "node-wall"
-    );
+    if (toggle) {
+      ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.toggle(
+        "node-wall"
+      );
+      node.isWall = !node.isWall;
+    } else if (add) {
+      ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
+        "node-wall"
+      );
+      node.isWall = true;
+    }
   };
 
   getInitialGrid = () => {
@@ -279,7 +333,7 @@ export default class Visualizer extends PureComponent {
       for (let col = 0; col < this.gridWidth; col++) {
         if (!this.isStartNode(row, col) && !this.isFinishNode(row, col)) {
           if (this.state.grid[row][col].isWall) {
-            this.toggleNodeWall(row, col);
+            this.changeNodeWall(row, col, { toggle: true });
           }
         }
       }
@@ -290,10 +344,14 @@ export default class Visualizer extends PureComponent {
   componentDidUpdate() {
     console.log("in visualizer component did update");
     if (this.props.isClearWallsRequested.requested === true) {
-      console.log("removing walls");
       this.handleClearWalls();
     }
+    if (this.props.isChangeDrawingModeRequested) {
+      this.handleChangeDrawingMode();
+    }
   }
+
+  handleChangeDrawingMode = () => {};
 
   render() {
     console.log("Visualizer component is rendering...");

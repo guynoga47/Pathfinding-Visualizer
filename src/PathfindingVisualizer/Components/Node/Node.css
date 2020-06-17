@@ -31,8 +31,8 @@ cursor: `url(${importAssetName}, auto` for example.
   border-color: #1f2833;
   /*   -webkit-animation: jello-horizontal 0.5s both;
   animation: jello-horizontal 0.5s both; */
-  -webkit-animation: fade-in 1.2s cubic-bezier(0.39, 0.575, 0.565, 1) both;
-  animation: fade-in 1.2s cubic-bezier(0.39, 0.575, 0.565, 1) both;
+  /*   -webkit-animation: fade-in 0s cubic-bezier(0.39, 0.575, 0.565, 1) both;
+  animation: fade-in 0s cubic-bezier(0.39, 0.575, 0.565, 1) both; */
 }
 
 /* ----------------------------------------------

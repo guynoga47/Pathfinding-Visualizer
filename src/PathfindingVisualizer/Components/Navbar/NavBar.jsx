@@ -9,6 +9,10 @@ import MenuItem from "@material-ui/core/MenuItem";
 import { withStyles } from "@material-ui/core/styles";
 import Menu from "@material-ui/core/Menu";
 
+import IconButton from "@material-ui/core/IconButton";
+import DrawFree from "@material-ui/icons/Create";
+import DrawRectangle from "@material-ui/icons/AspectRatio";
+
 const useStyles = makeStyles((theme) => ({
   navButton: {
     color: "white !important",
@@ -43,6 +47,21 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: "#1f2833",
       color: "#66FCF1",
     },
+  },
+  drawIcon: {
+    color: "white",
+    "&:hover": {
+      color: "#66FCF1 !important",
+      background: "#1f2833",
+      borderColor: "black !important",
+      transition: "all 0.4s ease 0s",
+    },
+  },
+  drawIconActive: {
+    color: "#66FCF1 !important",
+    background: "#1f2833",
+    borderColor: "black !important",
+    transition: "all 0.4s ease 0s",
   },
   toolbar: {
     display: "flex",
@@ -95,6 +114,8 @@ const Nav = (props) => {
     activeAlgorithm,
     setActiveAlgorithm,
     setClearWallsRequest,
+    drawingMode,
+    setDrawingMode,
     isRunning,
   } = props;
 
@@ -108,6 +129,10 @@ const Nav = (props) => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleDrawingModeButtonClicked = (e) => {
+    setDrawingMode(e.currentTarget.id === "btn-free" ? "free" : "rectangle");
   };
 
   return (
@@ -159,6 +184,27 @@ const Nav = (props) => {
             </MenuItem>
           ))}
         </StyledMenu>
+        <IconButton
+          id={"btn-free"}
+          style={{ marginLeft: "50em" }}
+          className={
+            drawingMode === "free" ? classes.drawIconActive : classes.drawIcon
+          }
+          onClick={handleDrawingModeButtonClicked}
+        >
+          <DrawFree />
+        </IconButton>
+        <IconButton
+          id={"btn-rectangle"}
+          className={
+            drawingMode === "rectangle"
+              ? classes.drawIconActive
+              : classes.drawIcon
+          }
+          onClick={handleDrawingModeButtonClicked}
+        >
+          <DrawRectangle />
+        </IconButton>
       </Toolbar>
     </AppBar>
   );
