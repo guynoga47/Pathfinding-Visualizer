@@ -100,12 +100,12 @@ export default class Visualizer extends PureComponent {
     this.props.setIsFinished(false);
     const grid = this.getInitialGrid();
     this.setState({ grid }, () => {
-      this.resetNodeStyles();
+      this.resetNodeStyles({ resetWalls: true });
     });
   };
 
   resetNodeStyles = ({ resetWalls, resetVisited, resetShortestPath }) => {
-    const wallsStyle = resetWalls ? `node-walls` : undefined;
+    const wallsStyle = resetWalls ? `node-wall` : undefined;
     for (let node in this.refs) {
       ReactDOM.findDOMNode(this.refs[node]).classList.remove(
         `node-visited`,
