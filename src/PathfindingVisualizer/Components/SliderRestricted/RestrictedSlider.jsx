@@ -49,7 +49,6 @@ export default function RestrictedSlider(props) {
   const classes = useStyles();
   const [value, setValue] = React.useState(25);
   const { disabled } = props;
-  console.log("in restricted slider", props);
   const handleChange = (event, newValue) => {
     setValue(newValue);
     props.onGridSizeChange(newValue);

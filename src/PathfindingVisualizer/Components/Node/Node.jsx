@@ -10,6 +10,7 @@ export default class Node extends PureComponent {
       col,
       isStart,
       isFinish,
+      dirtScore,
       onMouseDown,
       onMouseEnter,
       onMouseLeave,

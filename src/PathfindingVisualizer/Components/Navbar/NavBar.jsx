@@ -8,10 +8,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import MenuItem from "@material-ui/core/MenuItem";
 import { withStyles } from "@material-ui/core/styles";
 import Menu from "@material-ui/core/Menu";
-
-import IconButton from "@material-ui/core/IconButton";
-import DrawFree from "@material-ui/icons/Create";
-import DrawRectangle from "@material-ui/icons/AspectRatio";
+import Tools from "../Tools/Tools";
 
 const useStyles = makeStyles((theme) => ({
   navButton: {
@@ -47,21 +44,6 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: "#1f2833",
       color: "#66FCF1",
     },
-  },
-  drawIcon: {
-    color: "white",
-    "&:hover": {
-      color: "#66FCF1 !important",
-      background: "#1f2833",
-      borderColor: "black !important",
-      transition: "all 0.4s ease 0s",
-    },
-  },
-  drawIconActive: {
-    color: "#66FCF1 !important",
-    background: "#1f2833",
-    borderColor: "black !important",
-    transition: "all 0.4s ease 0s",
   },
   toolbar: {
     display: "flex",
@@ -107,20 +89,23 @@ const StyledMenu = withStyles({
 ));
 
 const Nav = (props) => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorElAlgMenu, setAnchorElAlgMenu] = React.useState(null);
+
   const classes = useStyles();
   const {
     algorithms,
     activeAlgorithm,
     setActiveAlgorithm,
     setClearWallsRequest,
+    setSaveLayoutRequest,
     drawingMode,
     setDrawingMode,
     isRunning,
+    isFinished,
   } = props;
 
   const handleAlgorithmSelectionClicked = (event) => {
-    setAnchorEl(event.currentTarget);
+    setAnchorElAlgMenu(event.currentTarget);
   };
 
   const handleClearWallsRequested = () => {
@@ -128,11 +113,7 @@ const Nav = (props) => {
   };
 
   const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleDrawingModeButtonClicked = (e) => {
-    setDrawingMode(e.currentTarget.id === "btn-free" ? "free" : "rectangle");
+    setAnchorElAlgMenu(null);
   };
 
   return (
@@ -163,9 +144,9 @@ const Nav = (props) => {
         <StyledMenu
           className={classes.menu}
           id="customized-menu"
-          anchorEl={anchorEl}
+          anchorEl={anchorElAlgMenu}
           keepMounted
-          open={Boolean(anchorEl)}
+          open={Boolean(anchorElAlgMenu)}
           onClose={handleClose}
         >
           {algorithms.map((algorithm) => (
@@ -184,27 +165,13 @@ const Nav = (props) => {
             </MenuItem>
           ))}
         </StyledMenu>
-        <IconButton
-          id={"btn-free"}
-          style={{ marginLeft: "50em" }}
-          className={
-            drawingMode === "free" ? classes.drawIconActive : classes.drawIcon
-          }
-          onClick={handleDrawingModeButtonClicked}
-        >
-          <DrawFree />
-        </IconButton>
-        <IconButton
-          id={"btn-rectangle"}
-          className={
-            drawingMode === "rectangle"
-              ? classes.drawIconActive
-              : classes.drawIcon
-          }
-          onClick={handleDrawingModeButtonClicked}
-        >
-          <DrawRectangle />
-        </IconButton>
+        <Tools
+          isRunning={isRunning}
+          isFinished={isFinished}
+          drawingMode={drawingMode}
+          setDrawingMode={setDrawingMode}
+          setSaveLayoutRequest={setSaveLayoutRequest}
+        />
       </Toolbar>
     </AppBar>
   );
@@ -215,5 +182,4 @@ export default Nav;
 TODO:
 
 1. Move some styling to theme.js.
-2. Make select button glow to indicate the user to choose an algorithm in order to unlock the playback controls. 
  */

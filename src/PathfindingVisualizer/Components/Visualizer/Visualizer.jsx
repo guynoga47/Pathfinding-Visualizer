@@ -1,4 +1,4 @@
-import React, { PureComponent } from "react";
+import React, { Component } from "react";
 import Node from "../Node/Node";
 import Controls, { DEFAULT_SPEED } from "../Controls/Controls";
 import "./Visualizer.css";
@@ -20,7 +20,7 @@ const calculateDefaultGridEndPointsLocations = (height, width) => {
   return { defaultStartNode, defaultFinishNode };
 };
 
-export default class Visualizer extends PureComponent {
+export default class Visualizer extends Component {
   constructor(props) {
     super(props);
     this.speed = DEFAULT_SPEED;
@@ -145,11 +145,12 @@ export default class Visualizer extends PureComponent {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-${this.endPointKeyDown}`
       );
+    } else {
+      if (drawingMode === "rectangle" || drawingMode === "obstacle") {
+        this.rectLocStart = { row, col };
+      }
+      this.changeNodeWall(row, col, { toggle: true });
     }
-    if (drawingMode === "rectangle") {
-      this.rectLocStart = { row, col };
-    }
-    this.changeNodeWall(row, col, { toggle: true });
   };
 
   handleMouseLeave = (row, col) => {
@@ -159,14 +160,18 @@ export default class Visualizer extends PureComponent {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-${this.endPointKeyDown}`
       );
-    }
-    if (drawingMode === "rectangle") {
-      if (this.mouseKeyDown) {
-        const rectangleNodes = this.calculateRectangleNodes(row, col);
-        console.log(rectangleNodes);
-        rectangleNodes.forEach((node) =>
-          this.changeNodeWall(node.row, node.col, { toggle: true })
-        );
+    } else if (!this.isStartNode() && !this.isFinishNode()) {
+      if (drawingMode === "rectangle") {
+        if (this.mouseKeyDown) {
+          this.createAndRenderRectangle(row, col, {
+            fill: false,
+            toggle: true,
+          });
+        }
+      } else if (drawingMode === "obstacle") {
+        if (this.mouseKeyDown) {
+          this.createAndRenderRectangle(row, col, { fill: true, toggle: true });
+        }
       }
     }
   };
@@ -178,15 +183,27 @@ export default class Visualizer extends PureComponent {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
         `node-${this.endPointKeyDown}`
       );
-    }
-    if (drawingMode === "rectangle") {
-      const rectangleNodes = this.calculateRectangleNodes(row, col);
-      console.log(rectangleNodes);
-      rectangleNodes.forEach((node) =>
-        this.changeNodeWall(node.row, node.col, { add: true })
-      );
+    } else if (drawingMode === "obstacle") {
+      this.createAndRenderRectangle(row, col, { fill: true, add: true });
+    } else if (drawingMode === "rectangle") {
+      this.createAndRenderRectangle(row, col, { fill: false, add: true });
     } else if (drawingMode === "free") {
       this.changeNodeWall(row, col, { toggle: true });
+    }
+  };
+
+  createAndRenderRectangle = (row, col, { fill, add, toggle }) => {
+    const rectangleNodes = this.calculateRectangleNodes(row, col, {
+      fill,
+    });
+    if (add) {
+      rectangleNodes.forEach((node) =>
+        this.changeNodeWall(node.row, node.col, { add })
+      );
+    } else {
+      rectangleNodes.forEach((node) =>
+        this.changeNodeWall(node.row, node.col, { toggle })
+      );
     }
   };
 
@@ -201,15 +218,12 @@ export default class Visualizer extends PureComponent {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
         `node-${this.endPointKeyDown}`
       );
-    } else if (this.mouseKeyDown) {
-      //initially was here as part of create wall rectangle feature...
-      //need to think if still relevant
     }
     this.endPointKeyDown = false;
     this.mouseKeyDown = false;
   };
 
-  calculateRectangleNodes = (row, col) => {
+  calculateRectangleNodes = (row, col, { fill }) => {
     const rectangleNodes = [];
     const startPoint = this.rectLocStart;
     const endPoint = { row, col };
@@ -219,14 +233,18 @@ export default class Visualizer extends PureComponent {
     const colDiff = Math.abs(startPoint.col - endPoint.col);
     for (let i = upperPoint.row; i <= rowDiff + upperPoint.row; i++) {
       for (let j = leftPoint.col; j <= colDiff + leftPoint.col; j++) {
-        if (
-          (j === startPoint.col ||
-            j === endPoint.col ||
-            i === startPoint.row ||
-            i === endPoint.row) &&
-          !this.isStartNode(i, j) &&
-          !this.isFinishNode(i, j)
-        ) {
+        if (!fill) {
+          if (
+            (j === startPoint.col ||
+              j === endPoint.col ||
+              i === startPoint.row ||
+              i === endPoint.row) &&
+            !this.isStartNode(i, j) &&
+            !this.isFinishNode(i, j)
+          ) {
+            rectangleNodes.push({ row: i, col: j });
+          }
+        } else {
           rectangleNodes.push({ row: i, col: j });
         }
       }
@@ -237,15 +255,19 @@ export default class Visualizer extends PureComponent {
   changeNodeWall = (row, col, { toggle, add }) => {
     const node = this.state.grid[row][col];
     if (toggle) {
-      ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.toggle(
-        "node-wall"
-      );
-      node.isWall = !node.isWall;
+      if (!this.isStartNode(row, col) && !this.isFinishNode(row, col)) {
+        ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.toggle(
+          "node-wall"
+        );
+        node.isWall = !node.isWall;
+      }
     } else if (add) {
-      ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
-        "node-wall"
-      );
-      node.isWall = true;
+      if (!this.isStartNode(row, col) && !this.isFinishNode(row, col)) {
+        ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
+          "node-wall"
+        );
+        node.isWall = true;
+      }
     }
   };
 
@@ -327,7 +349,6 @@ export default class Visualizer extends PureComponent {
   };
 
   handleClearWalls = () => {
-    console.log("handle clear walls");
     const { setClearWallsRequest } = this.props;
     for (let row = 0; row < this.gridHeight; row++) {
       for (let col = 0; col < this.gridWidth; col++) {
@@ -340,21 +361,32 @@ export default class Visualizer extends PureComponent {
     }
     setClearWallsRequest({ requested: false, cleared: true });
   };
+  /* shouldComponentUpdate() {
+    return this.props.isRunning ? false : true;
+  } */
 
   componentDidUpdate() {
     console.log("in visualizer component did update");
-    if (this.props.isClearWallsRequested.requested === true) {
+    if (this.props.isClearWallsRequested.requested) {
       this.handleClearWalls();
     }
     if (this.props.isChangeDrawingModeRequested) {
       this.handleChangeDrawingMode();
     }
+    if (this.props.isSaveLayoutRequested.requested) {
+      this.handleSaveLayout();
+    }
   }
 
   handleChangeDrawingMode = () => {};
 
+  handleSaveLayout = () => {
+    console.log("save layout requested");
+    const { setSaveLayoutRequest } = this.props;
+
+    setSaveLayoutRequest({ requested: false });
+  };
   render() {
-    console.log("Visualizer component is rendering...");
     const { grid } = this.state;
     return (
       <>
@@ -368,7 +400,6 @@ export default class Visualizer extends PureComponent {
           onGridSizeChange={this.handleGridSizeChange}
         />
         <div className="grid">
-          {console.log(grid.map)}
           {grid.map((row, rowIndex) => (
             <div key={rowIndex} className="row">
               {row.map((node) => {

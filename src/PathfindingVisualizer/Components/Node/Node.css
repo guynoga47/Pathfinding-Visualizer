@@ -5,10 +5,10 @@ cursor: `url(${importAssetName}, auto` for example.
 */
 
 .node {
-  width: 23px;
-  height: 23px;
+  width: 20px;
+  height: 20px;
   border: 1px solid rgba(0, 0, 0, 0.15);
-  cursor: url('../../../assets/cursors/cross.cur'), pointer;
+  cursor: url("../../../assets/cursors/cross.cur"), pointer;
   /* border: 1px solid rgb(175, 216, 248); */
   border-width: thin;
   display: inline-block;
@@ -17,13 +17,13 @@ cursor: `url(${importAssetName}, auto` for example.
 .node-start {
   background-color: green;
   border-color: green;
-  cursor: url('../../../assets/cursors/move.cur'), pointer;
+  cursor: url("../../../assets/cursors/move.cur"), pointer;
 }
 
 .node-finish {
   background-color: red;
   border-color: red;
-  cursor: url('../../../assets/cursors/move.cur'), pointer;
+  cursor: url("../../../assets/cursors/move.cur"), pointer;
 }
 
 .node-wall {
@@ -31,8 +31,8 @@ cursor: `url(${importAssetName}, auto` for example.
   border-color: #1f2833;
   /*   -webkit-animation: jello-horizontal 0.5s both;
   animation: jello-horizontal 0.5s both; */
-  /*   -webkit-animation: fade-in 0s cubic-bezier(0.39, 0.575, 0.565, 1) both;
-  animation: fade-in 0s cubic-bezier(0.39, 0.575, 0.565, 1) both; */
+  /* -webkit-animation: fade-in 1.2s cubic-bezier(0.39, 0.575, 0.565, 1) both;
+  animation: fade-in 1.2s cubic-bezier(0.39, 0.575, 0.565, 1) both; */
 }
 
 /* ----------------------------------------------
