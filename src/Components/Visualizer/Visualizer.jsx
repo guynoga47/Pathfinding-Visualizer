@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Node from "../Node/Node";
 import Controls, { DEFAULT_SPEED } from "../Controls/Controls";
+import { saveAs } from "file-saver";
 import "./Visualizer.css";
 import { getShortestPathNodesInOrder } from "../../Algorithms/algorithmUtils.js";
 import ReactDOM from "react-dom";
@@ -290,6 +291,7 @@ export default class Visualizer extends Component {
       isStart: this.isStartNode(row, col),
       isFinish: this.isFinishNode(row, col),
       distance: Infinity,
+      heuristicDistance: Infinity,
       isWall: isWall,
       previousNode: null,
     };
@@ -374,16 +376,29 @@ export default class Visualizer extends Component {
       this.handleChangeDrawingMode();
     }
     if (this.props.isSaveLayoutRequested.requested) {
-      this.handleSaveLayout();
+      this.handleSaveLayoutRequest();
     }
   }
+
+  handleSaveLayoutRequest = async () => {
+    const { setSaveLayoutRequest } = this.props;
+    const blob = new Blob([JSON.stringify(this.state.grid)]);
+    saveAs(
+      blob,
+      `Grid Snapshot ${new Date()
+        .toLocaleDateString()
+        .replace(/\./g, "-")} at ${new Date()
+        .toLocaleTimeString()
+        .replace(/:/g, ".")}.json`
+    );
+    setSaveLayoutRequest({ requested: false });
+  };
 
   handleChangeDrawingMode = () => {};
 
   handleSaveLayout = () => {
     console.log("save layout requested");
     const { setSaveLayoutRequest } = this.props;
-
     setSaveLayoutRequest({ requested: false });
   };
   render() {
@@ -443,13 +458,12 @@ TODO
 8. Generate random terrain feature?
 9. Settings Button.
 10. find better animation gradients and colors.
-11. Adjust speed so it will fit dfs as well. (current max speed is too fast)
-12. Adjust speed so it will reflect on the shortest path visualization as well.
-13. Move color to theme and style all components with material ui.
-14. Playback control to material ui speed dial?
-15. Extend menu functionality to figure out how to style it better.
-16. Move part of the state from PathfindingVisualizer to App, to make the code more
+
+12. Move color to theme and style all components with material ui.
+13. Playback control to material ui speed dial?
+14. Extend menu functionality to figure out how to style it better.
+15. Move part of the state from PathfindingVisualizer to App, to make the code more
     modular for future feature implementations.
-18. change visiting colors to better fit the theme.
+16. change visiting colors to better fit the theme.
 
 */

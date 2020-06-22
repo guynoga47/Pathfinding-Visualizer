@@ -10,6 +10,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 
 const useStyles = makeStyles((theme) => ({
+  input: {
+    display: "none",
+  },
   icon: {
     color: "white",
     "&:hover": {
@@ -39,6 +42,9 @@ const useStyles = makeStyles((theme) => ({
   popoverText: {
     padding: "5px",
   },
+  tools: {
+    marginLeft: "59.95em",
+  },
 }));
 
 const Tools = (props) => {
@@ -59,26 +65,47 @@ const Tools = (props) => {
   const [anchorElDrawObstacle, setAnchorElDrawObstacle] = React.useState(null);
 
   const handlePopoverOpen = (event) => {
-    if (event.currentTarget.id === "btn-free")
-      setAnchorElDrawFree(event.currentTarget);
-    if (event.currentTarget.id === "btn-rectangle")
-      setAnchorElDrawRectangle(event.currentTarget);
-    if (event.currentTarget.id === "btn-obstacle")
-      setAnchorElDrawObstacle(event.currentTarget);
-    if (event.currentTarget.id === "btn-save")
-      setAnchorElSaveLayout(event.currentTarget);
-    if (event.currentTarget.id === "btn-load")
-      setAnchorElLoadLayout(event.currentTarget);
+    switch (event.currentTarget.id) {
+      case "btn-free":
+        setAnchorElDrawFree(event.currentTarget);
+        break;
+      case "btn-rectangle":
+        setAnchorElDrawRectangle(event.currentTarget);
+        break;
+      case "btn-obstacle":
+        setAnchorElDrawObstacle(event.currentTarget);
+        break;
+      case "btn-save":
+        setAnchorElSaveLayout(event.currentTarget);
+        break;
+      case "btn-load":
+        setAnchorElLoadLayout(event.currentTarget);
+        break;
+      default:
+        console.log("default case entered in Tools.jsx: handlePopoverOpen");
+    }
   };
 
   const handlePopoverClose = (event) => {
-    if (event.currentTarget.id === "btn-free") setAnchorElDrawFree(null);
-    if (event.currentTarget.id === "btn-rectangle")
-      setAnchorElDrawRectangle(null);
-    if (event.currentTarget.id === "btn-obstacle")
-      setAnchorElDrawObstacle(null);
-    if (event.currentTarget.id === "btn-save") setAnchorElSaveLayout(null);
-    if (event.currentTarget.id === "btn-load") setAnchorElLoadLayout(null);
+    switch (event.currentTarget.id) {
+      case "btn-free":
+        setAnchorElDrawFree(null);
+        break;
+      case "btn-rectangle":
+        setAnchorElDrawRectangle(null);
+        break;
+      case "btn-obstacle":
+        setAnchorElDrawObstacle(null);
+        break;
+      case "btn-save":
+        setAnchorElSaveLayout(null);
+        break;
+      case "btn-load":
+        setAnchorElLoadLayout(null);
+        break;
+      default:
+        console.log("default case entered in Tools.jsx: handlePopoverClose");
+    }
   };
 
   const handleDrawingModeButtonClicked = (event) => {
@@ -91,16 +118,23 @@ const Tools = (props) => {
     );
   };
 
-  const handleSaveLayoutButtonClicked = () => {
+  const handleSaveLayoutButtonClicked = async () => {
+    /*     console.log(JSON.stringify(grid)); */
     setSaveLayoutRequest({ requested: true });
+  };
+
+  const handleLoadLayoutButtonClicked = (params) => {
+    //a place holder for load layout implementation.
+    fetch(`${params.fileName}.json`)
+      .then((response) => response.json())
+      .then((data) => console.log(data));
   };
 
   const classes = useStyles();
   return (
-    <React.Fragment>
+    <div className={classes.tools}>
       <IconButton
         id={"btn-free"}
-        style={{ marginLeft: "50em" }}
         className={drawingMode === "free" ? classes.iconActive : classes.icon}
         onClick={handleDrawingModeButtonClicked}
         onMouseEnter={handlePopoverOpen}
@@ -135,22 +169,33 @@ const Tools = (props) => {
       >
         <IconDrawObstacle />
       </IconButton>
-      <IconButton
-        id={"btn-load"}
-        className={classes.icon}
-        onMouseEnter={handlePopoverOpen}
-        onMouseLeave={handlePopoverClose}
-        disabled={isRunning}
-      >
-        <IconLoad />
-      </IconButton>
+
+      <input
+        accept=".json"
+        className={classes.input}
+        id="icon-button-load-file"
+        type="file"
+      />
+      <label htmlFor="icon-button-load-file">
+        <IconButton
+          id={"btn-load"}
+          className={classes.icon}
+          onMouseEnter={handlePopoverOpen}
+          onMouseLeave={handlePopoverClose}
+          disabled={isRunning}
+          component={"span"}
+        >
+          <IconLoad />
+        </IconButton>
+      </label>
+
       <IconButton
         id={"btn-save"}
         className={classes.icon}
         onMouseEnter={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
-        onClick={handleSaveLayoutButtonClicked}
         disabled={isRunning}
+        onClick={handleSaveLayoutButtonClicked}
       >
         <IconSave />
       </IconButton>
@@ -260,7 +305,7 @@ const Tools = (props) => {
       >
         <Typography className={classes.popoverText}>Rectangle</Typography>
       </Popover>
-    </React.Fragment>
+    </div>
   );
 };
 

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import Visualizer from "./PathfindingVisualizer/Components/Visualizer/Visualizer";
-import NavBar from "./PathfindingVisualizer/Components/Navbar/NavBar.jsx";
-import * as nonWeightedAlgorithms from "./PathfindingVisualizer/Algorithms/nonWeightedAlgorithms";
-import * as weightedAlgorithms from "./PathfindingVisualizer/Algorithms/weightedAlgorithms";
+import Visualizer from "./Components/Visualizer/Visualizer";
+import NavBar from "./Components/Navbar/NavBar.jsx";
+import * as nonWeightedAlgorithms from "./Algorithms/nonWeightedAlgorithms";
+import * as weightedAlgorithms from "./Algorithms/weightedAlgorithms";
 import { ThemeProvider } from "@material-ui/core/styles";
 import theme from "./Theme.js";
 import "./App.css";

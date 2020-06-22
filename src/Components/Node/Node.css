@@ -8,7 +8,7 @@ cursor: `url(${importAssetName}, auto` for example.
   width: 20px;
   height: 20px;
   border: 1px solid rgba(0, 0, 0, 0.15);
-  cursor: url("../../../assets/cursors/cross.cur"), pointer;
+  cursor: url("../../assets/cursors/cross.cur"), pointer;
   /* border: 1px solid rgb(175, 216, 248); */
   border-width: thin;
   display: inline-block;
@@ -17,13 +17,13 @@ cursor: `url(${importAssetName}, auto` for example.
 .node-start {
   background-color: green;
   border-color: green;
-  cursor: url("../../../assets/cursors/move.cur"), pointer;
+  cursor: url("../../assets/cursors/move.cur"), pointer;
 }
 
 .node-finish {
   background-color: red;
   border-color: red;
-  cursor: url("../../../assets/cursors/move.cur"), pointer;
+  cursor: url("../../assets/cursors/move.cur"), pointer;
 }
 
 .node-wall {

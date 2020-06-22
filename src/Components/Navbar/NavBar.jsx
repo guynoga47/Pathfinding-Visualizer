@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     background: "#1F2833",
     width: "12em",
     textAlign: "center",
-    padding: "10",
+    padding: "5px",
     border: "2px solid #66FCF1 !important",
     transition: "all 0.4s ease 0s",
     "&:hover": {
