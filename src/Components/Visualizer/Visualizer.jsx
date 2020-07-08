@@ -1,107 +1,45 @@
 import React, { Component } from "react";
-import Node from "../Node/Node";
-import Controls, { DEFAULT_SPEED } from "../Controls/Controls";
-import { saveAs } from "file-saver";
-import "./Visualizer.css";
-import { getShortestPathNodesInOrder } from "../../Algorithms/algorithmUtils.js";
 import ReactDOM from "react-dom";
 
-const DEFAULT_GRID_HEIGHT = 25;
-const DEFAULT_GRID_WIDTH = 50;
+import Node from "../Node/Node";
+import Controls, { DEFAULT_SPEED } from "../Controls/Controls";
+import { getShortestPathNodesInOrder } from "../../Algorithms/algorithmUtils.js";
 
-const calculateDefaultGridEndPointsLocations = (height, width) => {
-  const defaultStartNode = {
-    row: Math.floor(height / 2),
-    col: Math.floor(width / 5),
-  };
-  const defaultFinishNode = {
-    row: Math.floor(height / 2),
-    col: Math.floor((width * 4) / 5),
-  };
-  return { defaultStartNode, defaultFinishNode };
-};
+import "./Visualizer.css";
+
+import GridContext from "../../Context/grid-context";
 
 export default class Visualizer extends Component {
+  static contextType = GridContext;
+
   constructor(props) {
     super(props);
     this.speed = DEFAULT_SPEED;
-    this.gridHeight = DEFAULT_GRID_HEIGHT;
-    this.gridWidth = DEFAULT_GRID_WIDTH;
-    const {
-      defaultStartNode,
-      defaultFinishNode,
-    } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
-
-    this.state = {
-      grid: [],
-      startNode: defaultStartNode,
-      finishNode: defaultFinishNode,
-    };
-  }
-  mouseKeyDown = false;
-  endPointKeyDown = "";
-
-  isStartNode = (row, col) => {
-    return row === this.state.startNode.row && col === this.state.startNode.col;
-  };
-
-  isFinishNode = (row, col) => {
-    return (
-      row === this.state.finishNode.row && col === this.state.finishNode.col
-    );
-  };
-
-  componentDidMount() {
-    const grid = this.getInitialGrid();
-    this.setState({ grid });
+    this.mouseKeyDown = false;
+    this.endPointKeyDown = "";
   }
 
-  handleSpeedChange = (speed) => {
+  handleSpeedChanged = (speed) => {
     this.speed = speed;
   };
 
-  handleGridSizeChange = (height) => {
-    if (height === this.gridHeight) return;
-    this.gridHeight = height;
-    this.gridWidth = height * 2;
-    const {
-      defaultStartNode,
-      defaultFinishNode,
-    } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
-    this.setState(
-      { startNode: defaultStartNode, finishNode: defaultFinishNode },
-      () => this.reset()
-    );
-  };
-
   handleResetButtonClicked = () => {
-    this.props.setIsFinished(false);
-    const grid = this.resetGridKeepWalls();
-    console.log(grid);
-    this.setState({ grid }, () => {
-      this.resetNodeStyles({ resetWalls: false });
+    this.context.updateState("isFinished", false);
+    this.context.resetGridKeepWalls(this.resetNodeStyles, {
+      resetWalls: false,
     });
   };
 
-  resetGridKeepWalls = () => {
-    const grid = [];
-    for (let row = 0; row < this.gridHeight; row++) {
-      const currentRow = [];
-      for (let col = 0; col < this.gridWidth; col++) {
-        currentRow.push(
-          this.createNode(row, col, this.state.grid[row][col].isWall)
-        );
-      }
-      grid.push(currentRow);
-    }
-    return grid;
+  handleGridSizeChange = (height) => {
+    if (height === this.context.gridHeight) return;
+    this.context.resizeGrid(height, this.reset);
   };
 
   reset = () => {
-    this.props.setIsFinished(false);
-    const grid = this.getInitialGrid();
-    this.setState({ grid }, () => {
-      this.resetNodeStyles({ resetWalls: true });
+    this.context.updateState("isFinished", false);
+    const grid = this.context.getInitialGrid();
+    this.context.updateState("grid", grid, this.resetNodeStyles, {
+      resetWalls: true,
     });
   };
 
@@ -114,7 +52,7 @@ export default class Visualizer extends Component {
         `${wallsStyle}`
       );
       if (
-        !this.isStartNode(
+        !this.context.isStartNode(
           parseInt(node.split("-")[1]),
           parseInt(node.split("-")[2])
         )
@@ -124,7 +62,7 @@ export default class Visualizer extends Component {
         console.log(node);
       }
       if (
-        !this.isFinishNode(
+        !this.context.isFinishNode(
           parseInt(node.split("-")[1]),
           parseInt(node.split("-")[2])
         )
@@ -137,12 +75,17 @@ export default class Visualizer extends Component {
   };
 
   handleMouseDown = (row, col) => {
-    const { isFinished, isRunning, drawingMode } = this.props;
-    console.log(drawingMode);
+    const { drawingMode } = this.props;
+    const { isFinished, isRunning } = this.context.state;
     if (isFinished || isRunning) return;
     this.mouseKeyDown = true;
-    if (this.isStartNode(row, col) || this.isFinishNode(row, col)) {
-      this.endPointKeyDown = this.isStartNode(row, col) ? "start" : "finish";
+    if (
+      this.context.isStartNode(row, col) ||
+      this.context.isFinishNode(row, col)
+    ) {
+      this.endPointKeyDown = this.context.isStartNode(row, col)
+        ? "start"
+        : "finish";
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-${this.endPointKeyDown}`
       );
@@ -155,13 +98,14 @@ export default class Visualizer extends Component {
   };
 
   handleMouseLeave = (row, col) => {
-    const { isFinished, isRunning, drawingMode } = this.props;
+    const { drawingMode } = this.props;
+    const { isFinished, isRunning } = this.context.state;
     if (isFinished || isRunning) return;
     if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-${this.endPointKeyDown}`
       );
-    } else if (!this.isStartNode() && !this.isFinishNode()) {
+    } else if (!this.context.isStartNode() && !this.context.isFinishNode()) {
       if (drawingMode === "rectangle") {
         if (this.mouseKeyDown) {
           this.createAndRenderRectangle(row, col, {
@@ -178,7 +122,8 @@ export default class Visualizer extends Component {
   };
 
   handleMouseEnter = (row, col) => {
-    const { isFinished, isRunning, drawingMode } = this.props;
+    const { drawingMode } = this.props;
+    const { isFinished, isRunning } = this.context.state;
     if (isFinished || !this.mouseKeyDown || isRunning) return;
     if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
@@ -209,8 +154,7 @@ export default class Visualizer extends Component {
   };
 
   handleMouseUp = (row, col) => {
-    const { isFinished, isRunning } = this.props;
-    const { startNode, finishNode } = this.state;
+    const { isFinished, isRunning, startNode, finishNode } = this.context.state;
     if (isFinished || isRunning) return;
     if (this.endPointKeyDown) {
       let endPoint = this.endPointKeyDown === "start" ? startNode : finishNode;
@@ -240,8 +184,8 @@ export default class Visualizer extends Component {
               j === endPoint.col ||
               i === startPoint.row ||
               i === endPoint.row) &&
-            !this.isStartNode(i, j) &&
-            !this.isFinishNode(i, j)
+            !this.context.isStartNode(i, j) &&
+            !this.context.isFinishNode(i, j)
           ) {
             rectangleNodes.push({ row: i, col: j });
           }
@@ -254,47 +198,28 @@ export default class Visualizer extends Component {
   };
 
   changeNodeWall = (row, col, { toggle, add }) => {
-    const node = this.state.grid[row][col];
+    const node = this.context.state.grid[row][col];
     if (toggle) {
-      if (!this.isStartNode(row, col) && !this.isFinishNode(row, col)) {
+      if (
+        !this.context.isStartNode(row, col) &&
+        !this.context.isFinishNode(row, col)
+      ) {
         ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.toggle(
           "node-wall"
         );
         node.isWall = !node.isWall;
       }
     } else if (add) {
-      if (!this.isStartNode(row, col) && !this.isFinishNode(row, col)) {
+      if (
+        !this.context.isStartNode(row, col) &&
+        !this.context.isFinishNode(row, col)
+      ) {
         ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
           "node-wall"
         );
         node.isWall = true;
       }
     }
-  };
-
-  getInitialGrid = () => {
-    const grid = [];
-    for (let row = 0; row < this.gridHeight; row++) {
-      const currentRow = [];
-      for (let col = 0; col < this.gridWidth; col++) {
-        currentRow.push(this.createNode(row, col));
-      }
-      grid.push(currentRow);
-    }
-    return grid;
-  };
-
-  createNode = (row, col, isWall = false) => {
-    return {
-      row,
-      col,
-      isStart: this.isStartNode(row, col),
-      isFinish: this.isFinishNode(row, col),
-      distance: Infinity,
-      heuristicDistance: Infinity,
-      isWall: isWall,
-      previousNode: null,
-    };
   };
 
   visualize = (visitedNodesInOrder, nodesInShortestPathOrder) => {
@@ -318,8 +243,8 @@ export default class Visualizer extends Component {
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
       if (i === nodesInShortestPathOrder.length - 1) {
         setTimeout(() => {
-          this.props.setIsRunning(false);
-          this.props.setIsFinished(true);
+          this.context.updateState("isRunning", false);
+          this.context.updateState("isFinished", true);
         }, (this.speed + 30) * i);
       }
       setTimeout(() => {
@@ -333,15 +258,21 @@ export default class Visualizer extends Component {
 
   handlePlayButtonClicked = () => {
     //need to disable toolbar before choosing and then display error message accordingly.
-    if (!this.props.activeAlgorithm) return;
+    const activeAlgorithmCallback = this.context.state.activeAlgorithm.func;
+
+    if (!activeAlgorithmCallback) return;
+
     //maybe move this state up to App component and use a handler from app to set the state?
-    this.props.setIsRunning(true);
-    const { grid } = this.state;
-    const startNode = grid[this.state.startNode.row][this.state.startNode.col];
+    this.context.updateState("isRunning", true);
+    const { grid } = this.context.state;
+    const startNode =
+      grid[this.context.state.startNode.row][this.context.state.startNode.col];
     const finishNode =
-      grid[this.state.finishNode.row][this.state.finishNode.col];
-    console.log(this.props.activeAlgorithm);
-    const visitedNodesInOrder = this.props.activeAlgorithm(
+      grid[this.context.state.finishNode.row][
+        this.context.state.finishNode.col
+      ];
+
+    const visitedNodesInOrder = activeAlgorithmCallback(
       grid,
       startNode,
       finishNode
@@ -350,12 +281,15 @@ export default class Visualizer extends Component {
     this.visualize(visitedNodesInOrder, nodesInShortestPathOrder);
   };
 
-  handleClearWalls = () => {
+  handleClearWallsButtonClicked = () => {
     const { setClearWallsRequest } = this.props;
-    for (let row = 0; row < this.gridHeight; row++) {
-      for (let col = 0; col < this.gridWidth; col++) {
-        if (!this.isStartNode(row, col) && !this.isFinishNode(row, col)) {
-          if (this.state.grid[row][col].isWall) {
+    for (let row = 0; row < this.context.gridHeight; row++) {
+      for (let col = 0; col < this.context.gridWidth; col++) {
+        if (
+          !this.context.isStartNode(row, col) &&
+          !this.context.isFinishNode(row, col)
+        ) {
+          if (this.context.state.grid[row][col].isWall) {
             this.changeNodeWall(row, col, { toggle: true });
           }
         }
@@ -363,55 +297,21 @@ export default class Visualizer extends Component {
     }
     setClearWallsRequest({ requested: false, cleared: true });
   };
-  /* shouldComponentUpdate() {
-    return this.props.isRunning ? false : true;
-  } */
 
   componentDidUpdate() {
-    console.log("in visualizer component did update");
     if (this.props.isClearWallsRequested.requested) {
-      this.handleClearWalls();
-    }
-    if (this.props.isChangeDrawingModeRequested) {
-      this.handleChangeDrawingMode();
-    }
-    if (this.props.isSaveLayoutRequested.requested) {
-      this.handleSaveLayoutRequest();
+      this.handleClearWallsButtonClicked();
     }
   }
 
-  handleSaveLayoutRequest = async () => {
-    const { setSaveLayoutRequest } = this.props;
-    const blob = new Blob([JSON.stringify(this.state.grid)]);
-    saveAs(
-      blob,
-      `Grid Snapshot ${new Date()
-        .toLocaleDateString()
-        .replace(/\./g, "-")} at ${new Date()
-        .toLocaleTimeString()
-        .replace(/:/g, ".")}.json`
-    );
-    setSaveLayoutRequest({ requested: false });
-  };
-
-  handleChangeDrawingMode = () => {};
-
-  handleSaveLayout = () => {
-    console.log("save layout requested");
-    const { setSaveLayoutRequest } = this.props;
-    setSaveLayoutRequest({ requested: false });
-  };
   render() {
-    const { grid } = this.state;
+    const { grid } = this.context.state;
     return (
       <>
         <Controls
-          isFinished={this.props.isFinished}
-          isRunning={this.props.isRunning}
-          isAlgorithmSelected={this.props.activeAlgorithm}
           onResetButtonClicked={this.handleResetButtonClicked}
           onPlayButtonClicked={this.handlePlayButtonClicked}
-          onSpeedChange={this.handleSpeedChange}
+          onSpeedChange={this.handleSpeedChanged}
           onGridSizeChange={this.handleGridSizeChange}
         />
         <div className="grid">
@@ -442,28 +342,3 @@ export default class Visualizer extends Component {
     );
   }
 }
-/* 
-TODO
-1. Make grid responsive, using material ui grid container and grid item maybe? 
-2. Check edge cases when dragging end points (like when leaving grid and returning, or when dragging one endpoint over the other, 
-  or trying to put end point on a wall, or clicking on end point etc)
-3. Change icons for end points.
-4. Deal with no path found case.
-5. Shortest path draw is a bit choppy.
-6. Add functionality to add weights, to support weighted search algorithms.
-
-
-
-
-8. Generate random terrain feature?
-9. Settings Button.
-10. find better animation gradients and colors.
-
-12. Move color to theme and style all components with material ui.
-13. Playback control to material ui speed dial?
-14. Extend menu functionality to figure out how to style it better.
-15. Move part of the state from PathfindingVisualizer to App, to make the code more
-    modular for future feature implementations.
-16. change visiting colors to better fit the theme.
-
-*/

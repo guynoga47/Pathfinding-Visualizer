@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useContext } from "react";
+
 import IconButton from "@material-ui/core/IconButton";
 import IconDrawFree from "@material-ui/icons/Create";
 import IconDrawRectangle from "@material-ui/icons/AspectRatio";
@@ -6,55 +7,19 @@ import IconDrawObstacle from "@material-ui/icons/TabUnselected";
 import IconSave from "@material-ui/icons/GetApp";
 import IconLoad from "@material-ui/icons/Publish";
 import Popover from "@material-ui/core/Popover";
-import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
+import { saveAs } from "file-saver";
 
-const useStyles = makeStyles((theme) => ({
-  input: {
-    display: "none",
-  },
-  icon: {
-    color: "white",
-    "&:hover": {
-      color: "#66FCF1 !important",
-      background: "#1f2833",
-      borderColor: "black !important",
-      transition: "all 0.4s ease 0s",
-    },
-    "&:disabled": {
-      color: "#C5C6C7 !important",
-      transition: "all 0.4s ease 0s",
-    },
-  },
-  iconActive: {
-    color: "#66FCF1 !important",
-    background: "#1f2833",
-    borderColor: "black !important",
-    transition: "all 0.4s ease 0s",
-    "&:disabled": {
-      color: "#C5C6C7 !important",
-      transition: "all 0.4s ease 0s",
-    },
-  },
-  popover: {
-    pointerEvents: "none",
-  },
-  popoverText: {
-    padding: "5px",
-  },
-  tools: {
-    marginLeft: "59.95em",
-  },
-}));
+import GridContext from "../../Context/grid-context";
+import ToolsStyles from "./Tools.Styles";
+
+const useStyles = ToolsStyles;
 
 const Tools = (props) => {
-  const {
-    setDrawingMode,
-    drawingMode,
-    setSaveLayoutRequest,
-    isRunning,
-    isFinished,
-  } = props;
+  const context = useContext(GridContext);
+
+  const { setDrawingMode, drawingMode } = props;
+  const { isRunning, isFinished } = context.state;
 
   const [anchorElDrawFree, setAnchorElDrawFree] = React.useState(null);
   const [anchorElDrawRectangle, setAnchorElDrawRectangle] = React.useState(
@@ -119,15 +84,30 @@ const Tools = (props) => {
   };
 
   const handleSaveLayoutButtonClicked = async () => {
-    /*     console.log(JSON.stringify(grid)); */
-    setSaveLayoutRequest({ requested: true });
+    const blob = new Blob([JSON.stringify(context.state.grid)]);
+    saveAs(
+      blob,
+      `Grid Snapshot ${new Date()
+        .toLocaleDateString()
+        .replace(/\./g, "-")} at ${new Date()
+        .toLocaleTimeString()
+        .replace(/:/g, ".")}.json`
+    );
   };
 
-  const handleLoadLayoutButtonClicked = (params) => {
+  const handleLoadLayoutButtonClicked = (event) => {
     //a place holder for load layout implementation.
-    fetch(`${params.fileName}.json`)
-      .then((response) => response.json())
-      .then((data) => console.log(data));
+    console.log(event.currentTarget);
+    console.log(event.target.files[0]);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const newGrid = JSON.parse(reader.result);
+      console.log(context.state.grid);
+      console.log(newGrid);
+      context.updateState("grid", newGrid);
+    };
+    reader.readAsText(event.target.files[0]);
   };
 
   const classes = useStyles();
@@ -174,6 +154,11 @@ const Tools = (props) => {
         accept=".json"
         className={classes.input}
         id="icon-button-load-file"
+        onChange={handleLoadLayoutButtonClicked}
+        onClick={(event) => {
+          //to allow consecutive selection of same files, we need to clear input value after each click.
+          event.target.value = "";
+        }}
         type="file"
       />
       <label htmlFor="icon-button-load-file">
@@ -184,6 +169,7 @@ const Tools = (props) => {
           onMouseLeave={handlePopoverClose}
           disabled={isRunning}
           component={"span"}
+          htmlFor="icon-button-load-file"
         >
           <IconLoad />
         </IconButton>
