@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useEffect, useContext } from "react";
+
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Slider from "../Sliders/Base";
 
+import GridContext from "../../Context/grid-context";
+
 const MIN = 15;
 const MAX = 35;
+const DEFAULT_VALUE = 25;
 
 const useStyles = makeStyles({
   root: {
@@ -46,20 +50,32 @@ function valueLabelFormat(value) {
 }
 
 export default function RestrictedSlider(props) {
+  const context = useContext(GridContext);
   const classes = useStyles();
-  const [value, setValue] = React.useState(25);
+  const [value, setValue] = React.useState(DEFAULT_VALUE);
   const { disabled } = props;
+
+  useEffect(() => {
+    if (context.state.layoutLoaded) {
+      console.log("layout loaded in restrictedSlider");
+      if (context.state.grid.length !== value) {
+        setValue(context.state.grid.length);
+      }
+    }
+  }, [context.state.layoutLoaded, context.state.grid.length, value]);
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
     props.onGridSizeChange(newValue);
   };
+
   return (
     <div className={classes.root}>
       <Typography id="discrete-slider-restrict" gutterBottom>
         Grid Size
       </Typography>
       <Slider
-        defaultValue={25}
+        value={value}
         valueLabelFormat={valueLabelFormat}
         getAriaValueText={valuetext}
         aria-labelledby="discrete-slider-restrict"

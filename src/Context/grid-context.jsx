@@ -8,7 +8,7 @@ export default createContext({
   startNode: undefined,
   finishNode: undefined,
 
-  loadLayout: (nextGrid) => {},
+  loadLayout: (nextLayout) => {},
   updateState: (key, value, callback, param) => {},
   resizeGrid: (height, callback) => {},
   resetGridKeepWalls: (callback, param) => {},

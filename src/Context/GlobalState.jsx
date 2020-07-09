@@ -34,6 +34,7 @@ class GlobalState extends Component {
       isRunning: false,
       startNode: defaultStartNode,
       finishNode: defaultFinishNode,
+      layoutLoaded: false,
     };
   }
 
@@ -42,18 +43,40 @@ class GlobalState extends Component {
     this.setState({ grid });
   }
 
-  resizeGrid = (height, callback) => {
+  resizeGrid = (height, callback, param) => {
     this.gridHeight = height;
-    console.log(callback);
     this.gridWidth = height * 2;
     const {
       defaultStartNode,
       defaultFinishNode,
     } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
+    const grid = this.getInitialGrid();
     this.setState(
-      { startNode: defaultStartNode, finishNode: defaultFinishNode },
-      () => callback()
+      {
+        grid,
+        startNode: defaultStartNode,
+        finishNode: defaultFinishNode,
+        isFinished: false,
+      },
+      () => callback && callback(param)
     );
+  };
+
+  loadLayout = (newLayout) => {
+    this.gridHeight = newLayout.grid.length;
+    this.gridWidth = newLayout.grid[0].length;
+    for (let row = 0; row < this.gridHeight; row++) {
+      for (let col = 0; col < this.gridWidth; col++) {
+        newLayout.grid[row][col].distance = Infinity;
+        newLayout.grid[row][col].heuristicDistance = Infinity;
+      }
+    }
+    this.setState({
+      grid: newLayout.grid,
+      startNode: newLayout.startNode,
+      finishNode: newLayout.finishNode,
+      layoutLoaded: true,
+    });
   };
 
   resetGridKeepWalls = (callback, param) => {
@@ -68,7 +91,7 @@ class GlobalState extends Component {
       grid.push(currentRow);
     }
     this.setState({ grid }, () => {
-      callback(param);
+      callback && callback(param);
     });
   };
 
@@ -98,10 +121,10 @@ class GlobalState extends Component {
   };
 
   updateState = (key, value, callback, param) => {
-    console.log("in updateState", key, value);
     this.setState({ [key]: value }, () => {
       callback && callback(param);
     });
+
     //if the state update requires to run a function after state changes then we
     //will call this updateState with the callback, otherwise we wouldn't, so on
     //regular state updates we dont want to invoke undefined function.
@@ -127,6 +150,7 @@ class GlobalState extends Component {
           updateState: this.updateState,
           getInitialGrid: this.getInitialGrid,
           resizeGrid: this.resizeGrid,
+          loadLayout: this.loadLayout,
           resetGridKeepWalls: this.resetGridKeepWalls,
           gridHeight: this.gridHeight,
           gridWidth: this.gridWidth,

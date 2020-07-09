@@ -54,10 +54,11 @@ TODO
 6. Add functionality to add weights, to support weighted search algorithms.
 
 
-8. Remove ClearWalls, LoadLayout requests from Navbar to Visualizer.
-9. useCallback equivalent in globalstate class?
-10. try to define what should sit in the global state and what should sit in app.js/visualizer.js
-11. implement load layout functionality (from tools.jsx)
+8. Remove ClearWallsRequest from Navbar to Visualizer.
+9. Why visualizer reevaluates after visualizeShortestPath?
+10. Allow loading of different sizes grid (check for grid height and compare to current)
+11. useCallback equivalent in globalstate class?
+12. try to define what should sit in the global state and what should sit in app.js/visualizer.js
 
 
 

@@ -84,7 +84,14 @@ const Tools = (props) => {
   };
 
   const handleSaveLayoutButtonClicked = async () => {
-    const blob = new Blob([JSON.stringify(context.state.grid)]);
+    const blob = new Blob([
+      JSON.stringify({
+        grid: context.state.grid,
+        startNode: context.state.startNode,
+        finishNode: context.state.finishNode,
+      }),
+    ]);
+
     saveAs(
       blob,
       `Grid Snapshot ${new Date()
@@ -96,16 +103,10 @@ const Tools = (props) => {
   };
 
   const handleLoadLayoutButtonClicked = (event) => {
-    //a place holder for load layout implementation.
-    console.log(event.currentTarget);
-    console.log(event.target.files[0]);
-
     const reader = new FileReader();
     reader.onload = () => {
-      const newGrid = JSON.parse(reader.result);
-      console.log(context.state.grid);
-      console.log(newGrid);
-      context.updateState("grid", newGrid);
+      const newLayout = JSON.parse(reader.result);
+      context.loadLayout(newLayout);
     };
     reader.readAsText(event.target.files[0]);
   };

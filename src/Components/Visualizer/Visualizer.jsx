@@ -27,49 +27,55 @@ export default class Visualizer extends Component {
     this.context.updateState("isFinished", false);
     this.context.resetGridKeepWalls(this.resetNodeStyles, {
       resetWalls: false,
+      resetVisited: true,
+      resetShortestPath: true,
     });
   };
 
   handleGridSizeChange = (height) => {
     if (height === this.context.gridHeight) return;
-    this.context.resizeGrid(height, this.reset);
-  };
-
-  reset = () => {
-    this.context.updateState("isFinished", false);
-    const grid = this.context.getInitialGrid();
-    this.context.updateState("grid", grid, this.resetNodeStyles, {
+    this.context.resizeGrid(height, this.resetNodeStyles, {
       resetWalls: true,
+      resetVisited: true,
+      resetShortestPath: true,
     });
   };
 
-  resetNodeStyles = ({ resetWalls, resetVisited, resetShortestPath }) => {
-    const wallsStyle = resetWalls ? `node-wall` : undefined;
+  resetNodeStyles = ({
+    resetWalls,
+    setWalls,
+    resetVisited,
+    resetShortestPath,
+  }) => {
     for (let node in this.refs) {
-      ReactDOM.findDOMNode(this.refs[node]).classList.remove(
-        `node-visited`,
-        `node-shortest-path`,
-        `${wallsStyle}`
-      );
-      if (
-        !this.context.isStartNode(
-          parseInt(node.split("-")[1]),
-          parseInt(node.split("-")[2])
-        )
-      )
+      const row = parseInt(node.split("-")[1]);
+      const col = parseInt(node.split("-")[2]);
+      if (resetWalls) {
+        ReactDOM.findDOMNode(this.refs[node]).classList.remove("node-wall");
+      }
+      if (setWalls) {
+        ReactDOM.findDOMNode(this.refs[node]).classList.remove("node-wall");
+        if (this.context.state.grid[row][col].isWall)
+          ReactDOM.findDOMNode(this.refs[node]).classList.add("node-wall");
+      }
+      if (resetVisited) {
+        ReactDOM.findDOMNode(this.refs[node]).classList.remove(`node-visited`);
+      }
+      if (resetShortestPath) {
+        ReactDOM.findDOMNode(this.refs[node]).classList.remove(
+          `node-shortest-path`
+        );
+      }
+
+      if (!this.context.isStartNode(row, col))
         ReactDOM.findDOMNode(this.refs[node]).classList.remove(`node-start`);
       else {
-        console.log(node);
+        ReactDOM.findDOMNode(this.refs[node]).classList.add(`node-start`);
       }
-      if (
-        !this.context.isFinishNode(
-          parseInt(node.split("-")[1]),
-          parseInt(node.split("-")[2])
-        )
-      )
+      if (!this.context.isFinishNode(row, col))
         ReactDOM.findDOMNode(this.refs[node]).classList.remove(`node-finish`);
       else {
-        console.log(node);
+        ReactDOM.findDOMNode(this.refs[node]).classList.add(`node-finish`);
       }
     }
   };
@@ -262,9 +268,9 @@ export default class Visualizer extends Component {
 
     if (!activeAlgorithmCallback) return;
 
-    //maybe move this state up to App component and use a handler from app to set the state?
     this.context.updateState("isRunning", true);
     const { grid } = this.context.state;
+    console.log(grid);
     const startNode =
       grid[this.context.state.startNode.row][this.context.state.startNode.col];
     const finishNode =
@@ -278,6 +284,7 @@ export default class Visualizer extends Component {
       finishNode
     );
     const nodesInShortestPathOrder = getShortestPathNodesInOrder(finishNode);
+    console.log(visitedNodesInOrder);
     this.visualize(visitedNodesInOrder, nodesInShortestPathOrder);
   };
 
@@ -302,6 +309,16 @@ export default class Visualizer extends Component {
     if (this.props.isClearWallsRequested.requested) {
       this.handleClearWallsButtonClicked();
     }
+    if (this.context.state.layoutLoaded) {
+      //intended to detect loadLayout action.
+      console.log("componentdidupdate layout loaded");
+      this.resetNodeStyles({
+        setWalls: true,
+        resetVisited: true,
+        resetShortestPath: true,
+      });
+      this.context.updateState("layoutLoaded", false);
+    }
   }
 
   render() {
@@ -319,7 +336,6 @@ export default class Visualizer extends Component {
             <div key={rowIndex} className="row">
               {row.map((node) => {
                 const { row, col, isStart, isFinish } = node;
-                //console.log(`reevaluating node-${row}-${col}`);
                 return (
                   <Node
                     key={`node-${row}-${col}`}
