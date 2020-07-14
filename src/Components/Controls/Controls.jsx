@@ -49,7 +49,10 @@ const Controls = (props) => {
         <IconButton
           className={classes.button}
           onClick={onPlayButtonClicked}
-          disabled={!context.state.activeAlgorithm}
+          disabled={
+            !context.state.activeMappingAlgorithm &&
+            !context.state.activePathfindingAlgorithm
+          }
         >
           <PlayIcon style={{ fontSize: "2em" }} />
         </IconButton>
@@ -58,7 +61,10 @@ const Controls = (props) => {
         min={20}
         max={40}
         onSpeedChange={onSpeedChange}
-        disabled={context.state.isRunning || !context.state.activeAlgorithm}
+        disabled={
+          !context.state.activeMappingAlgorithm &&
+          !context.state.activePathfindingAlgorithm
+        }
       />
     </div>
   );

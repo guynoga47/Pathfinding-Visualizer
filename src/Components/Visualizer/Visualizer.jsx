@@ -14,13 +14,15 @@ export default class Visualizer extends Component {
 
   constructor(props) {
     super(props);
-    this.speed = DEFAULT_SPEED;
+    //this.speed = DEFAULT_SPEED;
+    this.speed = 100;
     this.mouseKeyDown = false;
     this.endPointKeyDown = "";
   }
 
   handleSpeedChanged = (speed) => {
-    this.speed = speed;
+    //this.speed = speed;
+    this.speed = 100;
   };
 
   handleResetButtonClicked = () => {
@@ -242,6 +244,12 @@ export default class Visualizer extends Component {
           this.refs[`node-${node.row}-${node.col}`]
         ).classList.add("node-visited");
       }, this.speed * i);
+      setTimeout(() => {
+        const node = visitedNodesInOrder[i];
+        ReactDOM.findDOMNode(
+          this.refs[`node-${node.row}-${node.col}`]
+        ).classList.remove("node-visited");
+      }, this.speed * (i + 1));
     }
   };
 
@@ -264,7 +272,13 @@ export default class Visualizer extends Component {
 
   handlePlayButtonClicked = () => {
     //need to disable toolbar before choosing and then display error message accordingly.
-    const activeAlgorithmCallback = this.context.state.activeAlgorithm.func;
+    //thisconst activeAlgorithmCallback = this.context.state.activeAlgorithm.func;
+    const activeAlgorithmCallback =
+      this.context.state.simulationType === "map"
+        ? this.context.state.activeMappingAlgorithm.func
+        : this.context.state.simulationType === "sweep"
+        ? this.context.state.activePathfindingAlgorithm.func
+        : undefined;
 
     if (!activeAlgorithmCallback) return;
 

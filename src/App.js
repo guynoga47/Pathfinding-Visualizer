@@ -2,8 +2,8 @@ import React, { useState } from "react";
 
 import Visualizer from "./Components/Visualizer/Visualizer";
 import NavBar from "./Components/Navbar/NavBar.jsx";
-import * as nonWeightedAlgorithms from "./Algorithms/nonWeightedAlgorithms";
-import * as weightedAlgorithms from "./Algorithms/weightedAlgorithms";
+import * as mappingAlgorithms from "./Algorithms/mappingAlgorithms";
+import * as pathfindingAlgorithms from "./Algorithms/pathfindingAlgorithms";
 
 import { ThemeProvider } from "@material-ui/core/styles";
 import theme from "./Theme.js";
@@ -17,15 +17,16 @@ const App = () => {
     cleared: true,
   });
   const [drawingMode, setDrawingMode] = useState("free");
-  const algorithms = nonWeightedAlgorithms.data.concat(weightedAlgorithms.data);
-  console.log("App rendering");
+
+  console.log(pathfindingAlgorithms.data);
 
   return (
     <div className="App">
       <ThemeProvider theme={theme}>
         <GlobalState>
           <NavBar
-            algorithms={algorithms}
+            mappingAlgorithms={mappingAlgorithms.data}
+            pathfindingAlgorithms={pathfindingAlgorithms.data}
             setClearWallsRequest={setClearWallsRequest}
             drawingMode={drawingMode}
             setDrawingMode={setDrawingMode}
@@ -56,9 +57,9 @@ TODO
 
 8. Remove ClearWallsRequest from Navbar to Visualizer.
 9. Why visualizer reevaluates after visualizeShortestPath?
-10. Allow loading of different sizes grid (check for grid height and compare to current)
-11. useCallback equivalent in globalstate class?
-12. try to define what should sit in the global state and what should sit in app.js/visualizer.js
+10. useCallback equivalent in globalstate class?
+11. try to define what should sit in the global state and what should sit in app.js/visualizer.js
+12. Design some mapping algorithms. (Horizontal Mapping, Vertical Mapping)
 
 
 

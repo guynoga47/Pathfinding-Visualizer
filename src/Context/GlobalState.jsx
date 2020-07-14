@@ -29,7 +29,9 @@ class GlobalState extends Component {
     } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
     this.state = {
       grid: [],
-      activeAlgorithm: undefined,
+      simulationType: undefined,
+      activeMappingAlgorithm: undefined,
+      activePathfindingAlgorithm: undefined,
       isFinished: false,
       isRunning: false,
       startNode: defaultStartNode,

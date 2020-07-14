@@ -18,27 +18,44 @@ import GridContext from "../../Context/grid-context";
 const useStyles = NavBarStyles;
 
 const Nav = (props) => {
-  const [anchorElAlgMenu, setAnchorElAlgMenu] = React.useState(null);
+  const [anchorElMapAlgMenu, setAnchorElMapAlgMenu] = React.useState(null);
+  const [anchorElPathAlgMenu, setAnchorElPathAlgMenu] = React.useState(null);
+  const [
+    anchorElSimulationTypeMenu,
+    setAnchorElSimulationType,
+  ] = React.useState(null);
   const context = useContext(GridContext);
   const classes = useStyles();
   const {
-    algorithms,
+    mappingAlgorithms,
+    pathfindingAlgorithms,
     setClearWallsRequest,
     setSaveLayoutRequest,
     drawingMode,
     setDrawingMode,
   } = props;
 
-  const handleAlgorithmSelectionClicked = (event) => {
-    setAnchorElAlgMenu(event.currentTarget);
+  const handleMapAlgorithmSelectionClicked = (event) => {
+    setAnchorElMapAlgMenu(event.currentTarget);
+  };
+  const handleMapMenuClose = () => {
+    setAnchorElMapAlgMenu(null);
+  };
+  const handlePathfindingAlgorithmSelectionClicked = (event) => {
+    setAnchorElPathAlgMenu(event.currentTarget);
+  };
+  const handlePathMenuClose = () => {
+    setAnchorElPathAlgMenu(null);
+  };
+  const handleSimulationTypeSelectionClicked = (event) => {
+    setAnchorElSimulationType(event.currentTarget);
+  };
+  const handleSimulationTypeMenuClose = () => {
+    setAnchorElSimulationType(null);
   };
 
   const handleClearWallsRequested = () => {
     setClearWallsRequest({ cleared: false, requested: true });
-  };
-
-  const handleClose = () => {
-    setAnchorElAlgMenu(null);
   };
 
   return (
@@ -57,11 +74,41 @@ const Nav = (props) => {
               aria-controls="customized-menu"
               aria-haspopup="true"
               variant="contained"
-              onClick={handleAlgorithmSelectionClicked}
+              onClick={handleSimulationTypeSelectionClicked}
             >
-              {context.state.activeAlgorithm
-                ? context.state.activeAlgorithm.shortened
-                : "select"}
+              {context.state.simulationType
+                ? context.state.simulationType
+                : "SIMULATION TYPE"}
+            </Button>
+            <Button
+              className={classes.navButton}
+              aria-controls="customized-menu"
+              aria-haspopup="true"
+              variant="contained"
+              disabled={
+                context.state.isRunning ||
+                !(context.state.simulationType === "map")
+              }
+              onClick={handleMapAlgorithmSelectionClicked}
+            >
+              {context.state.activeMappingAlgorithm
+                ? context.state.activeMappingAlgorithm.shortened
+                : "SELECT MAP"}
+            </Button>
+            <Button
+              className={classes.navButton}
+              aria-controls="customized-menu"
+              aria-haspopup="true"
+              variant="contained"
+              disabled={
+                context.state.isRunning ||
+                !(context.state.simulationType === "sweep")
+              }
+              onClick={handlePathfindingAlgorithmSelectionClicked}
+            >
+              {context.state.activePathfindingAlgorithm
+                ? context.state.activePathfindingAlgorithm.shortened
+                : "SELECT SWEEP"}
             </Button>
             <Button
               className={classes.navButton}
@@ -77,18 +124,69 @@ const Nav = (props) => {
           <StyledMenu
             className={classes.menu}
             id="customized-menu"
-            anchorEl={anchorElAlgMenu}
+            anchorEl={anchorElSimulationTypeMenu}
             keepMounted
-            open={Boolean(anchorElAlgMenu)}
-            onClose={handleClose}
+            open={Boolean(anchorElSimulationTypeMenu)}
+            onClose={handleSimulationTypeMenuClose}
           >
-            {algorithms.map((algorithm) => (
+            <MenuItem
+              className={classes.menuItem}
+              onClick={() => {
+                context.updateState("simulationType", "map");
+                handleSimulationTypeMenuClose();
+              }}
+            >
+              <ListItemText primary="MAP" className={classes.menuItemText} />
+            </MenuItem>
+            <MenuItem
+              className={classes.menuItem}
+              onClick={() => {
+                context.updateState("simulationType", "sweep");
+                handleSimulationTypeMenuClose();
+              }}
+            >
+              <ListItemText primary="SWEEP" className={classes.menuItemText} />
+            </MenuItem>
+          </StyledMenu>
+          <StyledMenu
+            className={classes.menu}
+            id="customized-menu"
+            anchorEl={anchorElMapAlgMenu}
+            keepMounted
+            open={Boolean(anchorElMapAlgMenu)}
+            onClose={handleMapMenuClose}
+          >
+            {mappingAlgorithms.map((algorithm) => (
               <MenuItem
                 key={algorithm.name}
                 className={classes.menuItem}
                 onClick={() => {
-                  context.updateState("activeAlgorithm", algorithm);
-                  handleClose();
+                  context.updateState("activeMappingAlgorithm", algorithm);
+                  handleMapMenuClose();
+                }}
+              >
+                <ListItemText
+                  primary={algorithm.name}
+                  className={classes.menuItemText}
+                />
+              </MenuItem>
+            ))}
+          </StyledMenu>
+          <StyledMenu
+            className={classes.menu}
+            id="customized-menu"
+            anchorEl={anchorElPathAlgMenu}
+            keepMounted
+            open={Boolean(anchorElPathAlgMenu)}
+            onClose={handlePathMenuClose}
+          >
+            {pathfindingAlgorithms.map((algorithm) => (
+              <MenuItem
+                key={algorithm.name}
+                className={classes.menuItem}
+                onClick={() => {
+                  context.updateState("activePathfindingAlgorithm", algorithm);
+                  handlePathMenuClose();
                 }}
               >
                 <ListItemText
@@ -114,8 +212,3 @@ const Nav = (props) => {
 };
 
 export default Nav;
-/* 
-TODO:
-
-1. Move some styling to theme.js.
- */

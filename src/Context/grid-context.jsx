@@ -2,7 +2,9 @@ import { createContext } from "react";
 
 export default createContext({
   grid: [],
-  activeAlgorithm: undefined,
+  simulationType: undefined,
+  activeMappingAlgorithm: undefined,
+  activePathfindingAlgorithm: undefined,
   isRunning: false,
   isFinished: false,
   startNode: undefined,
