@@ -57,6 +57,7 @@ const dfs = (grid, startNode, finishNode, order) => {
   return visitedNodesInOrder;
 };
 
+// comment in order to see changes in commit
 // need to add a order - vertcal/horizontal - determaind by the order that we push to stock (first left right or up down)
 // need to change functions names
 const mappingDfs = (grid, startNode) => {
