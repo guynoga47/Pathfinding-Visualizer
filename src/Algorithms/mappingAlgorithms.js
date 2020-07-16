@@ -32,35 +32,34 @@ const getNeighbors = (node, grid) => {
 };
 
 const dfs = (grid, startNode, finishNode, order) => {
-  // if (!startNode || !finishNode || startNode === finishNode) {
-  //   console.log("Bad parameters, unable to calculate path!");
-  //   return false;
-  // }
-  // const stack = new Stack();
-  // const visitedNodesInOrder = [];
-  // stack.push(startNode);
-  // while (!stack.isEmpty()) {
-  //   const currNode = stack.pop();
-  //   // console.log("this is currNode");
-  //   // console.log(currNode);
-  //   if (currNode.isWall) continue;
-  //   if (currNode === finishNode) return visitedNodesInOrder;
-  //   if (!visitedNodesInOrder.includes(currNode))
-  //     visitedNodesInOrder.push(currNode);
-  //   const neighbours = getUnvisitedNeighbours(currNode, grid, order);
-  //   neighbours.forEach((neighbour) => {
-  //     console.log(neighbour);
-  //     if (!visitedNodesInOrder.includes(neighbour)) {
-  //       stack.push(neighbour);
-  //       neighbour.previousNode = currNode;
-  //     }
-  //   });
-  // }
-  // return visitedNodesInOrder;
-  return newDfs(grid, startNode, finishNode);
+  if (!startNode || !finishNode || startNode === finishNode) {
+    console.log("Bad parameters, unable to calculate path!");
+    return false;
+  }
+  const stack = new Stack();
+  const visitedNodesInOrder = [];
+  stack.push(startNode);
+  while (!stack.isEmpty()) {
+    const currNode = stack.pop();
+    if (currNode.isWall) continue;
+    if (currNode === finishNode) return visitedNodesInOrder;
+    if (!visitedNodesInOrder.includes(currNode))
+      visitedNodesInOrder.push(currNode);
+    const neighbours = getUnvisitedNeighbours(currNode, grid, order);
+    neighbours.forEach((neighbour) => {
+      console.log(neighbour);
+      if (!visitedNodesInOrder.includes(neighbour)) {
+        stack.push(neighbour);
+        neighbour.previousNode = currNode;
+      }
+    });
+  }
+  return visitedNodesInOrder;
 };
 
-const newDfs = (grid, startNode, finishNode) => {
+// need to add a order - vertcal/horizontal - determaind by the order that we push to stock (first left right or up down)
+// need to change functions names
+const mappingDfs = (grid, startNode) => {
   if (!startNode || !finishNode || startNode === finishNode) {
     console.log("Bad parameters, unable to calculate path!");
     return false;
@@ -102,19 +101,6 @@ const isPrevNodeANeighbor = (node1, node2) => {
   console.log("**************************************");
   return (node2.previousNode === node1);
 }
-
-
-const experimentalDfs = (grid, node, in_visitedNodesInOrder) => {
-  // get all 4 neighbours - [0]=right,[1]=left,[2]=up,[3]=down
-  // if there near a wall or end of grid then [wall/grid]=null;
-  const currNeighbours = getNeighboursTom(node);
-
-  const neighbors = getNeighbors(node);
-  const visitedNodesInOrder = in_visitedNodesInOrder;
-  visitedNodesInOrder.push(node);
-
-  return visitedNodesInOrder;
-};
 
 const getNeighboursTom = (node, grid) => {
   const neighbors = [];
@@ -185,13 +171,13 @@ export const data = [{
     name: "Horizontal Mapping",
     shortened: "Horizontal",
     func: (grid, startNode, finishNode) =>
-      dfs(grid, startNode, finishNode, "horizontal"),
+      mappingDfs(grid, startNode),
   },
   {
     name: "Vertical Mapping",
     shortened: "Vertical",
     func: (grid, startNode, finishNode) =>
-      dfs(grid, startNode, finishNode, "vertical"),
+      mappingDfs(grid, startNode),
   },
   {
     name: "Random Walk",
