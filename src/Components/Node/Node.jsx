@@ -1,6 +1,4 @@
-import React, { Component, PureComponent } from "react";
-import StartNodeIcon from "@material-ui/icons/KeyboardArrowRight";
-import FinishNodeIcon from "@material-ui/icons/TrackChanges";
+import React, { PureComponent } from "react";
 import "./Node.css";
 
 export default class Node extends PureComponent {

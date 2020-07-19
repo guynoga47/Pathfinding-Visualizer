@@ -6,7 +6,7 @@ export const randomWalk = (grid, startNode, finishNode) => {
   let i = 0;
   let currNode = startNode;
   const visitedNodesInOrder = [];
-  while (i < 2000) {
+  while (i < 500) {
     visitedNodesInOrder.push(currNode);
     const neighbors = getNeighbors(currNode, grid);
     if (!neighbors.length || !neighbors) {
@@ -50,6 +50,7 @@ const dfs = (grid, startNode, finishNode, order) => {
       }
     });
   }
+  console.log(visitedNodesInOrder);
   return visitedNodesInOrder;
 };
 

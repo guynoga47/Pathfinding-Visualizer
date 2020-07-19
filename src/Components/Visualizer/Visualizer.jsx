@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
 import Node from "../Node/Node";
+import Robot from "../../Classes/Robot";
 import Controls, { DEFAULT_SPEED } from "../Controls/Controls";
 import { getShortestPathNodesInOrder } from "../../Algorithms/algorithmUtils.js";
 
@@ -273,31 +274,41 @@ export default class Visualizer extends Component {
   handlePlayButtonClicked = () => {
     //need to disable toolbar before choosing and then display error message accordingly.
     //thisconst activeAlgorithmCallback = this.context.state.activeAlgorithm.func;
+    const {
+      simulationType,
+      activeMappingAlgorithm,
+      activePathfindingAlgorithm,
+      startNode,
+      finishNode,
+      grid,
+    } = this.context.state;
+
+    const { robot } = this.context;
+
     const activeAlgorithmCallback =
-      this.context.state.simulationType === "map"
-        ? this.context.state.activeMappingAlgorithm.func
-        : this.context.state.simulationType === "sweep"
-        ? this.context.state.activePathfindingAlgorithm.func
+      simulationType === "map"
+        ? activeMappingAlgorithm.func
+        : simulationType === "sweep"
+        ? activePathfindingAlgorithm.func
         : undefined;
 
     if (!activeAlgorithmCallback) return;
 
     this.context.updateState("isRunning", true);
-    const { grid } = this.context.state;
-    console.log(grid);
-    const startNode =
-      grid[this.context.state.startNode.row][this.context.state.startNode.col];
-    const finishNode =
-      grid[this.context.state.finishNode.row][
-        this.context.state.finishNode.col
-      ];
 
     const visitedNodesInOrder = activeAlgorithmCallback(
       grid,
-      startNode,
-      finishNode
+      grid[startNode.row][startNode.col],
+      grid[finishNode.row][finishNode.col]
     );
-    const nodesInShortestPathOrder = getShortestPathNodesInOrder(finishNode);
+
+    if (simulationType === "map") {
+      robot.updateMap(visitedNodesInOrder);
+    }
+
+    const nodesInShortestPathOrder = getShortestPathNodesInOrder(
+      grid[finishNode.row][finishNode.col]
+    );
     console.log(visitedNodesInOrder);
     this.visualize(visitedNodesInOrder, nodesInShortestPathOrder);
   };
@@ -332,6 +343,44 @@ export default class Visualizer extends Component {
         resetShortestPath: true,
       });
       this.context.updateState("layoutLoaded", false);
+    }
+    if (this.props.isHighlightMapRequested) {
+      console.log("highlight map requested in visualizer");
+      const { map } = this.context.robot;
+      console.log(this.refs);
+      console.log(this.refs[`node-${0}-${0}`]);
+      //ReactDOM.findDOMNode(this.refs[node]).classList.add(`node-start`);
+      let count = 0;
+      console.log(map);
+      for (let row = 0; row < map.length; row++) {
+        for (let col = 0; col < map[0].length; col++) {
+          if (map[row][col]) {
+            ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
+              `highlight`
+            );
+          }
+        }
+      }
+      console.log(count);
+    }
+    if (!this.props.isHighlightMapRequested) {
+      console.log("highlight map requested in visualizer");
+      const { map } = this.context.robot;
+      console.log(this.refs);
+      console.log(this.refs[`node-${0}-${0}`]);
+      //ReactDOM.findDOMNode(this.refs[node]).classList.add(`node-start`);
+      let count = 0;
+      console.log(map);
+      for (let row = 0; row < map.length; row++) {
+        for (let col = 0; col < map[0].length; col++) {
+          if (map[row][col]) {
+            ReactDOM.findDOMNode(
+              this.refs[`node-${row}-${col}`]
+            ).classList.remove(`highlight`);
+          }
+        }
+      }
+      console.log(count);
     }
   }
 
