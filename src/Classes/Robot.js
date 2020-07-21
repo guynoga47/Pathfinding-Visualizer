@@ -6,7 +6,6 @@ export default class Robot {
 
   getInitialMap = (grid) => {
     let row, col;
-    console.log(grid);
     const map = [];
     for (row = 0; row < grid.length; row++) {
       map.push([]);
@@ -14,7 +13,6 @@ export default class Robot {
         map[row].push(false);
       }
     }
-    console.log(map);
     return map;
   };
 
@@ -36,7 +34,5 @@ export default class Robot {
         }
       }
     }
-    console.log(count / (this.map.length * this.map[0].length));
-    console.log(this.map);
   };
 }

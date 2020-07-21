@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
@@ -52,7 +52,7 @@ function valueLabelFormat(value) {
 export default function RestrictedSlider(props) {
   const context = useContext(GridContext);
   const classes = useStyles();
-  const [value, setValue] = React.useState(DEFAULT_VALUE);
+  const [value, setValue] = useState(DEFAULT_VALUE);
   const { disabled } = props;
 
   useEffect(() => {

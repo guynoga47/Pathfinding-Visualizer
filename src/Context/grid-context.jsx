@@ -17,4 +17,6 @@ export default createContext({
   getInitialGrid: () => {},
   isStartNode: (row, col) => {},
   isFinishNode: (row, col) => {},
+  convertBatteryCapacityToAvailableSteps: () => {},
+  convertAvailableStepsToBatteryCapacity: () => {},
 });

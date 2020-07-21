@@ -164,7 +164,7 @@ cursor: `url(${importAssetName}, auto` for example.
 .node-visited {
   /*   background-color: brown;
   border-color: brown; */
-  background-image: url("../../assets/icons/docking-station-2.png");
+  background-image: url("../../assets/icons/robot.svg");
   /* animation-name: visitedAnimation;
   animation-duration: 0s;
   animation-timing-function: ease-out;

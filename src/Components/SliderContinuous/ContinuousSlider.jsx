@@ -18,8 +18,6 @@ export default function ContinuousSlider(props) {
   const [value, setValue] = React.useState((max + min) / 2);
   const handleChange = (event, sliderValue) => {
     let calculatedSpeed = Math.abs(sliderValue - (max + min));
-    console.log(sliderValue);
-    console.log(calculatedSpeed);
     setValue(sliderValue);
     props.onSpeedChange(calculatedSpeed);
   };

@@ -31,6 +31,7 @@ class GlobalState extends Component {
     } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
     this.state = {
       grid: [],
+      availableSteps: this.gridHeight * this.gridWidth,
       simulationType: undefined,
       activeMappingAlgorithm: undefined,
       activePathfindingAlgorithm: undefined,
@@ -145,6 +146,16 @@ class GlobalState extends Component {
     );
   };
 
+  convertAvailableStepsToBatteryCapacity = () => {
+    return Math.floor(
+      (this.state.availableSteps / (this.gridHeight * this.gridWidth)) * 100
+    );
+  };
+
+  convertBatteryCapacityToAvailableSteps = (battery) => {
+    return Math.floor((battery / 100) * (this.gridHeight * this.gridWidth));
+  };
+
   render() {
     return (
       <GridContext.Provider
@@ -153,6 +164,10 @@ class GlobalState extends Component {
           robot: this.robot,
           isStartNode: this.isStartNode,
           isFinishNode: this.isFinishNode,
+          convertBatteryCapacityToAvailableSteps: this
+            .convertBatteryCapacityToAvailableSteps,
+          convertAvailableStepsToBatteryCapacity: this
+            .convertAvailableStepsToBatteryCapacity,
           updateState: this.updateState,
           getInitialGrid: this.getInitialGrid,
           resizeGrid: this.resizeGrid,

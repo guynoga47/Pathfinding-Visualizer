@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
 import Node from "../Node/Node";
-import Robot from "../../Classes/Robot";
 import Controls, { DEFAULT_SPEED } from "../Controls/Controls";
 import { getShortestPathNodesInOrder } from "../../Algorithms/algorithmUtils.js";
 
@@ -241,9 +240,11 @@ export default class Visualizer extends Component {
       }
       setTimeout(() => {
         const node = visitedNodesInOrder[i];
+        let { availableSteps } = this.context.state;
         ReactDOM.findDOMNode(
           this.refs[`node-${node.row}-${node.col}`]
         ).classList.add("node-visited");
+        this.context.updateState("availableSteps", availableSteps - 1);
       }, this.speed * i);
       setTimeout(() => {
         const node = visitedNodesInOrder[i];
@@ -336,7 +337,6 @@ export default class Visualizer extends Component {
     }
     if (this.context.state.layoutLoaded) {
       //intended to detect loadLayout action.
-      console.log("componentdidupdate layout loaded");
       this.resetNodeStyles({
         setWalls: true,
         resetVisited: true,
@@ -345,13 +345,7 @@ export default class Visualizer extends Component {
       this.context.updateState("layoutLoaded", false);
     }
     if (this.props.isHighlightMapRequested) {
-      console.log("highlight map requested in visualizer");
       const { map } = this.context.robot;
-      console.log(this.refs);
-      console.log(this.refs[`node-${0}-${0}`]);
-      //ReactDOM.findDOMNode(this.refs[node]).classList.add(`node-start`);
-      let count = 0;
-      console.log(map);
       for (let row = 0; row < map.length; row++) {
         for (let col = 0; col < map[0].length; col++) {
           if (map[row][col]) {
@@ -361,16 +355,9 @@ export default class Visualizer extends Component {
           }
         }
       }
-      console.log(count);
     }
     if (!this.props.isHighlightMapRequested) {
-      console.log("highlight map requested in visualizer");
       const { map } = this.context.robot;
-      console.log(this.refs);
-      console.log(this.refs[`node-${0}-${0}`]);
-      //ReactDOM.findDOMNode(this.refs[node]).classList.add(`node-start`);
-      let count = 0;
-      console.log(map);
       for (let row = 0; row < map.length; row++) {
         for (let col = 0; col < map[0].length; col++) {
           if (map[row][col]) {
@@ -380,7 +367,6 @@ export default class Visualizer extends Component {
           }
         }
       }
-      console.log(count);
     }
   }
 
