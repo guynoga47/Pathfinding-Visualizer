@@ -20,10 +20,7 @@ export const randomWalk = (grid, startNode, finishNode) => {
 
 const getNeighbors = (node, grid) => {
   const neighbors = [];
-  const {
-    col,
-    row
-  } = node;
+  const { col, row } = node;
   if (col > 0) neighbors.push(grid[row][col - 1]);
   if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
   if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
@@ -58,10 +55,10 @@ const dfs = (grid, startNode, finishNode, order) => {
 };
 
 // comment in order to see changes in commit
-// need to add a order - vertcal/horizontal - determaind by the order that we push to stock (first left right or up down)
+// need to add a order - vertcal/horizontal - determined by the order that we push to stock (first left right or up down)
 // need to change functions names
 const mappingDfs = (grid, startNode) => {
-  if (!startNode || !finishNode || startNode === finishNode) {
+  if (!startNode) {
     console.log("Bad parameters, unable to calculate path!");
     return false;
   }
@@ -77,8 +74,21 @@ const mappingDfs = (grid, startNode) => {
     currNode = stack.pop();
 
     if (!isPrevNodeANeighbor(parentNode, currNode)) {
+      // function that goes from parent node to currNode only stepping on stepped nodes
+      // using the
+
       //shortest path from parent to curr
-      console.log("finding shortest path from " + parentNode.row + "," + parentNode.col + " to-> " + currNode.row + "," + currNode.col + "...");
+      console.log(
+        "finding shortest path from " +
+          parentNode.row +
+          "," +
+          parentNode.col +
+          " to-> " +
+          currNode.row +
+          "," +
+          currNode.col +
+          "..."
+      );
     }
     // needs to be else term
     if (!visitedNodesInOrder.includes(currNode))
@@ -97,23 +107,25 @@ const mappingDfs = (grid, startNode) => {
 
 const isPrevNodeANeighbor = (node1, node2) => {
   console.log("currNode=" + node2.row + "," + node2.col);
-  console.log("currNode.previousNode =" + node2.previousNode.row + "," + node2.previousNode.col);
-  console.log("parentNode =" + node1.row + "," + node1.col)
+  console.log(
+    "currNode.previousNode =" +
+      node2.previousNode.row +
+      "," +
+      node2.previousNode.col
+  );
+  console.log("parentNode =" + node1.row + "," + node1.col);
   console.log("**************************************");
-  return (node2.previousNode === node1);
-}
+  return node2.previousNode === node1;
+};
 
 const getNeighboursTom = (node, grid) => {
   const neighbors = [];
-  const {
-    col,
-    row
-  } = node;
+  const { col, row } = node;
 
   if (row < grid.length - 1 && !grid[row + 1][col].isWall) {
     neighbors.push(grid[row + 1][col]);
   }
-  if ((row > 0 && !grid[row - 1][col].isWall)) {
+  if (row > 0 && !grid[row - 1][col].isWall) {
     neighbors.push(grid[row - 1][col]);
   }
   if (col > 0 && !grid[row][col - 1].isWall) {
@@ -123,14 +135,11 @@ const getNeighboursTom = (node, grid) => {
     neighbors.push(grid[row][col + 1]);
   }
   return neighbors;
-}
+};
 
 const getUnvisitedNeighbours = (node, grid, order) => {
   const neighbors = [];
-  const {
-    col,
-    row
-  } = node;
+  const { col, row } = node;
   if (order === "vertical") {
     if (col > 0) neighbors.push(grid[row][col - 1]);
     if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
@@ -168,17 +177,16 @@ class Stack {
   }
 }
 
-export const data = [{
+export const data = [
+  {
     name: "Horizontal Mapping",
     shortened: "Horizontal",
-    func: (grid, startNode, finishNode) =>
-      mappingDfs(grid, startNode),
+    func: (grid, startNode, finishNode) => mappingDfs(grid, startNode),
   },
   {
     name: "Vertical Mapping",
     shortened: "Vertical",
-    func: (grid, startNode, finishNode) =>
-      mappingDfs(grid, startNode),
+    func: (grid, startNode, finishNode) => mappingDfs(grid, startNode),
   },
   {
     name: "Random Walk",
