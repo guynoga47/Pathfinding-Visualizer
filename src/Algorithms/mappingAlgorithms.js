@@ -42,7 +42,7 @@ const dfs = (grid, startNode, finishNode, order) => {
     if (currNode === finishNode) return visitedNodesInOrder;
     if (!visitedNodesInOrder.includes(currNode))
       visitedNodesInOrder.push(currNode);
-    const neighbours = getUnvisitedNeighbours(currNode, grid, order);
+    const neighbours = getUnvisitedNeighbors(currNode, grid, order);
     neighbours.forEach((neighbour) => {
       console.log(neighbour);
       if (!visitedNodesInOrder.includes(neighbour)) {
@@ -93,7 +93,7 @@ const mappingDfs = (grid, startNode) => {
     // needs to be else term
     if (!visitedNodesInOrder.includes(currNode))
       visitedNodesInOrder.push(currNode);
-    const neighbours = getNeighboursTom(currNode, grid);
+    const neighbours = getNeighborsTom(currNode, grid);
     neighbours.forEach((neighbour) => {
       if (!visitedNodesInOrder.includes(neighbour)) {
         stack.push(neighbour);
@@ -118,7 +118,7 @@ const isPrevNodeANeighbor = (node1, node2) => {
   return node2.previousNode === node1;
 };
 
-const getNeighboursTom = (node, grid) => {
+const getNeighborsTom = (node, grid) => {
   const neighbors = [];
   const { col, row } = node;
 
@@ -137,7 +137,7 @@ const getNeighboursTom = (node, grid) => {
   return neighbors;
 };
 
-const getUnvisitedNeighbours = (node, grid, order) => {
+const getUnvisitedNeighbors = (node, grid, order) => {
   const neighbors = [];
   const { col, row } = node;
   if (order === "vertical") {
