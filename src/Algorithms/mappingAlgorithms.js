@@ -1,3 +1,4 @@
+import { astar } from "./pathfindingAlgorithms";
 export const randomWalk = (grid, startNode, finishNode) => {
   if (!startNode || !finishNode || startNode === finishNode) {
     console.log("Bad parameters, unable to calculate path!");
@@ -58,6 +59,7 @@ const dfs = (grid, startNode, finishNode, order) => {
 // need to add a order - vertcal/horizontal - determined by the order that we push to stock (first left right or up down)
 // need to change functions names
 const mappingDfs = (grid, startNode) => {
+  let countInOrderToStopInfinityRun = 0;
   if (!startNode) {
     console.log("Bad parameters, unable to calculate path!");
     return false;
@@ -69,14 +71,21 @@ const mappingDfs = (grid, startNode) => {
   let currNode = startNode;
   currNode.previousNode = parentNode;
 
-  while (!stack.isEmpty()) {
+  while (!stack.isEmpty() && countInOrderToStopInfinityRun != 100) {
+    countInOrderToStopInfinityRun += 1;
     parentNode = currNode;
     currNode = stack.pop();
 
     if (!isPrevNodeANeighbor(parentNode, currNode)) {
-      // function that goes from parent node to currNode only stepping on stepped nodes
-      // using the
+      console.log(parentNode);
+      console.log(currNode);
+      let shortPathPtoC = astar(grid, parentNode, currNode);
+      console.log(shortPathPtoC);
+      //here we need to check that the battery is sufficient to go through this path and get back to the docking station
+      //visitedNodesInOrder.push(shortPathPtoC);
 
+      //function that goes from parent node to currNode only stepping on stepped nodes
+      //using the
       //shortest path from parent to curr
       console.log(
         "finding shortest path from " +
@@ -89,16 +98,20 @@ const mappingDfs = (grid, startNode) => {
           currNode.col +
           "..."
       );
+      visitedNodesInOrder.push(...shortPathPtoC);
+    } else {
+      if (!visitedNodesInOrder.includes(currNode))
+        visitedNodesInOrder.push(currNode);
     }
-    // needs to be else term
-    if (!visitedNodesInOrder.includes(currNode))
-      visitedNodesInOrder.push(currNode);
-    const neighbours = getNeighborsTom(currNode, grid);
-    neighbours.forEach((neighbour) => {
-      if (!visitedNodesInOrder.includes(neighbour)) {
+    const neighbors = getNeighborsTom(currNode, grid);
+    neighbors.forEach((neighbour) => {
+      if (
+        !visitedNodesInOrder.includes(neighbour) ||
+        !stack.includes(neighbour)
+      ) {
         stack.push(neighbour);
       }
-      neighbour.previousNode = currNode;
+      if (!stack.includes(neighbour)) neighbour.previousNode = currNode;
     });
   }
   console.log(visitedNodesInOrder);
@@ -175,18 +188,27 @@ class Stack {
   printStack() {
     this.items.forEach((item) => console.log(item));
   }
+
+  includes(itemToBeChecked) {
+    this.items.forEach((item) => {
+      if (item === itemToBeChecked) {
+        return true;
+      }
+    });
+    return false;
+  }
 }
 
 export const data = [
   {
     name: "Horizontal Mapping",
     shortened: "Horizontal",
-    func: (grid, startNode, finishNode) => mappingDfs(grid, startNode),
+    func: (grid, startNode) => mappingDfs(grid, startNode),
   },
   {
     name: "Vertical Mapping",
     shortened: "Vertical",
-    func: (grid, startNode, finishNode) => mappingDfs(grid, startNode),
+    func: (grid, startNode) => mappingDfs(grid, startNode),
   },
   {
     name: "Random Walk",
