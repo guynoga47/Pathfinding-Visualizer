@@ -30,7 +30,7 @@ const Nav = (props) => {
     mappingAlgorithms,
     pathfindingAlgorithms,
     setClearWallsRequest,
-    setSaveLayoutRequest,
+    setHighlightMapRequest,
     drawingMode,
     setDrawingMode,
   } = props;
@@ -202,7 +202,7 @@ const Nav = (props) => {
               isFinished={context.state.isFinished}
               drawingMode={drawingMode}
               setDrawingMode={setDrawingMode}
-              setSaveLayoutRequest={setSaveLayoutRequest}
+              setHighlightMapRequest={setHighlightMapRequest}
             />
           </Grid>
         </Grid>

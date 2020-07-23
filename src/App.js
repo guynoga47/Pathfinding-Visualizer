@@ -17,8 +17,7 @@ const App = () => {
     cleared: true,
   });
   const [drawingMode, setDrawingMode] = useState("free");
-
-  console.log(pathfindingAlgorithms.data);
+  const [highlightMapRequest, setHighlightMapRequest] = useState(false);
 
   return (
     <div className="App">
@@ -28,12 +27,15 @@ const App = () => {
             mappingAlgorithms={mappingAlgorithms.data}
             pathfindingAlgorithms={pathfindingAlgorithms.data}
             setClearWallsRequest={setClearWallsRequest}
-            drawingMode={drawingMode}
+            setHighlightMapRequest={setHighlightMapRequest}
             setDrawingMode={setDrawingMode}
+            drawingMode={drawingMode}
           />
           <Visualizer
             isClearWallsRequested={clearWallsRequest}
             setClearWallsRequest={setClearWallsRequest}
+            isHighlightMapRequested={highlightMapRequest}
+            setHighlightMapRequest={setHighlightMapRequest}
             drawingMode={drawingMode}
           />
         </GlobalState>

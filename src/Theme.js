@@ -15,6 +15,28 @@ export default createMuiTheme({
         },
       },
     },
+
+    /*     MuiSpeedDial: {
+      fab: {
+        boxShadow: "none",
+        margin: 0,
+        "&:hover": {
+          color: "#66FCF1",
+        },
+      },
+      actions: {
+        paddingTop: "100px",
+      },
+    },
+    MuiSpeedDialAction: {
+      staticTooltip: {
+        margin: "30px",
+      },
+      staticTooltipLabel: {
+        margin: "30px",
+      },
+    }, */
+
     MuiButton: {
       root: {
         margin: "1em",
@@ -41,6 +63,14 @@ export default createMuiTheme({
     },
     subtitle2: {
       fontWeight: "500",
+    },
+  },
+  palette: {
+    primary: {
+      main: "#1f2833",
+      dark: "#1f2833",
+      contrastText: "#fff",
+      disabled: "#C5C6C7",
     },
   },
 });

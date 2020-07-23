@@ -1,10 +1,12 @@
 import React, { Component } from "react";
 
 import GridContext from "./grid-context";
+import Robot from "../Classes/Robot";
 //Grid logical context, everything related to visualizing it is sitting
 //in visualizer.jsx
 const DEFAULT_GRID_HEIGHT = 25;
 const DEFAULT_GRID_WIDTH = 50;
+const DEFAULT_CHARGE = 100;
 
 const calculateDefaultGridEndPointsLocations = (height, width) => {
   const defaultStartNode = {
@@ -29,6 +31,7 @@ class GlobalState extends Component {
     } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
     this.state = {
       grid: [],
+      availableSteps: this.gridHeight * this.gridWidth,
       simulationType: undefined,
       activeMappingAlgorithm: undefined,
       activePathfindingAlgorithm: undefined,
@@ -42,6 +45,7 @@ class GlobalState extends Component {
 
   componentDidMount() {
     const grid = this.getInitialGrid();
+    this.robot = new Robot(DEFAULT_CHARGE, grid);
     this.setState({ grid });
   }
 
@@ -142,13 +146,28 @@ class GlobalState extends Component {
     );
   };
 
+  convertAvailableStepsToBatteryCapacity = () => {
+    return Math.floor(
+      (this.state.availableSteps / (this.gridHeight * this.gridWidth)) * 100
+    );
+  };
+
+  convertBatteryCapacityToAvailableSteps = (battery) => {
+    return Math.floor((battery / 100) * (this.gridHeight * this.gridWidth));
+  };
+
   render() {
     return (
       <GridContext.Provider
         value={{
           state: this.state,
+          robot: this.robot,
           isStartNode: this.isStartNode,
           isFinishNode: this.isFinishNode,
+          convertBatteryCapacityToAvailableSteps: this
+            .convertBatteryCapacityToAvailableSteps,
+          convertAvailableStepsToBatteryCapacity: this
+            .convertAvailableStepsToBatteryCapacity,
           updateState: this.updateState,
           getInitialGrid: this.getInitialGrid,
           resizeGrid: this.resizeGrid,

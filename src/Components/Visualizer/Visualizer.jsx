@@ -1,15 +1,9 @@
-import React, {
-  Component
-} from "react";
+import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
 import Node from "../Node/Node";
-import Controls, {
-  DEFAULT_SPEED
-} from "../Controls/Controls";
-import {
-  getShortestPathNodesInOrder
-} from "../../Algorithms/algorithmUtils.js";
+import Controls, { DEFAULT_SPEED } from "../Controls/Controls";
+import { getShortestPathNodesInOrder } from "../../Algorithms/algorithmUtils.js";
 
 import "./Visualizer.css";
 
@@ -21,14 +15,14 @@ export default class Visualizer extends Component {
   constructor(props) {
     super(props);
     //this.speed = DEFAULT_SPEED;
-    this.speed = 300;
+    this.speed = 100;
     this.mouseKeyDown = false;
     this.endPointKeyDown = "";
   }
 
   handleSpeedChanged = (speed) => {
     //this.speed = speed;
-    this.speed = 300;
+    this.speed = 100;
   };
 
   handleResetButtonClicked = () => {
@@ -89,46 +83,31 @@ export default class Visualizer extends Component {
   };
 
   handleMouseDown = (row, col) => {
-    const {
-      drawingMode
-    } = this.props;
-    const {
-      isFinished,
-      isRunning
-    } = this.context.state;
+    const { drawingMode } = this.props;
+    const { isFinished, isRunning } = this.context.state;
     if (isFinished || isRunning) return;
     this.mouseKeyDown = true;
     if (
       this.context.isStartNode(row, col) ||
       this.context.isFinishNode(row, col)
     ) {
-      this.endPointKeyDown = this.context.isStartNode(row, col) ?
-        "start" :
-        "finish";
+      this.endPointKeyDown = this.context.isStartNode(row, col)
+        ? "start"
+        : "finish";
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-${this.endPointKeyDown}`
       );
     } else {
       if (drawingMode === "rectangle" || drawingMode === "obstacle") {
-        this.rectLocStart = {
-          row,
-          col
-        };
+        this.rectLocStart = { row, col };
       }
-      this.changeNodeWall(row, col, {
-        toggle: true
-      });
+      this.changeNodeWall(row, col, { toggle: true });
     }
   };
 
   handleMouseLeave = (row, col) => {
-    const {
-      drawingMode
-    } = this.props;
-    const {
-      isFinished,
-      isRunning
-    } = this.context.state;
+    const { drawingMode } = this.props;
+    const { isFinished, isRunning } = this.context.state;
     if (isFinished || isRunning) return;
     if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
@@ -144,75 +123,46 @@ export default class Visualizer extends Component {
         }
       } else if (drawingMode === "obstacle") {
         if (this.mouseKeyDown) {
-          this.createAndRenderRectangle(row, col, {
-            fill: true,
-            toggle: true
-          });
+          this.createAndRenderRectangle(row, col, { fill: true, toggle: true });
         }
       }
     }
   };
 
   handleMouseEnter = (row, col) => {
-    const {
-      drawingMode
-    } = this.props;
-    const {
-      isFinished,
-      isRunning
-    } = this.context.state;
+    const { drawingMode } = this.props;
+    const { isFinished, isRunning } = this.context.state;
     if (isFinished || !this.mouseKeyDown || isRunning) return;
     if (this.endPointKeyDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
         `node-${this.endPointKeyDown}`
       );
     } else if (drawingMode === "obstacle") {
-      this.createAndRenderRectangle(row, col, {
-        fill: true,
-        add: true
-      });
+      this.createAndRenderRectangle(row, col, { fill: true, add: true });
     } else if (drawingMode === "rectangle") {
-      this.createAndRenderRectangle(row, col, {
-        fill: false,
-        add: true
-      });
+      this.createAndRenderRectangle(row, col, { fill: false, add: true });
     } else if (drawingMode === "free") {
-      this.changeNodeWall(row, col, {
-        toggle: true
-      });
+      this.changeNodeWall(row, col, { toggle: true });
     }
   };
 
-  createAndRenderRectangle = (row, col, {
-    fill,
-    add,
-    toggle
-  }) => {
+  createAndRenderRectangle = (row, col, { fill, add, toggle }) => {
     const rectangleNodes = this.calculateRectangleNodes(row, col, {
       fill,
     });
     if (add) {
       rectangleNodes.forEach((node) =>
-        this.changeNodeWall(node.row, node.col, {
-          add
-        })
+        this.changeNodeWall(node.row, node.col, { add })
       );
     } else {
       rectangleNodes.forEach((node) =>
-        this.changeNodeWall(node.row, node.col, {
-          toggle
-        })
+        this.changeNodeWall(node.row, node.col, { toggle })
       );
     }
   };
 
   handleMouseUp = (row, col) => {
-    const {
-      isFinished,
-      isRunning,
-      startNode,
-      finishNode
-    } = this.context.state;
+    const { isFinished, isRunning, startNode, finishNode } = this.context.state;
     if (isFinished || isRunning) return;
     if (this.endPointKeyDown) {
       let endPoint = this.endPointKeyDown === "start" ? startNode : finishNode;
@@ -226,15 +176,10 @@ export default class Visualizer extends Component {
     this.mouseKeyDown = false;
   };
 
-  calculateRectangleNodes = (row, col, {
-    fill
-  }) => {
+  calculateRectangleNodes = (row, col, { fill }) => {
     const rectangleNodes = [];
     const startPoint = this.rectLocStart;
-    const endPoint = {
-      row,
-      col
-    };
+    const endPoint = { row, col };
     const upperPoint = startPoint.row < endPoint.row ? startPoint : endPoint;
     const leftPoint = startPoint.col < endPoint.col ? startPoint : endPoint;
     const rowDiff = Math.abs(startPoint.row - endPoint.row);
@@ -250,26 +195,17 @@ export default class Visualizer extends Component {
             !this.context.isStartNode(i, j) &&
             !this.context.isFinishNode(i, j)
           ) {
-            rectangleNodes.push({
-              row: i,
-              col: j
-            });
+            rectangleNodes.push({ row: i, col: j });
           }
         } else {
-          rectangleNodes.push({
-            row: i,
-            col: j
-          });
+          rectangleNodes.push({ row: i, col: j });
         }
       }
     }
     return rectangleNodes;
   };
 
-  changeNodeWall = (row, col, {
-    toggle,
-    add
-  }) => {
+  changeNodeWall = (row, col, { toggle, add }) => {
     const node = this.context.state.grid[row][col];
     if (toggle) {
       if (
@@ -304,9 +240,11 @@ export default class Visualizer extends Component {
       }
       setTimeout(() => {
         const node = visitedNodesInOrder[i];
+        let { availableSteps } = this.context.state;
         ReactDOM.findDOMNode(
           this.refs[`node-${node.row}-${node.col}`]
         ).classList.add("node-visited");
+        this.context.updateState("availableSteps", availableSteps - 1);
       }, this.speed * i);
       setTimeout(() => {
         const node = visitedNodesInOrder[i];
@@ -337,41 +275,47 @@ export default class Visualizer extends Component {
   handlePlayButtonClicked = () => {
     //need to disable toolbar before choosing and then display error message accordingly.
     //thisconst activeAlgorithmCallback = this.context.state.activeAlgorithm.func;
+    const {
+      simulationType,
+      activeMappingAlgorithm,
+      activePathfindingAlgorithm,
+      startNode,
+      finishNode,
+      grid,
+    } = this.context.state;
+
+    const { robot } = this.context;
+
     const activeAlgorithmCallback =
-      this.context.state.simulationType === "map" ?
-      this.context.state.activeMappingAlgorithm.func :
-      this.context.state.simulationType === "sweep" ?
-      this.context.state.activePathfindingAlgorithm.func :
-      undefined;
+      simulationType === "map"
+        ? activeMappingAlgorithm.func
+        : simulationType === "sweep"
+        ? activePathfindingAlgorithm.func
+        : undefined;
 
     if (!activeAlgorithmCallback) return;
 
     this.context.updateState("isRunning", true);
-    const {
-      grid
-    } = this.context.state;
-    console.log(grid);
-    const startNode =
-      grid[this.context.state.startNode.row][this.context.state.startNode.col];
-    const finishNode =
-      grid[this.context.state.finishNode.row][
-        this.context.state.finishNode.col
-      ];
 
     const visitedNodesInOrder = activeAlgorithmCallback(
       grid,
-      startNode,
-      finishNode
+      grid[startNode.row][startNode.col],
+      grid[finishNode.row][finishNode.col]
     );
-    const nodesInShortestPathOrder = getShortestPathNodesInOrder(finishNode);
+
+    if (simulationType === "map") {
+      robot.updateMap(visitedNodesInOrder);
+    }
+
+    const nodesInShortestPathOrder = getShortestPathNodesInOrder(
+      grid[finishNode.row][finishNode.col]
+    );
     console.log(visitedNodesInOrder);
     this.visualize(visitedNodesInOrder, nodesInShortestPathOrder);
   };
 
   handleClearWallsButtonClicked = () => {
-    const {
-      setClearWallsRequest
-    } = this.props;
+    const { setClearWallsRequest } = this.props;
     for (let row = 0; row < this.context.gridHeight; row++) {
       for (let col = 0; col < this.context.gridWidth; col++) {
         if (
@@ -379,17 +323,12 @@ export default class Visualizer extends Component {
           !this.context.isFinishNode(row, col)
         ) {
           if (this.context.state.grid[row][col].isWall) {
-            this.changeNodeWall(row, col, {
-              toggle: true
-            });
+            this.changeNodeWall(row, col, { toggle: true });
           }
         }
       }
     }
-    setClearWallsRequest({
-      requested: false,
-      cleared: true
-    });
+    setClearWallsRequest({ requested: false, cleared: true });
   };
 
   componentDidUpdate() {
@@ -398,7 +337,6 @@ export default class Visualizer extends Component {
     }
     if (this.context.state.layoutLoaded) {
       //intended to detect loadLayout action.
-      console.log("componentdidupdate layout loaded");
       this.resetNodeStyles({
         setWalls: true,
         resetVisited: true,
@@ -406,82 +344,66 @@ export default class Visualizer extends Component {
       });
       this.context.updateState("layoutLoaded", false);
     }
+    if (this.props.isHighlightMapRequested) {
+      const { map } = this.context.robot;
+      for (let row = 0; row < map.length; row++) {
+        for (let col = 0; col < map[0].length; col++) {
+          if (map[row][col]) {
+            ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
+              `highlight`
+            );
+          }
+        }
+      }
+    }
+    if (!this.props.isHighlightMapRequested) {
+      const { map } = this.context.robot;
+      for (let row = 0; row < map.length; row++) {
+        for (let col = 0; col < map[0].length; col++) {
+          if (map[row][col]) {
+            ReactDOM.findDOMNode(
+              this.refs[`node-${row}-${col}`]
+            ).classList.remove(`highlight`);
+          }
+        }
+      }
+    }
   }
 
   render() {
-    const {
-      grid
-    } = this.context.state;
-    return ( <
-      >
-      <
-      Controls onResetButtonClicked = {
-        this.handleResetButtonClicked
-      }
-      onPlayButtonClicked = {
-        this.handlePlayButtonClicked
-      }
-      onSpeedChange = {
-        this.handleSpeedChanged
-      }
-      onGridSizeChange = {
-        this.handleGridSizeChange
-      }
-      /> <
-      div className = "grid" > {
-        grid.map((row, rowIndex) => ( <
-          div key = {
-            rowIndex
-          }
-          className = "row" > {
-            row.map((node) => {
-              const {
-                row,
-                col,
-                isStart,
-                isFinish
-              } = node;
-              return ( <
-                Node key = {
-                  `node-${row}-${col}`
-                }
-                ref = {
-                  `node-${row}-${col}`
-                }
-                row = {
-                  row
-                }
-                col = {
-                  col
-                }
-                isStart = {
-                  isStart
-                }
-                isFinish = {
-                  isFinish
-                }
-                onMouseDown = {
-                  this.handleMouseDown
-                }
-                onMouseEnter = {
-                  this.handleMouseEnter
-                }
-                onMouseLeave = {
-                  this.handleMouseLeave
-                }
-                onMouseUp = {
-                  this.handleMouseUp
-                } >
-                <
-                /Node>
-              );
-            })
-          } <
-          /div>
-        ))
-      } <
-      /div> < /
-      >
+    const { grid } = this.context.state;
+    return (
+      <>
+        <Controls
+          onResetButtonClicked={this.handleResetButtonClicked}
+          onPlayButtonClicked={this.handlePlayButtonClicked}
+          onSpeedChange={this.handleSpeedChanged}
+          onGridSizeChange={this.handleGridSizeChange}
+        />
+        <div className="grid">
+          {grid.map((row, rowIndex) => (
+            <div key={rowIndex} className="row">
+              {row.map((node) => {
+                const { row, col, isStart, isFinish } = node;
+                return (
+                  <Node
+                    key={`node-${row}-${col}`}
+                    ref={`node-${row}-${col}`}
+                    row={row}
+                    col={col}
+                    isStart={isStart}
+                    isFinish={isFinish}
+                    onMouseDown={this.handleMouseDown}
+                    onMouseEnter={this.handleMouseEnter}
+                    onMouseLeave={this.handleMouseLeave}
+                    onMouseUp={this.handleMouseUp}
+                  ></Node>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </>
     );
   }
 }

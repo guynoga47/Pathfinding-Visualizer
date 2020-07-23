@@ -1,16 +1,23 @@
 import React, { useContext } from "react";
 
 import IconButton from "@material-ui/core/IconButton";
+
 import IconDrawFree from "@material-ui/icons/Create";
 import IconDrawRectangle from "@material-ui/icons/AspectRatio";
 import IconDrawObstacle from "@material-ui/icons/TabUnselected";
+
 import IconSave from "@material-ui/icons/GetApp";
 import IconLoad from "@material-ui/icons/Publish";
+import IconMap from "@material-ui/icons/Map";
 import Popover from "@material-ui/core/Popover";
 import Typography from "@material-ui/core/Typography";
+
 import { saveAs } from "file-saver";
 
 import GridContext from "../../Context/grid-context";
+import InteractiveBattery from "../Tools/InteractiveBattery";
+import BatterySlider from "../SliderBattery/BatterySlider";
+
 import ToolsStyles from "./Tools.Styles";
 
 const useStyles = ToolsStyles;
@@ -18,8 +25,8 @@ const useStyles = ToolsStyles;
 const Tools = (props) => {
   const context = useContext(GridContext);
 
-  const { setDrawingMode, drawingMode } = props;
   const { isRunning, isFinished } = context.state;
+  const { setHighlightMapRequest, setDrawingMode, drawingMode } = props;
 
   const [anchorElDrawFree, setAnchorElDrawFree] = React.useState(null);
   const [anchorElDrawRectangle, setAnchorElDrawRectangle] = React.useState(
@@ -27,7 +34,26 @@ const Tools = (props) => {
   );
   const [anchorElSaveLayout, setAnchorElSaveLayout] = React.useState(null);
   const [anchorElLoadLayout, setAnchorElLoadLayout] = React.useState(null);
+  const [anchorElHighlightMap, setAnchorElHighlightMap] = React.useState(null);
+
   const [anchorElDrawObstacle, setAnchorElDrawObstacle] = React.useState(null);
+
+  const [
+    anchorElBatteryCapacityClick,
+    setAnchorElBatteryCapacityClick,
+  ] = React.useState(null);
+  const [
+    anchorElBatteryCapacityHover,
+    setAnchorElBatteryCapacityHover,
+  ] = React.useState(null);
+
+  const handleBatteryCapacityButtonClicked = (event) => {
+    setAnchorElBatteryCapacityClick(event.currentTarget);
+  };
+
+  const handleBatteryCapacityButtonClosed = (event) => {
+    setAnchorElBatteryCapacityClick(null);
+  };
 
   const handlePopoverOpen = (event) => {
     switch (event.currentTarget.id) {
@@ -46,8 +72,14 @@ const Tools = (props) => {
       case "btn-load":
         setAnchorElLoadLayout(event.currentTarget);
         break;
+      case "btn-map":
+        setAnchorElHighlightMap(event.currentTarget);
+        break;
+      case "btn-battery":
+        setAnchorElBatteryCapacityHover(event.currentTarget);
+        break;
       default:
-        console.log("default case entered in Tools.jsx: handlePopoverOpen");
+        console.log("Default case entered in Tools.jsx: handlePopoverOpen");
     }
   };
 
@@ -68,8 +100,15 @@ const Tools = (props) => {
       case "btn-load":
         setAnchorElLoadLayout(null);
         break;
+      case "btn-map":
+        setAnchorElHighlightMap(null);
+        break;
+      case "btn-battery":
+        setAnchorElBatteryCapacityHover(null);
+
+        break;
       default:
-        console.log("default case entered in Tools.jsx: handlePopoverClose");
+        console.log("Default case entered in Tools.jsx: handlePopoverClose");
     }
   };
 
@@ -109,6 +148,14 @@ const Tools = (props) => {
       context.loadLayout(newLayout);
     };
     reader.readAsText(event.target.files[0]);
+  };
+
+  const handleMapButtonMouseDown = (event) => {
+    setHighlightMapRequest(true);
+  };
+
+  const handleMapButtonMouseUp = (event) => {
+    setHighlightMapRequest(false);
   };
 
   const classes = useStyles();
@@ -185,6 +232,28 @@ const Tools = (props) => {
         onClick={handleSaveLayoutButtonClicked}
       >
         <IconSave />
+      </IconButton>
+
+      <IconButton
+        id={"btn-map"}
+        className={classes.icon}
+        onMouseEnter={handlePopoverOpen}
+        onMouseLeave={handlePopoverClose}
+        disabled={isRunning}
+        onMouseDown={handleMapButtonMouseDown}
+        onMouseUp={handleMapButtonMouseUp}
+      >
+        <IconMap />
+      </IconButton>
+
+      <IconButton
+        id={"btn-battery"}
+        className={classes.icon}
+        onClick={handleBatteryCapacityButtonClicked}
+        onMouseEnter={handlePopoverOpen}
+        onMouseLeave={handlePopoverClose}
+      >
+        <InteractiveBattery />
       </IconButton>
 
       <Popover
@@ -291,6 +360,71 @@ const Tools = (props) => {
         disableRestoreFocus
       >
         <Typography className={classes.popoverText}>Rectangle</Typography>
+      </Popover>
+
+      <Popover
+        id="mouse-over-popover"
+        className={classes.popover}
+        classes={{
+          paper: classes.paper,
+        }}
+        open={Boolean(anchorElHighlightMap)}
+        anchorEl={anchorElHighlightMap}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        onClose={handlePopoverClose}
+        disableRestoreFocus
+      >
+        <Typography className={classes.popoverText}>
+          Highlight Robot Map
+        </Typography>
+      </Popover>
+
+      <Popover
+        id="mouse-over-popover"
+        className={classes.popover}
+        classes={{
+          paper: classes.paper,
+        }}
+        open={Boolean(anchorElBatteryCapacityHover)}
+        anchorEl={anchorElBatteryCapacityHover}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        onClose={handlePopoverClose}
+        disableRestoreFocus
+      >
+        <Typography className={classes.popoverText}>
+          Battery: {context.convertAvailableStepsToBatteryCapacity()}%
+        </Typography>
+      </Popover>
+
+      <Popover
+        id="simple-popover"
+        open={Boolean(anchorElBatteryCapacityClick)}
+        anchorEl={anchorElBatteryCapacityClick}
+        onClose={handleBatteryCapacityButtonClosed}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+      >
+        <BatterySlider />
       </Popover>
     </div>
   );
