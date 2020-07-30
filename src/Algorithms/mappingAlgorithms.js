@@ -1,12 +1,17 @@
-export const randomWalk = (grid, startNode, finishNode) => {
-  if (!startNode || !finishNode || startNode === finishNode) {
+export const randomWalk = (grid, startNode) => {
+  /*   if (!startNode || !finishNode || startNode === finishNode) {
     console.log("Bad parameters, unable to calculate path!");
     return false;
-  }
+  } */
   let i = 0;
   let currNode = startNode;
   const visitedNodesInOrder = [];
-  while (i < 500) {
+  /* const stepsBoundary = grid.length * grid[0].length; */
+  const stepsBoundary = grid.length * grid[0].length;
+  /* bound random walk number of iteration to a high enough number of steps according to grid size, trying to fully visit the grid might be very
+  inefficient so we bound it artificially, regardless of the battery consideration which is taken care of as part of the play button handler in
+  visualizer component.`*/
+  while (i < stepsBoundary) {
     visitedNodesInOrder.push(currNode);
     const neighbors = getNeighbors(currNode, grid);
     if (!neighbors.length || !neighbors) {
@@ -29,10 +34,10 @@ const getNeighbors = (node, grid) => {
 };
 
 const dfs = (grid, startNode, finishNode, order) => {
-  if (!startNode || !finishNode || startNode === finishNode) {
+  /*   if (!startNode || !finishNode || startNode === finishNode) {
     console.log("Bad parameters, unable to calculate path!");
     return false;
-  }
+  } */
   const stack = new Stack();
   const visitedNodesInOrder = [];
   stack.push(startNode);

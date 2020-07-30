@@ -1,8 +1,8 @@
-const bfs = (grid, startNode, finishNode) => {
-  if (!startNode || !finishNode || startNode === finishNode) {
+export const bfs = (grid, startNode, finishNode) => {
+  /*   if (!startNode || !finishNode || startNode === finishNode) {
     console.log("Bad parameters, unable to calculate path!");
     return false;
-  }
+  } */
   startNode.distance = 0;
   const unvisitedNodes = getAllNodes(grid);
   const visitedNodesInOrder = [];
@@ -47,7 +47,9 @@ const getUnvisitedNeighbours = (node, grid) => {
   if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
   if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
   if (row > 0) neighbors.push(grid[row - 1][col]);
-  return neighbors.filter((neighbor) => !neighbor.isVisited);
+  return neighbors.filter(
+    (neighbor) => !neighbor.isVisited && !neighbor.isWall
+  );
 };
 
 const getAllNodes = (grid) => {
@@ -55,10 +57,10 @@ const getAllNodes = (grid) => {
 };
 
 const dfs = (grid, startNode, finishNode) => {
-  if (!startNode || !finishNode || startNode === finishNode) {
+  /*   if (!startNode || !finishNode || startNode === finishNode) {
     console.log("Bad parameters, unable to calculate path!");
     return false;
-  }
+  } */
   const stack = new Stack();
   const visitedNodesInOrder = [];
   stack.push(startNode);
@@ -100,13 +102,14 @@ class Stack {
   }
 }
 
-const astar = (grid, startNode, finishNode) => {
-  if (!startNode || !finishNode || startNode === finishNode) {
+export const astar = (grid, startNode, finishNode) => {
+  /*   if (!startNode || !finishNode || startNode === finishNode) {
     console.log("Bad parameters, unable to calculate path!");
     return false;
-  }
-  const visitedNodesInOrder = [];
+  } */
+  console.log(grid, startNode, finishNode);
 
+  const visitedNodesInOrder = [];
   startNode.distance = 0;
   startNode.heuristicDistance = 0;
 
@@ -122,7 +125,7 @@ const astar = (grid, startNode, finishNode) => {
       break;
     }
 
-    const neighbors = getUnivistedNeighbors(closestNode, grid);
+    const neighbors = getUnvisitedNeighbours(closestNode, grid);
     for (const neighbor of neighbors) {
       //for single headed path visualization don't add weight to closestNode.distance.
       let tentativeWeightedDistance = closestNode.distance + 0; //+closestNode.weight
@@ -135,7 +138,12 @@ const astar = (grid, startNode, finishNode) => {
       }
     }
   }
-  visitedNodesInOrder.forEach((node) => (node.isVisited = false));
+  /*   visitedNodesInOrder.forEach((node) => {
+    node.isVisited = false;
+    node.distance = Infinity;
+    node.heuristicDistance = Infinity;
+    node.previousNode = null;
+  }); */
   return visitedNodesInOrder;
 };
 
@@ -151,18 +159,6 @@ const manhattanDistance = (node, finishNode) => {
 const sortNodesByHeuristicDistance = (unvisitedNodes) => {
   unvisitedNodes.sort(
     (nodeA, nodeB) => nodeA.heuristicDistance - nodeB.heuristicDistance
-  );
-};
-
-const getUnivistedNeighbors = (node, grid) => {
-  const neighbors = [];
-  const { col, row } = node;
-  if (col > 0) neighbors.push(grid[row][col - 1]);
-  if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-  if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-  if (row > 0) neighbors.push(grid[row - 1][col]);
-  return neighbors.filter(
-    (neighbor) => !neighbor.isVisited && !neighbor.isWall
   );
 };
 

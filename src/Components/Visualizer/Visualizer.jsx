@@ -25,7 +25,7 @@ export default class Visualizer extends Component {
     this.speed = 100;
   };
 
-  handleResetButtonClicked = () => {
+  handleReset = () => {
     this.context.updateState("isFinished", false);
     this.context.resetGridKeepWalls(this.resetNodeStyles, {
       resetWalls: false,
@@ -230,11 +230,12 @@ export default class Visualizer extends Component {
     }
   };
 
-  visualize = (visitedNodesInOrder, nodesInShortestPathOrder) => {
+  visualize = (visitedNodesInOrder /* nodesInShortestPathOrder */) => {
     for (let i = 0; i <= visitedNodesInOrder.length; i++) {
       if (i === visitedNodesInOrder.length) {
         setTimeout(() => {
-          this.visualizeShortestPath(nodesInShortestPathOrder);
+          this.context.updateState("isRunning", false);
+          this.context.updateState("isFinished", true);
         }, this.speed * i);
         return;
       }
@@ -272,18 +273,15 @@ export default class Visualizer extends Component {
     }
   };
 
-  handlePlayButtonClicked = () => {
-    //need to disable toolbar before choosing and then display error message accordingly.
-    //thisconst activeAlgorithmCallback = this.context.state.activeAlgorithm.func;
+  handlePlay = () => {
     const {
       simulationType,
       activeMappingAlgorithm,
       activePathfindingAlgorithm,
       startNode,
-      finishNode,
       grid,
     } = this.context.state;
-
+    const { modifyVisitedNodesConsideringBatteryAndReturnPath } = this.context;
     const { robot } = this.context;
 
     const activeAlgorithmCallback =
@@ -299,22 +297,20 @@ export default class Visualizer extends Component {
 
     const visitedNodesInOrder = activeAlgorithmCallback(
       grid,
-      grid[startNode.row][startNode.col],
-      grid[finishNode.row][finishNode.col]
+      grid[startNode.row][startNode.col]
+    );
+    const robotPath = modifyVisitedNodesConsideringBatteryAndReturnPath(
+      visitedNodesInOrder
     );
 
     if (simulationType === "map") {
-      robot.updateMap(visitedNodesInOrder);
+      robot.updateMap(robotPath);
     }
 
-    const nodesInShortestPathOrder = getShortestPathNodesInOrder(
-      grid[finishNode.row][finishNode.col]
-    );
-    console.log(visitedNodesInOrder);
-    this.visualize(visitedNodesInOrder, nodesInShortestPathOrder);
+    this.visualize(robotPath);
   };
 
-  handleClearWallsButtonClicked = () => {
+  handleClearWalls = () => {
     const { setClearWallsRequest } = this.props;
     for (let row = 0; row < this.context.gridHeight; row++) {
       for (let col = 0; col < this.context.gridWidth; col++) {
@@ -333,7 +329,7 @@ export default class Visualizer extends Component {
 
   componentDidUpdate() {
     if (this.props.isClearWallsRequested.requested) {
-      this.handleClearWallsButtonClicked();
+      this.handleClearWalls();
     }
     if (this.context.state.layoutLoaded) {
       //intended to detect loadLayout action.
@@ -375,8 +371,8 @@ export default class Visualizer extends Component {
     return (
       <>
         <Controls
-          onResetButtonClicked={this.handleResetButtonClicked}
-          onPlayButtonClicked={this.handlePlayButtonClicked}
+          onResetButtonClicked={this.handleReset}
+          onPlayButtonClicked={this.handlePlay}
           onSpeedChange={this.handleSpeedChanged}
           onGridSizeChange={this.handleGridSizeChange}
         />

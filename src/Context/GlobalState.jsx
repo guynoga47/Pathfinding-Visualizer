@@ -2,6 +2,9 @@ import React, { Component } from "react";
 
 import GridContext from "./grid-context";
 import Robot from "../Classes/Robot";
+
+import { astar } from "../Algorithms/pathfindingAlgorithms";
+import { getShortestPathNodesInOrder } from "../Algorithms/algorithmUtils";
 //Grid logical context, everything related to visualizing it is sitting
 //in visualizer.jsx
 const DEFAULT_GRID_HEIGHT = 25;
@@ -69,20 +72,15 @@ class GlobalState extends Component {
   };
 
   loadLayout = (newLayout) => {
-    this.gridHeight = newLayout.grid.length;
-    this.gridWidth = newLayout.grid[0].length;
-    for (let row = 0; row < this.gridHeight; row++) {
-      for (let col = 0; col < this.gridWidth; col++) {
-        newLayout.grid[row][col].distance = Infinity;
-        newLayout.grid[row][col].heuristicDistance = Infinity;
-      }
-    }
-    this.setState({
-      grid: newLayout.grid,
-      startNode: newLayout.startNode,
-      finishNode: newLayout.finishNode,
-      layoutLoaded: true,
-    });
+    this.setState(
+      {
+        grid: newLayout.grid,
+        startNode: newLayout.startNode,
+        finishNode: newLayout.finishNode,
+        layoutLoaded: true,
+      },
+      this.resetNodesSearchProperties
+    );
   };
 
   resetGridKeepWalls = (callback, param) => {
@@ -156,6 +154,47 @@ class GlobalState extends Component {
     return Math.floor((battery / 100) * (this.gridHeight * this.gridWidth));
   };
 
+  modifyVisitedNodesConsideringBatteryAndReturnPath = (visitedNodesInOrder) => {
+    let { grid, startNode, availableSteps } = this.state;
+
+    const startNodeRef = grid[startNode.row][startNode.col];
+    /* 
+    visitedNodes is calculated regardless of battery size (using the algorithm callback).
+    we want to minimize the amount of iterations of this loop, so we start searching for a path
+    back to the docking station starting from the node that corresponds to our current battery, backwards,
+    until we find a complete path (mapping/sweeping + return to docking station).
+    */
+    for (let i = availableSteps - 1; i >= 1; i--) {
+      const node = visitedNodesInOrder[i];
+
+      const searchResult = astar(grid, node, startNodeRef);
+
+      const pathToDockingStation = getShortestPathNodesInOrder(
+        searchResult[searchResult.length - 1]
+      );
+
+      this.resetNodesSearchProperties();
+
+      if (pathToDockingStation.length + i <= availableSteps) {
+        return visitedNodesInOrder.slice(0, i - 1).concat(pathToDockingStation);
+      }
+    }
+    console.log("error in getVisitedNodesConsideringBattery in GlobalContext");
+    return visitedNodesInOrder;
+  };
+
+  resetNodesSearchProperties = () => {
+    const { grid } = this.state;
+    for (let row = 0; row < grid.length; row++) {
+      for (let col = 0; col < grid[0].length; col++) {
+        grid[row][col].previousNode = null;
+        grid[row][col].isVisited = false;
+        grid[row][col].distance = Infinity;
+        grid[row][col].heuristicDistance = Infinity;
+      }
+    }
+  };
+
   render() {
     return (
       <GridContext.Provider
@@ -175,6 +214,8 @@ class GlobalState extends Component {
           resetGridKeepWalls: this.resetGridKeepWalls,
           gridHeight: this.gridHeight,
           gridWidth: this.gridWidth,
+          modifyVisitedNodesConsideringBatteryAndReturnPath: this
+            .modifyVisitedNodesConsideringBatteryAndReturnPath,
         }}
       >
         {this.props.children}
