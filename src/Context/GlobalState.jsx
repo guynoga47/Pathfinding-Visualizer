@@ -60,6 +60,7 @@ class GlobalState extends Component {
       defaultFinishNode,
     } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
     const grid = this.getInitialGrid();
+    this.robot = new Robot(DEFAULT_CHARGE, grid);
     this.setState(
       {
         grid,
@@ -155,36 +156,55 @@ class GlobalState extends Component {
   };
 
   modifyVisitedNodesConsideringBatteryAndReturnPath = (visitedNodesInOrder) => {
-    let { grid, startNode, availableSteps } = this.state;
+    let { startNode, availableSteps } = this.state;
+    const runningMap = JSON.parse(JSON.stringify(this.robot.map));
+    this.resetNodesSearchProperties(runningMap);
+    const startNodeRef = runningMap[startNode.row][startNode.col];
 
-    const startNodeRef = grid[startNode.row][startNode.col];
     /* 
     visitedNodes is calculated regardless of battery size (using the algorithm callback).
     we want to minimize the amount of iterations of this loop, so we start searching for a path
     back to the docking station starting from the node that corresponds to our current battery, backwards,
     until we find a complete path (mapping/sweeping + return to docking station).
     */
+
+    const visitedNodesConsideringBattery = visitedNodesInOrder.slice(
+      0,
+      availableSteps
+    );
+    visitedNodesConsideringBattery.forEach(
+      (node) => (runningMap[node.row][node.col].isMapped = true)
+    );
+
     for (let i = availableSteps - 1; i >= 1; i--) {
-      const node = visitedNodesInOrder[i];
+      const node = visitedNodesConsideringBattery[i];
 
-      const searchResult = astar(grid, node, startNodeRef);
+      const searchResult = astar(runningMap, node, startNodeRef);
 
-      const pathToDockingStation = getShortestPathNodesInOrder(
-        searchResult[searchResult.length - 1]
-      );
-
-      this.resetNodesSearchProperties();
-
-      if (pathToDockingStation.length + i <= availableSteps) {
-        return visitedNodesInOrder.slice(0, i - 1).concat(pathToDockingStation);
+      if (searchResult) {
+        const pathToDockingStation = getShortestPathNodesInOrder(
+          searchResult[searchResult.length - 1]
+        );
+        if (pathToDockingStation.length + i <= availableSteps) {
+          const robotPath = visitedNodesInOrder
+            .slice(0, i)
+            .concat(pathToDockingStation);
+          this.robot.updateMap(robotPath);
+          console.log(robotPath);
+          console.log(pathToDockingStation);
+          return robotPath;
+        }
       }
+      this.resetNodesSearchProperties(runningMap);
+      runningMap[node.row][node.col].isMapped = false;
     }
-    console.log("error in getVisitedNodesConsideringBattery in GlobalContext");
+    console.log(
+      "error in modifyVisitedNodesConsideringBatteryAndReturnPath in GlobalContext"
+    );
     return visitedNodesInOrder;
   };
 
-  resetNodesSearchProperties = () => {
-    const { grid } = this.state;
+  resetNodesSearchProperties = (grid) => {
     for (let row = 0; row < grid.length; row++) {
       for (let col = 0; col < grid[0].length; col++) {
         grid[row][col].previousNode = null;

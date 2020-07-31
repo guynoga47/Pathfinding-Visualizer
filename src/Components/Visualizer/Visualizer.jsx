@@ -344,7 +344,7 @@ export default class Visualizer extends Component {
       const { map } = this.context.robot;
       for (let row = 0; row < map.length; row++) {
         for (let col = 0; col < map[0].length; col++) {
-          if (map[row][col]) {
+          if (map[row][col].isMapped) {
             ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
               `highlight`
             );
