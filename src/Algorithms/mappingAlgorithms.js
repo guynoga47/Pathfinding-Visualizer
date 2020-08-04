@@ -1,13 +1,19 @@
+import { bfs, astar } from "./pathfindingAlgorithms";
+import { getShortestPathNodesInOrder } from "./algorithmUtils";
+
 export const randomWalk = (grid, startNode) => {
   /*   if (!startNode || !finishNode || startNode === finishNode) {
     console.log("Bad parameters, unable to calculate path!");
     return false;
   } */
+  return breadthMapping(grid, startNode);
   let i = 0;
   let currNode = startNode;
   const visitedNodesInOrder = [];
+  const percentages = [85, 10, 4, 1];
   /* const stepsBoundary = grid.length * grid[0].length; */
   const stepsBoundary = grid.length * grid[0].length;
+  grid.forEach((row) => row.forEach((node) => (node.visitCount = 0)));
   /* bound random walk number of iteration to a high enough number of steps according to grid size, trying to fully visit the grid might be very
   inefficient so we bound it artificially, regardless of the battery consideration which is taken care of as part of the play button handler in
   visualizer component.`*/
@@ -17,9 +23,39 @@ export const randomWalk = (grid, startNode) => {
     if (!neighbors.length || !neighbors) {
       alert("No neighbors found");
     }
-    currNode = neighbors[Math.floor(Math.random() * neighbors.length)];
+    const neighborsAscending = [...neighbors].sort(
+      (n1, n2) => n1.visitCount - n2.visitCount
+    );
+    const neighborsDescending = [...neighbors].sort(
+      (n1, n2) => n2.visitCount - n1.visitCount
+    );
+    const neighborsProbabilities = [];
+
+    neighborsDescending.forEach((neighbor, i) => {
+      for (let count = 0; count < percentages[i]; count++) {
+        neighborsProbabilities.push(neighborsAscending[i]);
+      }
+      console.log(neighborsProbabilities);
+    });
+    currNode =
+      neighborsProbabilities[
+        Math.floor(Math.random() * neighborsProbabilities.length)
+      ];
+    currNode.visitCount = !currNode.visitCount ? 1 : currNode.visitCount + 1;
     i++;
   }
+  return visitedNodesInOrder;
+};
+
+export const breadthMapping = (grid, startNode) => {
+  const bfsResult = bfs(grid, startNode);
+  const visitedNodesInOrder = [];
+  let currentLocation = startNode;
+  bfsResult.forEach((node) => {
+    let astarResult = astar(grid, currentLocation, node);
+    let path = getShortestPathNodesInOrder(astarResult[astarResult.length - 1]);
+    visitedNodesInOrder.push(path);
+  });
   return visitedNodesInOrder;
 };
 

@@ -24,6 +24,7 @@ export const bfs = (grid, startNode, finishNode) => {
     }
     updateUnvisitedNeighborsDistances(closestNode, grid);
   }
+  return visitedNodesInOrder;
 };
 
 //check if we get undefined on function call since we are defining it as variable.
@@ -33,24 +34,24 @@ const sortNodesByDistance = (unvisitedNodes) => {
 };
 
 const updateUnvisitedNeighborsDistances = (node, grid) => {
-  const neighbors = getMappedUnvisitedNeighbors(node, grid);
+  let neighbors = getNeighbors(node, grid);
+  neighbors = neighbors.filter(
+    (neighbor) => !neighbor.isVisited && !neighbor.isWall
+  );
   for (const neighbor of neighbors) {
     neighbor.distance = node.distance + 1;
     neighbor.previousNode = node;
   }
 };
 
-const getMappedUnvisitedNeighbors = (node, grid) => {
+const getNeighbors = (node, grid) => {
   const neighbors = [];
   const { col, row } = node;
   if (col > 0) neighbors.push(grid[row][col - 1]);
   if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
   if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
   if (row > 0) neighbors.push(grid[row - 1][col]);
-  return neighbors.filter(
-    (neighbor) => neighbor.isMapped && !neighbor.isVisited && !neighbor.isWall
-    /*isMapped probably contains isWall as well because walls can't be mapped by the robot */
-  );
+  return neighbors;
 };
 
 const getAllNodes = (grid) => {
@@ -71,8 +72,10 @@ const dfs = (grid, startNode, finishNode) => {
     if (currNode === finishNode) return visitedNodesInOrder;
     if (!visitedNodesInOrder.includes(currNode))
       visitedNodesInOrder.push(currNode);
-    const neighbours = getMappedUnvisitedNeighbors(currNode, grid);
-    neighbours.forEach((neighbour) => {
+    let neighbors = getNeighbors(currNode, grid).filter(
+      (neighbor) => neighbor.isMapped && !neighbor.isVisited && !neighbor.isWall
+    );
+    neighbors.forEach((neighbour) => {
       if (!visitedNodesInOrder.includes(neighbour)) {
         stack.push(neighbour);
         neighbour.previousNode = currNode;
@@ -125,7 +128,10 @@ export const astar = (grid, startNode, finishNode) => {
       return visitedNodesInOrder;
     }
 
-    const neighbors = getMappedUnvisitedNeighbors(closestNode, grid);
+    let neighbors = getNeighbors(closestNode, grid);
+    neighbors = neighbors.filter(
+      (neighbor) => !neighbor.isVisited && !neighbor.isWall
+    );
     for (const neighbor of neighbors) {
       //for single headed path visualization don't add weight to closestNode.distance.
       let tentativeWeightedDistance = closestNode.distance + 0; //+closestNode.weight

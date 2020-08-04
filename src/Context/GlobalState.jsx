@@ -64,9 +64,11 @@ class GlobalState extends Component {
     this.setState(
       {
         grid,
+        availableSteps: this.gridHeight * this.gridWidth,
         startNode: defaultStartNode,
         finishNode: defaultFinishNode,
         isFinished: false,
+        isRunning: false,
       },
       () => callback && callback(param)
     );

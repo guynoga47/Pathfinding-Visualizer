@@ -3,7 +3,7 @@ export const getShortestPathNodesInOrder = (finishNode) => {
   let currentNode = finishNode;
   while (currentNode !== null) {
     shortestPathInOrder.unshift(currentNode);
-    currentNode = currentNode.previousNode;
+    currentNode = currentNode.previousNode ? currentNode.previousNode : null;
   }
   return shortestPathInOrder;
 };

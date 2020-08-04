@@ -12,6 +12,7 @@ export default class Robot {
       for (col = 0; col < grid[0].length; col++) {
         map[row].push({ ...grid[row][col] });
         map[row][col].isMapped = false;
+        map[row][col].visitCount = 0;
       }
     }
     return map;
