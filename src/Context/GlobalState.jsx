@@ -98,7 +98,8 @@ class GlobalState extends Component {
   };
 
   loadConfiguration = (newLayout) => {
-    this.robot = newLayout.robot;
+    this.robot = new Robot(100, newLayout.grid);
+    this.robot.map = newLayout.robot.map;
     this.gridHeight = newLayout.grid.length;
     this.gridWidth = newLayout.grid[0].length;
     this.setState(
