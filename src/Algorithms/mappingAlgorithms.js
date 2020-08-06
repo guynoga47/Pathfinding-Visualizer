@@ -1,25 +1,32 @@
 import { bfs, astar } from "./pathfindingAlgorithms";
-import { getShortestPathNodesInOrder } from "./algorithmUtils";
+import {
+  getAllNodes,
+  getNeighbors,
+  getShortestPathNodesInOrder,
+} from "./algorithmUtils";
 
-export const randomWalk = (grid, startNode) => {
+export const randomWalk = (grid, map, dockingStation, battery) => {
   /*   if (!startNode || !finishNode || startNode === finishNode) {
     console.log("Bad parameters, unable to calculate path!");
     return false;
   } */
-  return breadthMapping(grid, startNode);
   let i = 0;
-  let currNode = startNode;
+  let currNode = !dockingStation.isMapped
+    ? dockingStation
+    : getRandomUnmappedNode(map, grid);
+  if (!currNode) {
+    currNode = dockingStation;
+  }
   const visitedNodesInOrder = [];
-  const percentages = [85, 10, 4, 1];
-  /* const stepsBoundary = grid.length * grid[0].length; */
-  const stepsBoundary = grid.length * grid[0].length;
-  grid.forEach((row) => row.forEach((node) => (node.visitCount = 0)));
+
   /* bound random walk number of iteration to a high enough number of steps according to grid size, trying to fully visit the grid might be very
   inefficient so we bound it artificially, regardless of the battery consideration which is taken care of as part of the play button handler in
   visualizer component.`*/
-  while (i < stepsBoundary) {
+  while (i < battery) {
     visitedNodesInOrder.push(currNode);
-    const neighbors = getNeighbors(currNode, grid);
+    const neighbors = getNeighbors(currNode, map).filter(
+      (neighbor) => !grid[neighbor.row][neighbor.col].isWall
+    );
     if (!neighbors.length || !neighbors) {
       alert("No neighbors found");
     }
@@ -32,10 +39,9 @@ export const randomWalk = (grid, startNode) => {
     const neighborsProbabilities = [];
 
     neighborsDescending.forEach((neighbor, i) => {
-      for (let count = 0; count < percentages[i]; count++) {
+      for (let count = 0; count <= neighbor.visitCount; count++) {
         neighborsProbabilities.push(neighborsAscending[i]);
       }
-      console.log(neighborsProbabilities);
     });
     currNode =
       neighborsProbabilities[
@@ -45,6 +51,23 @@ export const randomWalk = (grid, startNode) => {
     i++;
   }
   return visitedNodesInOrder;
+};
+
+const getRandomUnmappedNode = (map, grid) => {
+  const allNodes = getAllNodes(map);
+  const mappedNodes = allNodes.filter((node) => node.isMapped);
+  const unmappedMapAdjacentNodes = mappedNodes.filter((node) => {
+    const mappedNeighbors = getNeighbors(node, grid).filter((neighbor) => {
+      const { row, col } = neighbor;
+      return !map[row][col].isMapped && !grid[row][col].isWall;
+    });
+    return mappedNeighbors.length > 0;
+  });
+  return unmappedMapAdjacentNodes.length > 0
+    ? unmappedMapAdjacentNodes[
+        Math.floor(Math.random() * unmappedMapAdjacentNodes.length)
+      ]
+    : false;
 };
 
 export const breadthMapping = (grid, startNode) => {
@@ -57,16 +80,6 @@ export const breadthMapping = (grid, startNode) => {
     visitedNodesInOrder.push(path);
   });
   return visitedNodesInOrder;
-};
-
-const getNeighbors = (node, grid) => {
-  const neighbors = [];
-  const { col, row } = node;
-  if (col > 0) neighbors.push(grid[row][col - 1]);
-  if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-  if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-  if (row > 0) neighbors.push(grid[row - 1][col]);
-  return neighbors.filter((neighbor) => !neighbor.isWall);
 };
 
 const dfs = (grid, startNode, finishNode, order) => {

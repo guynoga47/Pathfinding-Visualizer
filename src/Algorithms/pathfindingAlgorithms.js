@@ -1,3 +1,5 @@
+import { getAllNodes, getNeighbors } from "./algorithmUtils";
+
 export const bfs = (grid, startNode, finishNode) => {
   /*   if (!startNode || !finishNode || startNode === finishNode) {
     console.log("Bad parameters, unable to calculate path!");
@@ -42,20 +44,6 @@ const updateUnvisitedNeighborsDistances = (node, grid) => {
     neighbor.distance = node.distance + 1;
     neighbor.previousNode = node;
   }
-};
-
-const getNeighbors = (node, grid) => {
-  const neighbors = [];
-  const { col, row } = node;
-  if (col > 0) neighbors.push(grid[row][col - 1]);
-  if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-  if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-  if (row > 0) neighbors.push(grid[row - 1][col]);
-  return neighbors;
-};
-
-const getAllNodes = (grid) => {
-  return [].concat(...grid);
 };
 
 const dfs = (grid, startNode, finishNode) => {

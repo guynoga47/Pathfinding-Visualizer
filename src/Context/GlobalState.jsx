@@ -5,6 +5,8 @@ import Robot from "../Classes/Robot";
 
 import { astar } from "../Algorithms/pathfindingAlgorithms";
 import { getShortestPathNodesInOrder } from "../Algorithms/algorithmUtils";
+
+import { saveAs } from "file-saver";
 //Grid logical context, everything related to visualizing it is sitting
 //in visualizer.jsx
 const DEFAULT_GRID_HEIGHT = 25;
@@ -74,15 +76,40 @@ class GlobalState extends Component {
     );
   };
 
-  loadLayout = (newLayout) => {
+  saveConfiguration = () => {
+    const blob = new Blob([
+      JSON.stringify({
+        grid: this.state.grid,
+        robot: this.robot,
+        availableSteps: this.state.availableSteps,
+        startNode: this.state.startNode,
+        finishNode: this.state.finishNode,
+      }),
+    ]);
+    const [rows, cols] = [this.gridHeight, this.gridWidth];
+    saveAs(
+      blob,
+      `Grid Snapshot ${rows}*${cols} ${new Date()
+        .toLocaleDateString()
+        .replace(/\./g, "-")} at ${new Date()
+        .toLocaleTimeString()
+        .replace(/:/g, ".")}.json`
+    );
+  };
+
+  loadConfiguration = (newLayout) => {
+    this.robot = newLayout.robot;
+    this.gridHeight = newLayout.grid.length;
+    this.gridWidth = newLayout.grid[0].length;
     this.setState(
       {
         grid: newLayout.grid,
+        availableSteps: newLayout.availableSteps,
         startNode: newLayout.startNode,
         finishNode: newLayout.finishNode,
         layoutLoaded: true,
       },
-      this.resetNodesSearchProperties
+      () => this.resetNodesSearchProperties(this.state.grid)
     );
   };
 
@@ -232,7 +259,8 @@ class GlobalState extends Component {
           updateState: this.updateState,
           getInitialGrid: this.getInitialGrid,
           resizeGrid: this.resizeGrid,
-          loadLayout: this.loadLayout,
+          loadConfiguration: this.loadConfiguration,
+          saveConfiguration: this.saveConfiguration,
           resetGridKeepWalls: this.resetGridKeepWalls,
           gridHeight: this.gridHeight,
           gridWidth: this.gridWidth,

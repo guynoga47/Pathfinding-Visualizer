@@ -276,6 +276,7 @@ export default class Visualizer extends Component {
   handlePlay = () => {
     const {
       simulationType,
+      availableSteps,
       activeMappingAlgorithm,
       activePathfindingAlgorithm,
       startNode,
@@ -297,7 +298,9 @@ export default class Visualizer extends Component {
 
     const visitedNodesInOrder = activeAlgorithmCallback(
       grid,
-      grid[startNode.row][startNode.col]
+      robot.map,
+      robot.map[startNode.row][startNode.col],
+      availableSteps
     );
     const robotPath = modifyVisitedNodesConsideringBatteryAndReturnPath(
       visitedNodesInOrder
@@ -306,8 +309,9 @@ export default class Visualizer extends Component {
     if (simulationType === "map") {
       robot.updateMap(robotPath);
     }
-
-    this.visualize(robotPath);
+    /* this.visualize(robotPath); */
+    this.context.updateState("isRunning", false);
+    this.context.updateState("isFinished", true);
   };
 
   handleClearWalls = () => {
