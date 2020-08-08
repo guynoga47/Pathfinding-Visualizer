@@ -188,7 +188,7 @@ class GlobalState extends Component {
   modifyVisitedNodesConsideringBatteryAndReturnPath = (visitedNodesInOrder) => {
     let { startNode, availableSteps } = this.state;
     const runningMap = JSON.parse(JSON.stringify(this.robot.map));
-    this.resetNodesSearchProperties(runningMap);
+    /* this.resetNodesSearchProperties(runningMap); */
     const startNodeRef = runningMap[startNode.row][startNode.col];
 
     /* 
@@ -196,6 +196,10 @@ class GlobalState extends Component {
     we want to minimize the amount of iterations of this loop, so we start searching for a path
     back to the docking station starting from the node that corresponds to our current battery, backwards,
     until we find a complete path (mapping/sweeping + return to docking station).
+
+    TODO:
+    Currently we use astar on the global grid meaning we dont take into account that we want to search a path only through
+    mapped nodes. NEED TO IMPLEMENT isMapped consideration in astar algorithm.
     */
 
     const visitedNodesConsideringBattery = visitedNodesInOrder.slice(
@@ -220,29 +224,15 @@ class GlobalState extends Component {
             .slice(0, i)
             .concat(pathToDockingStation);
           this.robot.updateMap(robotPath);
-          console.log(robotPath);
-          console.log(pathToDockingStation);
           return robotPath;
         }
       }
-      this.resetNodesSearchProperties(runningMap);
       runningMap[node.row][node.col].isMapped = false;
     }
     console.log(
       "error in modifyVisitedNodesConsideringBatteryAndReturnPath in GlobalContext"
     );
-    return visitedNodesInOrder;
-  };
-
-  resetNodesSearchProperties = (grid) => {
-    for (let row = 0; row < grid.length; row++) {
-      for (let col = 0; col < grid[0].length; col++) {
-        grid[row][col].previousNode = null;
-        grid[row][col].isVisited = false;
-        grid[row][col].distance = Infinity;
-        grid[row][col].heuristicDistance = Infinity;
-      }
-    }
+    return false;
   };
 
   render() {

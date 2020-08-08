@@ -309,9 +309,9 @@ export default class Visualizer extends Component {
     if (simulationType === "map") {
       robot.updateMap(robotPath);
     }
-    /* this.visualize(robotPath); */
-    this.context.updateState("isRunning", false);
-    this.context.updateState("isFinished", true);
+    this.visualize(robotPath);
+    /* this.context.updateState("isRunning", false);
+    this.context.updateState("isFinished", true); */
   };
 
   handleClearWalls = () => {

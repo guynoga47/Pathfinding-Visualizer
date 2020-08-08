@@ -3,26 +3,29 @@ import {
   getAllNodes,
   getNeighbors,
   getShortestPathNodesInOrder,
+  resetGridSearchProperties,
 } from "./algorithmUtils";
 
 export const randomWalk = (grid, map, dockingStation, battery) => {
-  /*   if (!startNode || !finishNode || startNode === finishNode) {
-    console.log("Bad parameters, unable to calculate path!");
-    return false;
-  } */
   let i = 0;
+  const visitedNodesInOrder = [];
+
   let currNode = !dockingStation.isMapped
     ? dockingStation
     : getRandomUnmappedNode(map, grid);
   if (!currNode) {
     currNode = dockingStation;
   }
-  const visitedNodesInOrder = [];
-
+  const astarToStartNodeResult = astar(map, dockingStation, currNode);
+  const pathToStartNode = getShortestPathNodesInOrder(
+    astarToStartNodeResult[astarToStartNodeResult.length - 1]
+  );
+  visitedNodesInOrder.push(...pathToStartNode.slice(0, pathToStartNode.length));
+  resetGridSearchProperties(map);
   /* bound random walk number of iteration to a high enough number of steps according to grid size, trying to fully visit the grid might be very
   inefficient so we bound it artificially, regardless of the battery consideration which is taken care of as part of the play button handler in
   visualizer component.`*/
-  while (i < battery) {
+  while (i < battery - pathToStartNode.length) {
     visitedNodesInOrder.push(currNode);
     const neighbors = getNeighbors(currNode, map).filter(
       (neighbor) => !grid[neighbor.row][neighbor.col].isWall
@@ -57,11 +60,11 @@ const getRandomUnmappedNode = (map, grid) => {
   const allNodes = getAllNodes(map);
   const mappedNodes = allNodes.filter((node) => node.isMapped);
   const unmappedMapAdjacentNodes = mappedNodes.filter((node) => {
-    const mappedNeighbors = getNeighbors(node, grid).filter((neighbor) => {
+    const unmappedNeighbors = getNeighbors(node, grid).filter((neighbor) => {
       const { row, col } = neighbor;
       return !map[row][col].isMapped && !grid[row][col].isWall;
     });
-    return mappedNeighbors.length > 0;
+    return unmappedNeighbors.length > 0;
   });
   return unmappedMapAdjacentNodes.length > 0
     ? unmappedMapAdjacentNodes[
@@ -83,10 +86,6 @@ export const breadthMapping = (grid, startNode) => {
 };
 
 const dfs = (grid, startNode, finishNode, order) => {
-  /*   if (!startNode || !finishNode || startNode === finishNode) {
-    console.log("Bad parameters, unable to calculate path!");
-    return false;
-  } */
   const stack = new Stack();
   const visitedNodesInOrder = [];
   stack.push(startNode);

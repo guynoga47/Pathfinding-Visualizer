@@ -1,4 +1,8 @@
-import { getAllNodes, getNeighbors } from "./algorithmUtils";
+import {
+  getAllNodes,
+  getNeighbors,
+  resetGridSearchProperties,
+} from "./algorithmUtils";
 
 export const bfs = (grid, startNode, finishNode) => {
   /*   if (!startNode || !finishNode || startNode === finishNode) {
@@ -132,13 +136,7 @@ export const astar = (grid, startNode, finishNode) => {
       }
     }
   }
-  /*   visitedNodesInOrder.forEach((node) => {
-    node.isVisited = false;
-    node.distance = Infinity;
-    node.heuristicDistance = Infinity;
-    node.previousNode = null;
-  }); */
-  return false;
+  return visitedNodesInOrder;
 };
 
 const manhattanDistance = (node, finishNode) => {

@@ -21,3 +21,14 @@ export const getNeighbors = (node, grid) => {
   if (row > 0) neighbors.push(grid[row - 1][col]);
   return neighbors;
 };
+
+export const resetGridSearchProperties = (grid) => {
+  for (let row = 0; row < grid.length; row++) {
+    for (let col = 0; col < grid[0].length; col++) {
+      grid[row][col].previousNode = null;
+      grid[row][col].isVisited = false;
+      grid[row][col].distance = Infinity;
+      grid[row][col].heuristicDistance = Infinity;
+    }
+  }
+};
