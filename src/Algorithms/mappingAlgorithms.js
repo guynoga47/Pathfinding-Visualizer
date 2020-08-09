@@ -10,22 +10,32 @@ export const randomWalk = (grid, map, dockingStation, battery) => {
   let i = 0;
   const visitedNodesInOrder = [];
 
-  let currNode = !dockingStation.isMapped
-    ? dockingStation
-    : getRandomUnmappedNode(map, grid);
-  if (!currNode) {
-    currNode = dockingStation;
+  let currNode = dockingStation;
+  let pathToBufferNode = [];
+  const unmappedAreaBufferNode = getRandomBufferNode(map, grid);
+  if (unmappedAreaBufferNode) {
+    const astarToBufferNodeResult = astar(
+      map,
+      dockingStation,
+      unmappedAreaBufferNode
+    );
+    pathToBufferNode = [];
+    if (astarToBufferNodeResult) {
+      currNode = unmappedAreaBufferNode;
+      pathToBufferNode = getShortestPathNodesInOrder(
+        astarToBufferNodeResult[astarToBufferNodeResult.length - 1]
+      );
+      visitedNodesInOrder.push(
+        ...pathToBufferNode.slice(0, pathToBufferNode.length)
+      );
+    }
   }
-  const astarToStartNodeResult = astar(map, dockingStation, currNode);
-  const pathToStartNode = getShortestPathNodesInOrder(
-    astarToStartNodeResult[astarToStartNodeResult.length - 1]
-  );
-  visitedNodesInOrder.push(...pathToStartNode.slice(0, pathToStartNode.length));
+
   resetGridSearchProperties(map);
   /* bound random walk number of iteration to a high enough number of steps according to grid size, trying to fully visit the grid might be very
   inefficient so we bound it artificially, regardless of the battery consideration which is taken care of as part of the play button handler in
   visualizer component.`*/
-  while (i < battery - pathToStartNode.length) {
+  while (i < battery - pathToBufferNode.length) {
     visitedNodesInOrder.push(currNode);
     const neighbors = getNeighbors(currNode, map).filter(
       (neighbor) => !grid[neighbor.row][neighbor.col].isWall
@@ -56,7 +66,7 @@ export const randomWalk = (grid, map, dockingStation, battery) => {
   return visitedNodesInOrder;
 };
 
-const getRandomUnmappedNode = (map, grid) => {
+const getRandomBufferNode = (map, grid) => {
   const allNodes = getAllNodes(map);
   const mappedNodes = allNodes.filter((node) => node.isMapped);
   const unmappedMapAdjacentNodes = mappedNodes.filter((node) => {
@@ -75,6 +85,9 @@ const getRandomUnmappedNode = (map, grid) => {
 
 export const breadthMapping = (grid, startNode) => {
   const bfsResult = bfs(grid, startNode);
+  /*
+  astar probably adds unwanted nodes because we are not respecting isMapped property in the astar implementation.
+  */
   const visitedNodesInOrder = [];
   let currentLocation = startNode;
   bfsResult.forEach((node) => {

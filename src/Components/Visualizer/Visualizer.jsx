@@ -28,7 +28,8 @@ export default class Visualizer extends Component {
   handleReset = () => {
     this.context.updateState("isFinished", false);
     this.context.resetGridKeepWalls(this.resetNodeStyles, {
-      resetWalls: false,
+      /* resetWalls: false, */
+      setWalls: true,
       resetVisited: true,
       resetShortestPath: true,
     });
@@ -282,7 +283,11 @@ export default class Visualizer extends Component {
       startNode,
       grid,
     } = this.context.state;
-    const { modifyVisitedNodesConsideringBatteryAndReturnPath } = this.context;
+    const {
+      modifyVisitedNodesConsideringBatteryAndReturnPath,
+      convertAvailableStepsToBatteryCapacity,
+      updateState,
+    } = this.context;
     const { robot } = this.context;
 
     const activeAlgorithmCallback =
@@ -292,9 +297,14 @@ export default class Visualizer extends Component {
         ? activePathfindingAlgorithm.func
         : undefined;
 
-    if (!activeAlgorithmCallback) return;
+    if (
+      !activeAlgorithmCallback ||
+      convertAvailableStepsToBatteryCapacity() === 0
+    )
+      return;
+    updateState("isRunning", true);
 
-    this.context.updateState("isRunning", true);
+    robot.syncMapLayoutWithGrid(grid);
 
     const visitedNodesInOrder = activeAlgorithmCallback(
       grid,

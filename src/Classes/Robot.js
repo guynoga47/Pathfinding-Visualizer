@@ -18,6 +18,15 @@ export default class Robot {
     return map;
   };
 
+  syncMapLayoutWithGrid = (grid) => {
+    let row, col;
+    for (row = 0; row < grid.length; row++) {
+      for (col = 0; col < grid[0].length; col++) {
+        this.map[row][col].isWall = grid[row][col].isWall;
+      }
+    }
+  };
+
   /* mapChargeToAvailableSteps = (charge) => {
     const totalSteps = this.map.length * this.map[0].length * 5;
     return (charge / 100) * totalSteps;

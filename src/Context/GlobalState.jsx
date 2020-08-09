@@ -4,7 +4,10 @@ import GridContext from "./grid-context";
 import Robot from "../Classes/Robot";
 
 import { astar } from "../Algorithms/pathfindingAlgorithms";
-import { getShortestPathNodesInOrder } from "../Algorithms/algorithmUtils";
+import {
+  getShortestPathNodesInOrder,
+  resetGridSearchProperties,
+} from "../Algorithms/algorithmUtils";
 
 import { saveAs } from "file-saver";
 //Grid logical context, everything related to visualizing it is sitting
@@ -76,6 +79,12 @@ class GlobalState extends Component {
     );
   };
 
+  getGridDeepCopy = (grid) => {
+    const gridCopy = JSON.parse(JSON.stringify(grid));
+    resetGridSearchProperties(gridCopy);
+    return gridCopy;
+  };
+
   saveConfiguration = () => {
     const blob = new Blob([
       JSON.stringify({
@@ -110,7 +119,10 @@ class GlobalState extends Component {
         finishNode: newLayout.finishNode,
         layoutLoaded: true,
       },
-      () => this.resetNodesSearchProperties(this.state.grid)
+      () => {
+        resetGridSearchProperties(this.state.grid);
+        resetGridSearchProperties(this.robot.map);
+      }
     );
   };
 
@@ -187,8 +199,8 @@ class GlobalState extends Component {
 
   modifyVisitedNodesConsideringBatteryAndReturnPath = (visitedNodesInOrder) => {
     let { startNode, availableSteps } = this.state;
-    const runningMap = JSON.parse(JSON.stringify(this.robot.map));
-    /* this.resetNodesSearchProperties(runningMap); */
+    const runningMap = this.getGridDeepCopy(this.robot.map);
+
     const startNodeRef = runningMap[startNode.row][startNode.col];
 
     /* 
@@ -227,6 +239,7 @@ class GlobalState extends Component {
           return robotPath;
         }
       }
+      resetGridSearchProperties(runningMap);
       runningMap[node.row][node.col].isMapped = false;
     }
     console.log(

@@ -1,8 +1,4 @@
-import {
-  getAllNodes,
-  getNeighbors,
-  resetGridSearchProperties,
-} from "./algorithmUtils";
+import { getAllNodes, getNeighbors } from "./algorithmUtils";
 
 export const bfs = (grid, startNode, finishNode) => {
   /*   if (!startNode || !finishNode || startNode === finishNode) {
@@ -98,11 +94,15 @@ class Stack {
   }
 }
 
-export const astar = (grid, startNode, finishNode) => {
+export const astar = (grid, startNode, finishNode, filters) => {
   /*   if (!startNode || !finishNode || startNode === finishNode) {
     console.log("Bad parameters, unable to calculate path!");
     return false;
   } */
+  filters = [
+    { attribute: "isVisited", evaluation: false },
+    { attribute: "isWall", evaluation: false },
+  ];
 
   const visitedNodesInOrder = [];
   startNode.distance = 0;
@@ -121,9 +121,24 @@ export const astar = (grid, startNode, finishNode) => {
     }
 
     let neighbors = getNeighbors(closestNode, grid);
+    /*     neighbors = neighbors.filter((neighbor) => {
+      filters.forEach((filter) => {
+        const { attribute, evaluation } = filter;
+        if (neighbor[attribute] !== evaluation) {
+          return false;
+        }
+      });
+      return true;
+    }); */
     neighbors = neighbors.filter(
-      (neighbor) => !neighbor.isVisited && !neighbor.isWall
+      (neighbor) => !neighbor.isWall && !neighbor.isVisited
     );
+    if (neighbors.length === 0) {
+      console.log(
+        `failed to find a path in astar pathfinding, when reaching node ${closestNode.row}-${closestNode.col}`
+      );
+      return false;
+    }
     for (const neighbor of neighbors) {
       //for single headed path visualization don't add weight to closestNode.distance.
       let tentativeWeightedDistance = closestNode.distance + 0; //+closestNode.weight
