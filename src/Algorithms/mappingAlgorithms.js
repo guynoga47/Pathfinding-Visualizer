@@ -132,7 +132,7 @@ const dfs = (grid, startNode, finishNode, order) => {
 // comment in order to see changes in commit
 // need to add a order - vertcal/horizontal - determined by the order that we push to stock (first left right or up down)
 // need to change functions names
-const mappingDfs = (grid, startNode) => {
+const mappingDfs = (grid, map, startNode, battery) => {
   let countInOrderToStopInfinityRun = 0;
   if (!startNode) {
     console.log("Bad parameters, unable to calculate path!");
@@ -141,23 +141,24 @@ const mappingDfs = (grid, startNode) => {
 
   const stack = new Stack();
   const visitedNodesInOrder = [];
-  let parentNode = startNode;
+  let parentNode;
   let currNode = startNode;
-  console.log(currNode);
-  currNode.previousNode = parentNode;
   stack.push(currNode);
-  // visitedNodesInOrder.push(currNode);
 
   while (!stack.isEmpty() && countInOrderToStopInfinityRun !== 40) {
     countInOrderToStopInfinityRun += 1;
-
     parentNode = currNode;
     currNode = stack.pop();
     const neighbors = getNeighborsTom(currNode, grid);
     pushRelevantToStack(stack, neighbors, visitedNodesInOrder, currNode);
 
-    if (!isPrevNodeTheParent(parentNode, currNode)) {
-      let shortPathPtoC = astar(grid, parentNode, currNode);
+    if (!isPrevNodeTheParent(parentNode, currNode) && parentNode !== currNode) {
+      let shortPathPtoC = astar(grid, parentNode, currNode, [
+        { attribute: "isVisited", evaluation: false },
+        { attribute: "isWall", evaluation: false },
+        { attribute: "isMapped", evaluation: true },
+      ]);
+
       console.log(
         "finding shortest path from " +
           parentNode.row +
@@ -194,23 +195,36 @@ const pushRelevantToStack = (
   console.log(currNode);
   console.log(neighbors);
   neighbors.forEach((neighbour) => {
-    if (!visitedNodesInOrder.includes(neighbour) && !stack.isIn(neighbour)) {
+    if (!didVisit(neighbour, visitedNodesInOrder) && !stack.isIn(neighbour)) {
       neighbour.previousNode = currNode;
       stack.push(neighbour);
     }
   });
 };
 
+const didVisit = (neighbor, visitedNodesInOrder) => {
+  for (let i = 0; i < visitedNodesInOrder.length; i++) {
+    if (
+      visitedNodesInOrder[i].row === neighbor.row &&
+      visitedNodesInOrder[i].col === neighbor.col
+    )
+      return true;
+  }
+  return false;
+};
+
 const isPrevNodeTheParent = (node1, node2) => {
-  console.log("currNode=" + node2.row + "," + node2.col);
-  console.log(
-    "currNode.previousNode =" +
-      node2.previousNode.row +
-      "," +
-      node2.previousNode.col
-  );
-  console.log("parentNode =" + node1.row + "," + node1.col);
-  console.log("**************************************");
+  if (node1.previousNode !== null || node2.previousNode !== null) {
+    console.log("currNode=" + node2.row + "," + node2.col);
+    console.log(
+      "currNode.previousNode =" +
+        node2.previousNode.row +
+        "," +
+        node2.previousNode.col
+    );
+    console.log("parentNode =" + node1.row + "," + node1.col);
+    console.log("**************************************");
+  }
   return node2.previousNode === node1;
 };
 
@@ -281,7 +295,7 @@ export const data = [
   {
     name: "Horizontal Mapping",
     shortened: "Horizontal",
-    func: (grid, startNode) => mappingDfs(grid, startNode),
+    func: mappingDfs,
   },
   {
     name: "Vertical Mapping",
