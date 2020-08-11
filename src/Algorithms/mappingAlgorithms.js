@@ -64,29 +64,26 @@ const mappingDfs = (grid, startNode) => {
     console.log("Bad parameters, unable to calculate path!");
     return false;
   }
-  let parentNode = startNode;
+
   const stack = new Stack();
   const visitedNodesInOrder = [];
-  stack.push(startNode);
+  let parentNode = startNode;
   let currNode = startNode;
+  console.log(currNode);
   currNode.previousNode = parentNode;
+  stack.push(currNode);
+  // visitedNodesInOrder.push(currNode);
 
-  while (!stack.isEmpty() && countInOrderToStopInfinityRun != 100) {
+  while (!stack.isEmpty() && countInOrderToStopInfinityRun !== 40) {
     countInOrderToStopInfinityRun += 1;
+
     parentNode = currNode;
     currNode = stack.pop();
+    const neighbors = getNeighborsTom(currNode, grid);
+    pushRelevantToStack(stack, neighbors, visitedNodesInOrder, currNode);
 
-    if (!isPrevNodeANeighbor(parentNode, currNode)) {
-      console.log(parentNode);
-      console.log(currNode);
+    if (!isPrevNodeTheParent(parentNode, currNode)) {
       let shortPathPtoC = astar(grid, parentNode, currNode);
-      console.log(shortPathPtoC);
-      //here we need to check that the battery is sufficient to go through this path and get back to the docking station
-      //visitedNodesInOrder.push(shortPathPtoC);
-
-      //function that goes from parent node to currNode only stepping on stepped nodes
-      //using the
-      //shortest path from parent to curr
       console.log(
         "finding shortest path from " +
           parentNode.row +
@@ -98,27 +95,39 @@ const mappingDfs = (grid, startNode) => {
           currNode.col +
           "..."
       );
+      console.log(shortPathPtoC);
+      //here we need to check that the battery is sufficient to go through this path and get back to the docking station
+      //visitedNodesInOrder.push(shortPathPtoC);
+
+      //function that goes from parent node to currNode only stepping on stepped nodes
+      //using the
+      //shortest path from parent to curr
+
       visitedNodesInOrder.push(...shortPathPtoC);
-    } else {
-      if (!visitedNodesInOrder.includes(currNode))
-        visitedNodesInOrder.push(currNode);
     }
-    const neighbors = getNeighborsTom(currNode, grid);
-    neighbors.forEach((neighbour) => {
-      if (
-        !visitedNodesInOrder.includes(neighbour) ||
-        !stack.includes(neighbour)
-      ) {
-        stack.push(neighbour);
-      }
-      if (!stack.includes(neighbour)) neighbour.previousNode = currNode;
-    });
+    visitedNodesInOrder.push(currNode);
   }
   console.log(visitedNodesInOrder);
   return visitedNodesInOrder;
 };
 
-const isPrevNodeANeighbor = (node1, node2) => {
+const pushRelevantToStack = (
+  stack,
+  neighbors,
+  visitedNodesInOrder,
+  currNode
+) => {
+  console.log(currNode);
+  console.log(neighbors);
+  neighbors.forEach((neighbour) => {
+    if (!visitedNodesInOrder.includes(neighbour) && !stack.isIn(neighbour)) {
+      neighbour.previousNode = currNode;
+      stack.push(neighbour);
+    }
+  });
+};
+
+const isPrevNodeTheParent = (node1, node2) => {
   console.log("currNode=" + node2.row + "," + node2.col);
   console.log(
     "currNode.previousNode =" +
@@ -189,13 +198,8 @@ class Stack {
     this.items.forEach((item) => console.log(item));
   }
 
-  includes(itemToBeChecked) {
-    this.items.forEach((item) => {
-      if (item === itemToBeChecked) {
-        return true;
-      }
-    });
-    return false;
+  isIn(itemToBeChecked) {
+    return this.items.includes(itemToBeChecked);
   }
 }
 
