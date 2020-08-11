@@ -3,7 +3,6 @@ import ReactDOM from "react-dom";
 
 import Node from "../Node/Node";
 import Controls, { DEFAULT_SPEED } from "../Controls/Controls";
-import { getShortestPathNodesInOrder } from "../../Algorithms/algorithmUtils.js";
 
 import "./Visualizer.css";
 
@@ -14,15 +13,13 @@ export default class Visualizer extends Component {
 
   constructor(props) {
     super(props);
-    //this.speed = DEFAULT_SPEED;
-    this.speed = 100;
+    this.speed = DEFAULT_SPEED;
     this.mouseKeyDown = false;
     this.endPointKeyDown = "";
   }
 
   handleSpeedChanged = (speed) => {
-    //this.speed = speed;
-    this.speed = 100;
+    this.speed = speed;
   };
 
   handleReset = () => {
@@ -305,6 +302,9 @@ export default class Visualizer extends Component {
     updateState("isRunning", true);
 
     robot.syncMapLayoutWithGrid(grid);
+
+    /*     const gridCpy = this.context.getGridDeepCopy(grid);
+    const mapCpy = this.context.getGridDeepCopy(robot.map); */
 
     const visitedNodesInOrder = activeAlgorithmCallback(
       grid,

@@ -17,7 +17,12 @@ export const randomWalk = (grid, map, dockingStation, battery) => {
     const astarToBufferNodeResult = astar(
       map,
       dockingStation,
-      unmappedAreaBufferNode
+      unmappedAreaBufferNode,
+      [
+        { attribute: "isVisited", evaluation: false },
+        { attribute: "isWall", evaluation: false },
+        { attribute: "isMapped", evaluation: true },
+      ]
     );
     pathToBufferNode = [];
     if (astarToBufferNodeResult) {
@@ -86,12 +91,16 @@ const getRandomBufferNode = (map, grid) => {
 export const breadthMapping = (grid, startNode) => {
   const bfsResult = bfs(grid, startNode);
   /*
-  astar probably adds unwanted nodes because we are not respecting isMapped property in the astar implementation.
+  astar probably adds unwanted nodes because if are not respecting isMapped property in the astar implementation.
   */
   const visitedNodesInOrder = [];
   let currentLocation = startNode;
   bfsResult.forEach((node) => {
-    let astarResult = astar(grid, currentLocation, node);
+    let astarResult = astar(grid, currentLocation, node, [
+      { attribute: "isVisited", evaluation: false },
+      { attribute: "isWall", evaluation: false },
+      { attribute: "isMapped", evaluation: true },
+    ]);
     let path = getShortestPathNodesInOrder(astarResult[astarResult.length - 1]);
     visitedNodesInOrder.push(path);
   });

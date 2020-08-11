@@ -17,6 +17,7 @@ export default createContext({
   resizeGrid: (height, callback) => {},
   resetGridKeepWalls: (callback, param) => {},
   getInitialGrid: () => {},
+  getGridDeepCopy: (grid) => {},
   isStartNode: (row, col) => {},
   isFinishNode: (row, col) => {},
   convertBatteryCapacityToAvailableSteps: () => {},

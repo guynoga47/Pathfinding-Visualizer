@@ -14,7 +14,6 @@ import { saveAs } from "file-saver";
 //in visualizer.jsx
 const DEFAULT_GRID_HEIGHT = 25;
 const DEFAULT_GRID_WIDTH = 50;
-const DEFAULT_CHARGE = 100;
 
 const calculateDefaultGridEndPointsLocations = (height, width) => {
   const defaultStartNode = {
@@ -53,7 +52,7 @@ class GlobalState extends Component {
 
   componentDidMount() {
     const grid = this.getInitialGrid();
-    this.robot = new Robot(DEFAULT_CHARGE, grid);
+    this.robot = new Robot(grid);
     this.setState({ grid });
   }
 
@@ -65,7 +64,7 @@ class GlobalState extends Component {
       defaultFinishNode,
     } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
     const grid = this.getInitialGrid();
-    this.robot = new Robot(DEFAULT_CHARGE, grid);
+    this.robot = new Robot(grid);
     this.setState(
       {
         grid,
@@ -107,7 +106,7 @@ class GlobalState extends Component {
   };
 
   loadConfiguration = (newLayout) => {
-    this.robot = new Robot(100, newLayout.grid);
+    this.robot = new Robot(newLayout.grid);
     this.robot.map = newLayout.robot.map;
     this.gridHeight = newLayout.grid.length;
     this.gridWidth = newLayout.grid[0].length;
@@ -225,7 +224,11 @@ class GlobalState extends Component {
     for (let i = availableSteps - 1; i >= 1; i--) {
       const node = visitedNodesConsideringBattery[i];
 
-      const searchResult = astar(runningMap, node, startNodeRef);
+      const searchResult = astar(runningMap, node, startNodeRef, [
+        { attribute: "isVisited", evaluation: false },
+        { attribute: "isWall", evaluation: false },
+        /* { attribute: "isMapped", evaluation: true }, */
+      ]);
 
       if (searchResult) {
         const pathToDockingStation = getShortestPathNodesInOrder(
@@ -239,7 +242,7 @@ class GlobalState extends Component {
           return robotPath;
         }
       }
-      resetGridSearchProperties(runningMap);
+      /* resetGridSearchProperties(runningMap); */
       runningMap[node.row][node.col].isMapped = false;
     }
     console.log(
@@ -262,6 +265,7 @@ class GlobalState extends Component {
             .convertAvailableStepsToBatteryCapacity,
           updateState: this.updateState,
           getInitialGrid: this.getInitialGrid,
+          getGridDeepCopy: this.getGridDeepCopy,
           resizeGrid: this.resizeGrid,
           loadConfiguration: this.loadConfiguration,
           saveConfiguration: this.saveConfiguration,
