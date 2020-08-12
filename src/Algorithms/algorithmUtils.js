@@ -1,7 +1,13 @@
 export const getShortestPathNodesInOrder = (finishNode) => {
   const shortestPathInOrder = [];
   let currentNode = finishNode;
+  let i = 0;
   while (currentNode !== null) {
+    i++;
+    if (i > 100) {
+      console.log("bababab");
+      let x = 5;
+    }
     shortestPathInOrder.unshift(currentNode);
     currentNode = currentNode.previousNode ? currentNode.previousNode : null;
   }

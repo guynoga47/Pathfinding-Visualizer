@@ -104,7 +104,10 @@ export const astar = (grid, startNode, finishNode, filters) => {
     closestNode.isVisited = true;
     visitedNodesInOrder.push(closestNode);
 
-    if (closestNode === finishNode) {
+    if (
+      closestNode.row === finishNode.row &&
+      closestNode.col === finishNode.col
+    ) {
       return visitedNodesInOrder;
     }
 

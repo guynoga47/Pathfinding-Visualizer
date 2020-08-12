@@ -145,7 +145,7 @@ const mappingDfs = (grid, map, startNode, battery) => {
   let currNode = startNode;
   stack.push(currNode);
 
-  while (!stack.isEmpty() && countInOrderToStopInfinityRun !== 40) {
+  while (!stack.isEmpty() && countInOrderToStopInfinityRun !== 10000) {
     countInOrderToStopInfinityRun += 1;
     parentNode = currNode;
     currNode = stack.pop();
@@ -153,10 +153,12 @@ const mappingDfs = (grid, map, startNode, battery) => {
     pushRelevantToStack(stack, neighbors, visitedNodesInOrder, currNode);
 
     if (!isPrevNodeTheParent(parentNode, currNode) && parentNode !== currNode) {
-      let shortPathPtoC = astar(grid, parentNode, currNode, [
+      const gridCopy = JSON.parse(JSON.stringify(grid));
+      let parentNode2 = gridCopy[parentNode.row][parentNode.col];
+      let currNode2 = gridCopy[currNode.row][currNode.col];
+      let astarResult = astar(gridCopy, parentNode2, currNode2, [
         { attribute: "isVisited", evaluation: false },
         { attribute: "isWall", evaluation: false },
-        { attribute: "isMapped", evaluation: true },
       ]);
 
       console.log(
@@ -170,7 +172,9 @@ const mappingDfs = (grid, map, startNode, battery) => {
           currNode.col +
           "..."
       );
-      console.log(shortPathPtoC);
+      let PtoC = getShortestPathNodesInOrder(
+        astarResult[astarResult.length - 1]
+      );
       //here we need to check that the battery is sufficient to go through this path and get back to the docking station
       //visitedNodesInOrder.push(shortPathPtoC);
 
@@ -178,10 +182,11 @@ const mappingDfs = (grid, map, startNode, battery) => {
       //using the
       //shortest path from parent to curr
 
-      visitedNodesInOrder.push(...shortPathPtoC);
+      visitedNodesInOrder.push(...PtoC);
     }
     visitedNodesInOrder.push(currNode);
   }
+  console.log(countInOrderToStopInfinityRun);
   console.log(visitedNodesInOrder);
   return visitedNodesInOrder;
 };
@@ -214,7 +219,7 @@ const didVisit = (neighbor, visitedNodesInOrder) => {
 };
 
 const isPrevNodeTheParent = (node1, node2) => {
-  if (node1.previousNode !== null || node2.previousNode !== null) {
+  if (!(node1.previousNode === null || node2.previousNode === null)) {
     console.log("currNode=" + node2.row + "," + node2.col);
     console.log(
       "currNode.previousNode =" +

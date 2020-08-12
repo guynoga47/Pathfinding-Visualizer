@@ -320,7 +320,7 @@ export default class Visualizer extends Component {
       robot.updateMap(robotPath);
     }
     this.visualize(robotPath);
-    /* this.context.updateState("isRunning", false);
+    /*     this.context.updateState("isRunning", false);
     this.context.updateState("isFinished", true); */
   };
 
