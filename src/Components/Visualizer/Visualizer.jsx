@@ -306,21 +306,18 @@ export default class Visualizer extends Component {
     /*     const gridCpy = this.context.getGridDeepCopy(grid);
     const mapCpy = this.context.getGridDeepCopy(robot.map); */
 
-    const visitedNodesInOrder = activeAlgorithmCallback(
+    const robotPath = activeAlgorithmCallback(
       grid,
       robot.map,
       robot.map[startNode.row][startNode.col],
       availableSteps
-    );
-    const robotPath = modifyVisitedNodesConsideringBatteryAndReturnPath(
-      visitedNodesInOrder
     );
 
     if (simulationType === "map") {
       robot.updateMap(robotPath);
     }
     this.visualize(robotPath);
-    /* this.context.updateState("isRunning", false);
+    /*     this.context.updateState("isRunning", false);
     this.context.updateState("isFinished", true); */
   };
 

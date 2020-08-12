@@ -32,3 +32,9 @@ export const resetGridSearchProperties = (grid) => {
     }
   }
 };
+
+export const getGridDeepCopy = (grid) => {
+  const gridCopy = JSON.parse(JSON.stringify(grid));
+  resetGridSearchProperties(gridCopy);
+  return gridCopy;
+};

@@ -22,5 +22,4 @@ export default createContext({
   isFinishNode: (row, col) => {},
   convertBatteryCapacityToAvailableSteps: () => {},
   convertAvailableStepsToBatteryCapacity: () => {},
-  getVisitedNodesConsideringBattery: (visitedNodesInOrder) => {},
 });

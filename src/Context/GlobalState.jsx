@@ -2,12 +2,7 @@ import React, { Component } from "react";
 
 import GridContext from "./grid-context";
 import Robot from "../Classes/Robot";
-
-import { astar } from "../Algorithms/pathfindingAlgorithms";
-import {
-  getShortestPathNodesInOrder,
-  resetGridSearchProperties,
-} from "../Algorithms/algorithmUtils";
+import { resetGridSearchProperties } from "../Algorithms/algorithmUtils";
 
 import { saveAs } from "file-saver";
 //Grid logical context, everything related to visualizing it is sitting
@@ -76,12 +71,6 @@ class GlobalState extends Component {
       },
       () => callback && callback(param)
     );
-  };
-
-  getGridDeepCopy = (grid) => {
-    const gridCopy = JSON.parse(JSON.stringify(grid));
-    resetGridSearchProperties(gridCopy);
-    return gridCopy;
   };
 
   saveConfiguration = () => {
@@ -196,61 +185,6 @@ class GlobalState extends Component {
     return Math.floor((battery / 100) * (this.gridHeight * this.gridWidth));
   };
 
-  modifyVisitedNodesConsideringBatteryAndReturnPath = (visitedNodesInOrder) => {
-    let { startNode, availableSteps } = this.state;
-    const runningMap = this.getGridDeepCopy(this.robot.map);
-
-    const startNodeRef = runningMap[startNode.row][startNode.col];
-
-    /* 
-    visitedNodes is calculated regardless of battery size (using the algorithm callback).
-    we want to minimize the amount of iterations of this loop, so we start searching for a path
-    back to the docking station starting from the node that corresponds to our current battery, backwards,
-    until we find a complete path (mapping/sweeping + return to docking station).
-
-    TODO:
-    Currently we use astar on the global grid meaning we dont take into account that we want to search a path only through
-    mapped nodes. NEED TO IMPLEMENT isMapped consideration in astar algorithm.
-    */
-
-    const visitedNodesConsideringBattery = visitedNodesInOrder.slice(
-      0,
-      availableSteps
-    );
-    visitedNodesConsideringBattery.forEach(
-      (node) => (runningMap[node.row][node.col].isMapped = true)
-    );
-
-    for (let i = availableSteps - 1; i >= 1; i--) {
-      const node = visitedNodesConsideringBattery[i];
-
-      const searchResult = astar(runningMap, node, startNodeRef, [
-        { attribute: "isVisited", evaluation: false },
-        { attribute: "isWall", evaluation: false },
-        /* { attribute: "isMapped", evaluation: true }, */
-      ]);
-
-      if (searchResult) {
-        const pathToDockingStation = getShortestPathNodesInOrder(
-          searchResult[searchResult.length - 1]
-        );
-        if (pathToDockingStation.length + i <= availableSteps) {
-          const robotPath = visitedNodesInOrder
-            .slice(0, i)
-            .concat(pathToDockingStation);
-          this.robot.updateMap(robotPath);
-          return robotPath;
-        }
-      }
-      /* resetGridSearchProperties(runningMap); */
-      runningMap[node.row][node.col].isMapped = false;
-    }
-    console.log(
-      "error in modifyVisitedNodesConsideringBatteryAndReturnPath in GlobalContext"
-    );
-    return false;
-  };
-
   render() {
     return (
       <GridContext.Provider
@@ -265,15 +199,12 @@ class GlobalState extends Component {
             .convertAvailableStepsToBatteryCapacity,
           updateState: this.updateState,
           getInitialGrid: this.getInitialGrid,
-          getGridDeepCopy: this.getGridDeepCopy,
           resizeGrid: this.resizeGrid,
           loadConfiguration: this.loadConfiguration,
           saveConfiguration: this.saveConfiguration,
           resetGridKeepWalls: this.resetGridKeepWalls,
           gridHeight: this.gridHeight,
           gridWidth: this.gridWidth,
-          modifyVisitedNodesConsideringBatteryAndReturnPath: this
-            .modifyVisitedNodesConsideringBatteryAndReturnPath,
         }}
       >
         {this.props.children}
