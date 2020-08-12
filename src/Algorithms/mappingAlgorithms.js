@@ -107,17 +107,64 @@ export const breadthMapping = (grid, startNode) => {
   return visitedNodesInOrder;
 };
 
-const dfs = (grid, startNode, finishNode, order) => {
+const dfsHelper = (grid, roborMap, startNode, battery) => {
+  let visitedIncludingJumps = dfs(grid, startNode);
+  const gridCopy = JSON.parse(JSON.stringify(grid));
+  let visitedNodesInOrder = addShortPathBetweenUneighbours(
+    visitedIncludingJumps,
+    gridCopy
+  );
+  return visitedNodesInOrder;
+};
+
+const areNeighbors = (node1, node2) => {
+  let node1Neighbors = getNeighbors(node1);
+  for (let i = 0; i < node1Neighbors; i++) {
+    if (
+      node1Neighbors[i].row === node2.row &&
+      node1Neighbors[i].col === node2.col
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const addShortPathBetweenUneighbours = (visitedIncludingJumps, gridCopy) => {
+  let fixedVisitedNodesInOrder = [];
+  for (let i = 0; i < visitedIncludingJumps.length - 1; i++) {
+    if (!areNeighbors(visitedIncludingJumps[i], visitedIncludingJumps[i + 1])) {
+      //find shortest path using astar and
+      let node1 =
+        gridCopy[visitedIncludingJumps[i].row][visitedIncludingJumps[i].col];
+      let node2 =
+        gridCopy[visitedIncludingJumps[i + 1].row][
+          visitedIncludingJumps[i + 1].col
+        ];
+      let shortestPath = astar(
+        gridCopy,
+        visitedIncludingJumps[i],
+        visitedIncludingJumps[i + 1]
+      );
+      fixedVisitedNodesInOrder.push(...shortestPath);
+    } else {
+      fixedVisitedNodesInOrder.push(visitedIncludingJumps[i]);
+    }
+  }
+  return fixedVisitedNodesInOrder;
+};
+
+const dfs = (grid, startNode) => {
   const stack = new Stack();
   const visitedNodesInOrder = [];
   stack.push(startNode);
   while (!stack.isEmpty()) {
     const currNode = stack.pop();
     if (currNode.isWall) continue;
-    if (currNode === finishNode) return visitedNodesInOrder;
+    //if (currNode === finishNode) return visitedNodesInOrder;
     if (!visitedNodesInOrder.includes(currNode))
       visitedNodesInOrder.push(currNode);
-    const neighbours = getUnvisitedNeighbors(currNode, grid, order);
+    const neighbours = getUnvisitedNeighbors(currNode, grid, "horizontal");
     neighbours.forEach((neighbour) => {
       console.log(neighbour);
       if (!visitedNodesInOrder.includes(neighbour)) {
@@ -305,7 +352,7 @@ export const data = [
   {
     name: "Vertical Mapping",
     shortened: "Vertical",
-    func: (grid, startNode) => mappingDfs(grid, startNode),
+    func: dfsHelper,
   },
   {
     name: "Random Walk",
