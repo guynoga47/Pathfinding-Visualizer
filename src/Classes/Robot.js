@@ -1,7 +1,6 @@
 export default class Robot {
   constructor(charge, grid) {
     this.map = this.getInitialMap(grid);
-    /*     this.stepsAvailable = this.mapChargeToAvailableSteps(charge); */
   }
 
   getInitialMap = (grid) => {
@@ -22,15 +21,13 @@ export default class Robot {
     let row, col;
     for (row = 0; row < grid.length; row++) {
       for (col = 0; col < grid[0].length; col++) {
-        this.map[row][col].isWall = grid[row][col].isWall;
+        const gridNode = grid[row][col];
+        const mapNode = this.map[row][col];
+        mapNode.isWall = gridNode.isWall;
+        mapNode.isMapped = gridNode.isWall ? false : mapNode.isMapped;
       }
     }
   };
-
-  /* mapChargeToAvailableSteps = (charge) => {
-    const totalSteps = this.map.length * this.map[0].length * 5;
-    return (charge / 100) * totalSteps;
-  }; */
 
   updateMap = (path) => {
     for (const node of path) {

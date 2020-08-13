@@ -225,7 +225,11 @@ class GlobalState extends Component {
     for (let i = availableSteps - 1; i >= 1; i--) {
       const node = visitedNodesConsideringBattery[i];
 
-      const searchResult = astar(runningMap, node, startNodeRef);
+      const searchResult = astar(runningMap, node, startNodeRef, [
+        { attribute: "isVisited", evaluation: false },
+        { attribute: "isWall", evaluation: false },
+        { attribute: "isMapped", evaluation: true },
+      ]);
 
       if (searchResult) {
         const pathToDockingStation = getShortestPathNodesInOrder(
@@ -235,7 +239,8 @@ class GlobalState extends Component {
           const robotPath = visitedNodesInOrder
             .slice(0, i)
             .concat(pathToDockingStation);
-          this.robot.updateMap(robotPath);
+          /* this.robot.updateMap(robotPath); */
+          resetGridSearchProperties(runningMap);
           return robotPath;
         }
       }

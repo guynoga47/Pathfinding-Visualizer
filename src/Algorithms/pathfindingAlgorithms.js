@@ -1,10 +1,6 @@
 import { getAllNodes, getNeighbors } from "./algorithmUtils";
 
 export const bfs = (grid, startNode, finishNode) => {
-  /*   if (!startNode || !finishNode || startNode === finishNode) {
-    console.log("Bad parameters, unable to calculate path!");
-    return false;
-  } */
   startNode.distance = 0;
   const unvisitedNodes = getAllNodes(grid);
   const visitedNodesInOrder = [];
@@ -29,8 +25,6 @@ export const bfs = (grid, startNode, finishNode) => {
   return visitedNodesInOrder;
 };
 
-//check if we get undefined on function call since we are defining it as variable.
-//so hoisting to undefined
 const sortNodesByDistance = (unvisitedNodes) => {
   unvisitedNodes.sort((nodeA, nodeB) => nodeA.distance - nodeB.distance);
 };
@@ -47,10 +41,6 @@ const updateUnvisitedNeighborsDistances = (node, grid) => {
 };
 
 const dfs = (grid, startNode, finishNode) => {
-  /*   if (!startNode || !finishNode || startNode === finishNode) {
-    console.log("Bad parameters, unable to calculate path!");
-    return false;
-  } */
   const stack = new Stack();
   const visitedNodesInOrder = [];
   stack.push(startNode);
@@ -95,14 +85,10 @@ class Stack {
 }
 
 export const astar = (grid, startNode, finishNode, filters) => {
-  /*   if (!startNode || !finishNode || startNode === finishNode) {
-    console.log("Bad parameters, unable to calculate path!");
-    return false;
-  } */
-  filters = [
+  /* filters = [
     { attribute: "isVisited", evaluation: false },
     { attribute: "isWall", evaluation: false },
-  ];
+  ]; */
 
   const visitedNodesInOrder = [];
   startNode.distance = 0;
@@ -121,27 +107,19 @@ export const astar = (grid, startNode, finishNode, filters) => {
     }
 
     let neighbors = getNeighbors(closestNode, grid);
-    /*     neighbors = neighbors.filter((neighbor) => {
-      filters.forEach((filter) => {
-        const { attribute, evaluation } = filter;
+    neighbors = neighbors.filter((neighbor) => {
+      for (let i = 0; i < filters.length; i++) {
+        const { attribute, evaluation } = filters[i];
         if (neighbor[attribute] !== evaluation) {
           return false;
         }
-      });
+      }
       return true;
-    }); */
-    neighbors = neighbors.filter(
-      (neighbor) => !neighbor.isWall && !neighbor.isVisited
-    );
-    if (neighbors.length === 0) {
-      console.log(
-        `failed to find a path in astar pathfinding, when reaching node ${closestNode.row}-${closestNode.col}`
-      );
-      return false;
-    }
+    });
+
     for (const neighbor of neighbors) {
       //for single headed path visualization don't add weight to closestNode.distance.
-      let tentativeWeightedDistance = closestNode.distance + 0; //+closestNode.weight
+      let tentativeWeightedDistance = closestNode.distance + 1; //+closestNode.weight
       if (tentativeWeightedDistance < neighbor.distance) {
         neighbor.distance = tentativeWeightedDistance;
         neighbor.heuristicDistance =
@@ -151,7 +129,7 @@ export const astar = (grid, startNode, finishNode, filters) => {
       }
     }
   }
-  return visitedNodesInOrder;
+  return false;
 };
 
 const manhattanDistance = (node, finishNode) => {
@@ -161,8 +139,6 @@ const manhattanDistance = (node, finishNode) => {
   );
 };
 
-//check if we get undefined on function call since we are defining it as variable.
-//so hoisting to undefined
 const sortNodesByHeuristicDistance = (unvisitedNodes) => {
   unvisitedNodes.sort(
     (nodeA, nodeB) => nodeA.heuristicDistance - nodeB.heuristicDistance
