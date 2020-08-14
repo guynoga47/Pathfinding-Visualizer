@@ -1,6 +1,10 @@
 export const getShortestPathNodesInOrder = (finishNode) => {
   const shortestPathInOrder = [];
   let currentNode = finishNode;
+  if (!finishNode) {
+    console.log("bad param in getShortestPathNodesInOrder");
+    return false;
+  }
   while (currentNode !== null) {
     shortestPathInOrder.unshift(currentNode);
     currentNode = currentNode.previousNode ? currentNode.previousNode : null;
@@ -10,6 +14,19 @@ export const getShortestPathNodesInOrder = (finishNode) => {
 
 export const getAllNodes = (grid) => {
   return [].concat(...grid);
+};
+
+export const isNeighbors = (n1, n2) => {
+  return Math.abs(n1.row - n2.row) <= 1 && Math.abs(n1.col - n2.col) <= 1;
+};
+
+export const isValidCoordinates = (node, grid) => {
+  return (
+    node.row < grid.length &&
+    node.row >= 0 &&
+    node.col < grid[0].length &&
+    node.col >= 0
+  );
 };
 
 export const getNeighbors = (node, grid) => {
@@ -31,4 +48,10 @@ export const resetGridSearchProperties = (grid) => {
       grid[row][col].heuristicDistance = Infinity;
     }
   }
+};
+
+export const getGridDeepCopy = (grid) => {
+  const gridCopy = JSON.parse(JSON.stringify(grid));
+  resetGridSearchProperties(gridCopy);
+  return gridCopy;
 };

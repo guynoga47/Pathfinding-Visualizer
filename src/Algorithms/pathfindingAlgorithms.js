@@ -1,4 +1,8 @@
-import { getAllNodes, getNeighbors } from "./algorithmUtils";
+import {
+  getAllNodes,
+  getNeighbors,
+  resetGridSearchProperties,
+} from "./algorithmUtils";
 
 export const bfs = (grid, startNode, finishNode) => {
   startNode.distance = 0;
@@ -85,12 +89,8 @@ class Stack {
 }
 
 export const astar = (grid, startNode, finishNode, filters) => {
-  /* filters = [
-    { attribute: "isVisited", evaluation: false },
-    { attribute: "isWall", evaluation: false },
-  ]; */
-
   const visitedNodesInOrder = [];
+  resetGridSearchProperties(grid);
   startNode.distance = 0;
   startNode.heuristicDistance = 0;
 
@@ -108,13 +108,14 @@ export const astar = (grid, startNode, finishNode, filters) => {
 
     let neighbors = getNeighbors(closestNode, grid);
     neighbors = neighbors.filter((neighbor) => {
-      for (let i = 0; i < filters.length; i++) {
-        const { attribute, evaluation } = filters[i];
+      let res = true;
+      filters.forEach((filter) => {
+        const { attribute, evaluation } = filter;
         if (neighbor[attribute] !== evaluation) {
-          return false;
+          res = false;
         }
-      }
-      return true;
+      });
+      return res;
     });
 
     for (const neighbor of neighbors) {
@@ -129,6 +130,9 @@ export const astar = (grid, startNode, finishNode, filters) => {
       }
     }
   }
+  console.log(
+    `failed to find path from node-${startNode.row}-${startNode.col} to node-${finishNode.row}-${finishNode.col} at astar.`
+  );
   return false;
 };
 
