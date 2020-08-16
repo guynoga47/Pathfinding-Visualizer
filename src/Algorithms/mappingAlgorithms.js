@@ -7,13 +7,14 @@ import {
   resetGridSearchProperties,
   isNeighbors,
   isValidCoordinates,
+  fillPathGapsInNodeList,
 } from "./algorithmUtils";
 
 export const baseMap = (grid, map, dockingStation, availableSteps, step) => {
   let i = 0;
   const visitedNodesInOrder = [];
 
-  let [currNode, startingPathLength] = resolveMappingStartingNode(
+  let [currNode, startingPathLength] = resolveStartingNode(
     visitedNodesInOrder,
     grid,
     map,
@@ -63,8 +64,19 @@ export const breadthMapping = (grid, startNode) => {
 };
 
 const spiralMap = (grid, map, dockingStation, availableSteps) => {
-  const offsets = calculateSpiralTraversalOffsets(grid, availableSteps);
-  let startNode = dockingStation;
+  const visitedNodesInOrder = [];
+
+  let [startNode, startingPathLength] = resolveStartingNode(
+    visitedNodesInOrder,
+    grid,
+    map,
+    dockingStation
+  );
+
+  const offsets = calculateSpiralTraversalOffsets(
+    grid,
+    availableSteps - startingPathLength
+  );
 
   const spiralOrderFromStartNode = [];
   offsets.forEach((offset) => {
@@ -73,45 +85,45 @@ const spiralMap = (grid, map, dockingStation, availableSteps) => {
       col: startNode.col + offset.col,
     });
   });
+
   const gridDimensionsLimitedCoords = spiralOrderFromStartNode.filter(
     (nodeCoord) => isValidCoordinates(nodeCoord, grid)
   );
 
+  const accessibleNodes = bfs(map, dockingStation);
+
   const accessibleNodesCoords = gridDimensionsLimitedCoords.filter(
-    (nodeCoord) => !grid[nodeCoord.row][nodeCoord.col].isWall
+    (nodeCoord) => {
+      const { row, col } = nodeCoord;
+      return accessibleNodes.includes(map[row][col]);
+    }
   );
 
-  const visitedNodesInOrder = [];
+  const spiralOrderNodes = [];
 
   accessibleNodesCoords.forEach((nodeCoord) => {
-    visitedNodesInOrder.push(map[nodeCoord.row][nodeCoord.col]);
+    spiralOrderNodes.push(map[nodeCoord.row][nodeCoord.col]);
   });
 
-  for (let i = 1; i < visitedNodesInOrder.length; i++) {
-    const currNode = visitedNodesInOrder[i];
-    const prevNode = visitedNodesInOrder[i - 1];
-    if (!isNeighbors(currNode, prevNode)) {
+  fillPathGapsInNodeList(map, spiralOrderNodes, visitedNodesInOrder);
+
+  const robotPath = modifyVisitedNodesConsideringBatteryAndReturnPath(
+    visitedNodesInOrder,
+    map,
+    dockingStation,
+    availableSteps
+  );
+
+  for (let i = 0; i < robotPath.length - 1; i++) {
+    if (!isNeighbors(robotPath[i], robotPath[i + 1])) {
       console.log(
-        `not neighbors found: node-${currNode.row}-${currNode.col}, node-${prevNode.row}-${prevNode.col}`
+        `iteration ${i} node-${robotPath[i].row}-${robotPath[i].col}, node-${
+          robotPath[i + 1].row
+        }-${robotPath[i + 1].col}`
       );
-      const astarResult = astar(map, prevNode, currNode, [
-        { attribute: "isVisited", evaluation: false },
-        { attribute: "isWall", evaluation: false },
-      ]);
-      const path = getShortestPathNodesInOrder(
-        astarResult[astarResult.length - 1]
-      );
-      if (path) {
-        visitedNodesInOrder.splice(i - 1, 2, ...path);
-        i += path.length;
-      } else {
-        console.log(
-          `could not find a path between node-${prevNode.row}-${prevNode.col} to node-${currNode.row}-${currNode.col}`
-        );
-      }
     }
   }
-  return visitedNodesInOrder;
+  return robotPath;
 };
 
 const calculateSpiralTraversalOffsets = (grid, availableSteps) => {
@@ -126,7 +138,6 @@ const calculateSpiralTraversalOffsets = (grid, availableSteps) => {
       -numCols / 2 < col &&
       col <= numCols / 2
     ) {
-      console.log(row, col);
       offsets.push({ row, col });
     }
     if (
@@ -186,7 +197,7 @@ const bestFirst = (currNode, map, grid) => {
   return neighborsAscending[0];
 };
 
-const resolveMappingStartingNode = (
+const resolveStartingNode = (
   visitedNodesInOrder,
   grid,
   map,
@@ -253,7 +264,14 @@ const modifyVisitedNodesConsideringBatteryAndReturnPath = (
     (node) => (runningMap[node.row][node.col].isMapped = true)
   );
 
-  for (let i = availableSteps - 1; i >= 1; i--) {
+  for (
+    let i = Math.min(
+      availableSteps - 1,
+      visitedNodesConsideringBattery.length - 1
+    );
+    i >= 1;
+    i--
+  ) {
     const node = visitedNodesConsideringBattery[i];
 
     const searchResult = astar(runningMap, node, startNodeRef, [
@@ -270,6 +288,14 @@ const modifyVisitedNodesConsideringBatteryAndReturnPath = (
         const robotPath = visitedNodesInOrder
           .slice(0, i)
           .concat(pathToDockingStation);
+        console.log("robotPath: ", robotPath);
+        for (let i = 0; i < robotPath.length - 1; i++) {
+          if (robotPath[i] === robotPath[i + 1]) {
+            robotPath.splice(i, 1);
+          }
+          if (!isNeighbors(robotPath[i], robotPath[i + 1]))
+            console.log(robotPath[i], robotPath[i + 1]);
+        }
         return robotPath;
       }
     }

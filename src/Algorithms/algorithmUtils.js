@@ -1,3 +1,5 @@
+import { astar } from "./pathfindingAlgorithms";
+
 export const getShortestPathNodesInOrder = (finishNode) => {
   const shortestPathInOrder = [];
   let currentNode = finishNode;
@@ -54,4 +56,32 @@ export const getGridDeepCopy = (grid) => {
   const gridCopy = JSON.parse(JSON.stringify(grid));
   resetGridSearchProperties(gridCopy);
   return gridCopy;
+};
+
+export const fillPathGapsInNodeList = (map, nodeList, visitedNodesInOrder) => {
+  for (let i = 0; i < nodeList.length; i++) {
+    const currNode = nodeList[i];
+    const prevNode = i > 0 ? nodeList[i - 1] : currNode;
+    if (!isNeighbors(currNode, prevNode)) {
+      console.log(
+        `not neighbors found: node-${currNode.row}-${currNode.col}, node-${prevNode.row}-${prevNode.col}`
+      );
+      const astarResult = astar(map, prevNode, currNode, [
+        { attribute: "isVisited", evaluation: false },
+        { attribute: "isWall", evaluation: false },
+      ]);
+      const path = getShortestPathNodesInOrder(
+        astarResult[astarResult.length - 1]
+      );
+      if (path) {
+        visitedNodesInOrder.push(...path);
+      } else {
+        console.log(
+          `could not fill path gap between node-${prevNode.row}-${prevNode.col} to node-${currNode.row}-${currNode.col}`
+        );
+      }
+    } else {
+      visitedNodesInOrder.push(currNode);
+    }
+  }
 };
