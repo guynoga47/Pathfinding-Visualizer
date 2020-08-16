@@ -85,3 +85,12 @@ export const fillPathGapsInNodeList = (map, nodeList, visitedNodesInOrder) => {
     }
   }
 };
+
+export const removeDuplicateNodes = (path) => {
+  for (let i = 0; i < path.length - 1; i++) {
+    if (path[i] === path[i + 1]) {
+      path.splice(i, 1);
+    }
+    if (!isNeighbors(path[i], path[i + 1])) console.log(path[i], path[i + 1]);
+  }
+};

@@ -66,6 +66,9 @@ class GlobalState extends Component {
         availableSteps: this.gridHeight * this.gridWidth,
         startNode: defaultStartNode,
         finishNode: defaultFinishNode,
+        simulationType: undefined,
+        activeMappingAlgorithm: undefined,
+        activePathfindingAlgorithm: undefined,
         isFinished: false,
         isRunning: false,
       },
@@ -81,6 +84,10 @@ class GlobalState extends Component {
         availableSteps: this.state.availableSteps,
         startNode: this.state.startNode,
         finishNode: this.state.finishNode,
+        simulationType: this.state
+          .simulationType /* 
+        activeMappingAlgorithm: this.state.activeMappingAlgorithm,
+        activePathfindingAlgorithm: this.state.activePathfindingAlgorithm, */,
       }),
     ]);
     const [rows, cols] = [this.gridHeight, this.gridWidth];
@@ -94,17 +101,21 @@ class GlobalState extends Component {
     );
   };
 
-  loadConfiguration = (newLayout) => {
-    this.robot = new Robot(newLayout.grid);
-    this.robot.map = newLayout.robot.map;
-    this.gridHeight = newLayout.grid.length;
-    this.gridWidth = newLayout.grid[0].length;
+  loadConfiguration = (config) => {
+    this.robot = new Robot(config.grid);
+    this.robot.map = config.robot.map;
+    this.gridHeight = config.grid.length;
+    this.gridWidth = config.grid[0].length;
     this.setState(
       {
-        grid: newLayout.grid,
-        availableSteps: newLayout.availableSteps,
-        startNode: newLayout.startNode,
-        finishNode: newLayout.finishNode,
+        grid: config.grid,
+        availableSteps: config.availableSteps,
+        startNode: config.startNode,
+        finishNode: config.finishNode,
+        simulationType:
+          config.simulationType /* 
+        activeMappingAlgorithm: config.activeMappingAlgorithm,
+        activePathfindingAlgorithm: config.activePathfindingAlgorithm, */,
         layoutLoaded: true,
       },
       () => {

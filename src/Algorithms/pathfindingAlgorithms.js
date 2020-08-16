@@ -50,6 +50,7 @@ const dfs = (grid, startNode, finishNode) => {
   stack.push(startNode);
   while (!stack.isEmpty()) {
     const currNode = stack.pop();
+    currNode.isVisited = true;
     if (currNode.isWall) continue;
     if (currNode === finishNode) return visitedNodesInOrder;
     if (!visitedNodesInOrder.includes(currNode))
@@ -93,7 +94,6 @@ export const astar = (grid, startNode, finishNode, filters) => {
   resetGridSearchProperties(grid);
   startNode.distance = 0;
   startNode.heuristicDistance = 0;
-
   const priorityQueue = [];
   priorityQueue.push(startNode);
   while (priorityQueue.length) {

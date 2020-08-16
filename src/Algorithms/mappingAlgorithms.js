@@ -8,24 +8,22 @@ import {
   isNeighbors,
   isValidCoordinates,
   fillPathGapsInNodeList,
+  removeDuplicateNodes,
 } from "./algorithmUtils";
 
 export const baseMap = (grid, map, dockingStation, availableSteps, step) => {
   let i = 0;
   const visitedNodesInOrder = [];
 
-  let [currNode, startingPathLength] = resolveStartingNode(
-    visitedNodesInOrder,
+  let [currNode, pathToStartingNode] = pushPathToNewStartingNode(
     grid,
     map,
-    dockingStation
+    dockingStation,
+    visitedNodesInOrder,
+    availableSteps
   );
-  /* return breadthMapping(map, currNode).slice(0, 1250); */
 
-  /* bound random walk number of iteration to a high enough number of steps according to grid size, trying to fully visit the grid might be very
-  inefficient so we bound it artificially, regardless of the battery consideration which is taken care of as part of the play button handler in
-  visualizer component.`*/
-  while (i < availableSteps - startingPathLength) {
+  while (i < availableSteps - pathToStartingNode.length) {
     visitedNodesInOrder.push(currNode);
 
     currNode = step(currNode, map, grid);
@@ -66,16 +64,24 @@ export const breadthMapping = (grid, startNode) => {
 const spiralMap = (grid, map, dockingStation, availableSteps) => {
   const visitedNodesInOrder = [];
 
-  let [startNode, startingPathLength] = resolveStartingNode(
+  /*   let [startNode, startingPathLength] = resolvePathToStartingNode(
     visitedNodesInOrder,
     grid,
     map,
     dockingStation
+  ); */
+
+  let [startNode, pathToStartingNode] = pushPathToNewStartingNode(
+    grid,
+    map,
+    dockingStation,
+    visitedNodesInOrder,
+    availableSteps
   );
 
   const offsets = calculateSpiralTraversalOffsets(
     grid,
-    availableSteps - startingPathLength
+    availableSteps - pathToStartingNode.length
   );
 
   const spiralOrderFromStartNode = [];
@@ -197,13 +203,27 @@ const bestFirst = (currNode, map, grid) => {
   return neighborsAscending[0];
 };
 
-const resolveStartingNode = (
-  visitedNodesInOrder,
+const pushPathToNewStartingNode = (
   grid,
   map,
-  dockingStation
+  dockingStation,
+  visitedNodesInOrder,
+  availableSteps
 ) => {
-  let startNode = dockingStation;
+  const pathToStartingNode = resolvePathToStartingNode(
+    grid,
+    map,
+    dockingStation
+  );
+  if (availableSteps >= pathToStartingNode.length * 2) {
+    visitedNodesInOrder.push(...pathToStartingNode);
+    const newStartingNode = pathToStartingNode[pathToStartingNode.length - 1];
+    return [newStartingNode, pathToStartingNode];
+  }
+  return [dockingStation, []];
+};
+
+const resolvePathToStartingNode = (grid, map, dockingStation) => {
   let pathToBufferNode = [];
   const unmappedAreaBufferNode = getRandomBufferNode(map, grid);
   if (unmappedAreaBufferNode) {
@@ -219,17 +239,13 @@ const resolveStartingNode = (
     );
     pathToBufferNode = [];
     if (astarToBufferNodeResult) {
-      startNode = unmappedAreaBufferNode;
       pathToBufferNode = getShortestPathNodesInOrder(
         astarToBufferNodeResult[astarToBufferNodeResult.length - 1]
-      );
-      visitedNodesInOrder.push(
-        ...pathToBufferNode.slice(0, pathToBufferNode.length)
       );
     }
   }
   resetGridSearchProperties(map);
-  return [startNode, pathToBufferNode.length];
+  return pathToBufferNode;
 };
 
 const modifyVisitedNodesConsideringBatteryAndReturnPath = (
@@ -241,10 +257,10 @@ const modifyVisitedNodesConsideringBatteryAndReturnPath = (
   const runningMap = getGridDeepCopy(map);
 
   const startNodeRef = runningMap[dockingStation.row][dockingStation.col];
-  visitedNodesInOrder.forEach((visitedNode) => {
+  /*     visitedNodesInOrder.forEach((visitedNode) => {
     const { row, col } = visitedNode;
     runningMap[row][col].isMapped = true;
-  });
+  }); */
   /* 
   visitedNodes is calculated regardless of battery size (using the algorithm callback).
   we want to minimize the amount of iterations of this loop, so we start searching for a path
@@ -252,8 +268,7 @@ const modifyVisitedNodesConsideringBatteryAndReturnPath = (
   until we find a complete path (mapping/sweeping + return to docking station).
 
   TODO:
-  Currently we use astar on the global grid meaning we dont take into account that we want to search a path only through
-  mapped nodes. NEED TO IMPLEMENT isMapped consideration in astar algorithm.
+  1. Consider removing isMapped consideration. we update the robot map in handlePlay function on visualizer.
   */
 
   const visitedNodesConsideringBattery = visitedNodesInOrder.slice(
@@ -272,8 +287,10 @@ const modifyVisitedNodesConsideringBatteryAndReturnPath = (
     i >= 1;
     i--
   ) {
-    const node = visitedNodesConsideringBattery[i];
-
+    const node =
+      runningMap[visitedNodesConsideringBattery[i].row][
+        visitedNodesConsideringBattery[i].col
+      ];
     const searchResult = astar(runningMap, node, startNodeRef, [
       { attribute: "isVisited", evaluation: false },
       { attribute: "isWall", evaluation: false },
@@ -289,13 +306,7 @@ const modifyVisitedNodesConsideringBatteryAndReturnPath = (
           .slice(0, i)
           .concat(pathToDockingStation);
         console.log("robotPath: ", robotPath);
-        for (let i = 0; i < robotPath.length - 1; i++) {
-          if (robotPath[i] === robotPath[i + 1]) {
-            robotPath.splice(i, 1);
-          }
-          if (!isNeighbors(robotPath[i], robotPath[i + 1]))
-            console.log(robotPath[i], robotPath[i + 1]);
-        }
+        removeDuplicateNodes(robotPath);
         return robotPath;
       }
     }
@@ -366,6 +377,78 @@ class Stack {
     this.items.forEach((item) => console.log(item));
   }
 }
+
+/************************************************************** */
+
+const dfsHelper = (grid, roborMap, startNode, battery) => {
+  let visitedIncludingJumps = dfs(grid, startNode);
+  const gridCopy = JSON.parse(JSON.stringify(grid));
+  let visitedNodesInOrder = addShortPathBetweenUneighbours(
+    visitedIncludingJumps,
+    gridCopy
+  );
+  return visitedNodesInOrder;
+};
+
+const areNeighbors = (node1, node2, gridCopy) => {
+  let node1Neighbors = getNeighbors(node1, gridCopy);
+  for (let i = 0; i < node1Neighbors.length; i++) {
+    if (
+      node1Neighbors[i].row === node2.row &&
+      node1Neighbors[i].col === node2.col
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const addShortPathBetweenUneighbours = (visitedIncludingJumps, gridCopy) => {
+  let fixedVisitedNodesInOrder = [];
+  for (let i = 0; i < visitedIncludingJumps.length - 1; i++) {
+    if (
+      !areNeighbors(
+        visitedIncludingJumps[i],
+        visitedIncludingJumps[i + 1],
+        gridCopy
+      )
+    ) {
+      //find shortest path using astar
+      let node1 =
+        gridCopy[visitedIncludingJumps[i].row][visitedIncludingJumps[i].col];
+      let node2 =
+        gridCopy[visitedIncludingJumps[i + 1].row][
+          visitedIncludingJumps[i + 1].col
+        ];
+      console.log(
+        "i: " +
+          i +
+          " start node is: (" +
+          visitedIncludingJumps[i].row +
+          ", " +
+          visitedIncludingJumps[i].col +
+          ") finish node is: (" +
+          visitedIncludingJumps[i + 1].row +
+          ", " +
+          visitedIncludingJumps[i + 1].col +
+          ")"
+      );
+      let shortestPath = astar(
+        gridCopy,
+        visitedIncludingJumps[i],
+        visitedIncludingJumps[i + 1],
+        [
+          { attribute: "isVisited", evaluation: false },
+          { attribute: "isWall", evaluation: false },
+        ]
+      );
+      fixedVisitedNodesInOrder.push(...shortestPath);
+    } else {
+      fixedVisitedNodesInOrder.push(visitedIncludingJumps[i]);
+    }
+  }
+  return fixedVisitedNodesInOrder;
+};
 
 export const data = [
   {

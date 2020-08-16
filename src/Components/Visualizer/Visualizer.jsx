@@ -281,7 +281,6 @@ export default class Visualizer extends Component {
       grid,
     } = this.context.state;
     const {
-      modifyVisitedNodesConsideringBatteryAndReturnPath,
       convertAvailableStepsToBatteryCapacity,
       updateState,
     } = this.context;
