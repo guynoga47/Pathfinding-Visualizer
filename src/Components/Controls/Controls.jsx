@@ -10,7 +10,7 @@ import Spinner from "../Spinner/Spinner";
 import ControlStyles from "./Controls.Styles";
 import GridContext from "../../Context/grid-context";
 
-export const DEFAULT_SPEED = 100;
+export const DEFAULT_SPEED = 200;
 
 const useStyles = ControlStyles;
 
@@ -58,8 +58,8 @@ const Controls = (props) => {
         </IconButton>
       )}
       <SpeedSlider
-        min={70}
-        max={130}
+        min={130}
+        max={240}
         onSpeedChange={onSpeedChange}
         disabled={context.state.isRunning}
       />

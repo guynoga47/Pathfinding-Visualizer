@@ -19,7 +19,10 @@ export const getAllNodes = (grid) => {
 };
 
 export const isNeighbors = (n1, n2) => {
-  return Math.abs(n1.row - n2.row) <= 1 && Math.abs(n1.col - n2.col) <= 1;
+  return (
+    (n1.row === n2.row && Math.abs(n1.col - n2.col) <= 1) ||
+    (n1.col === n2.col && Math.abs(n1.row - n2.row) <= 1)
+  );
 };
 
 export const isValidCoordinates = (node, grid) => {
@@ -91,6 +94,5 @@ export const removeDuplicateNodes = (path) => {
     if (path[i] === path[i + 1]) {
       path.splice(i, 1);
     }
-    if (!isNeighbors(path[i], path[i + 1])) console.log(path[i], path[i + 1]);
   }
 };
