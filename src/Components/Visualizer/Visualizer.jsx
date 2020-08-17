@@ -3,7 +3,6 @@ import ReactDOM from "react-dom";
 
 import Node from "../Node/Node";
 import Controls, { DEFAULT_SPEED } from "../Controls/Controls";
-import { getShortestPathNodesInOrder } from "../../Algorithms/algorithmUtils.js";
 
 import "./Visualizer.css";
 
@@ -14,21 +13,20 @@ export default class Visualizer extends Component {
 
   constructor(props) {
     super(props);
-    //this.speed = DEFAULT_SPEED;
-    this.speed = 100;
+    this.speed = DEFAULT_SPEED;
     this.mouseKeyDown = false;
     this.endPointKeyDown = "";
   }
 
   handleSpeedChanged = (speed) => {
-    //this.speed = speed;
-    this.speed = 100;
+    this.speed = speed;
   };
 
-  handleResetButtonClicked = () => {
+  handleReset = () => {
     this.context.updateState("isFinished", false);
     this.context.resetGridKeepWalls(this.resetNodeStyles, {
-      resetWalls: false,
+      /* resetWalls: false, */
+      setWalls: true,
       resetVisited: true,
       resetShortestPath: true,
     });
@@ -230,11 +228,12 @@ export default class Visualizer extends Component {
     }
   };
 
-  visualize = (visitedNodesInOrder, nodesInShortestPathOrder) => {
+  visualize = (visitedNodesInOrder /* nodesInShortestPathOrder */) => {
     for (let i = 0; i <= visitedNodesInOrder.length; i++) {
       if (i === visitedNodesInOrder.length) {
         setTimeout(() => {
-          this.visualizeShortestPath(nodesInShortestPathOrder);
+          this.context.updateState("isRunning", false);
+          this.context.updateState("isFinished", true);
         }, this.speed * i);
         return;
       }
@@ -272,18 +271,19 @@ export default class Visualizer extends Component {
     }
   };
 
-  handlePlayButtonClicked = () => {
-    //need to disable toolbar before choosing and then display error message accordingly.
-    //thisconst activeAlgorithmCallback = this.context.state.activeAlgorithm.func;
+  handlePlay = () => {
     const {
       simulationType,
+      availableSteps,
       activeMappingAlgorithm,
       activePathfindingAlgorithm,
       startNode,
-      finishNode,
       grid,
     } = this.context.state;
-
+    const {
+      convertAvailableStepsToBatteryCapacity,
+      updateState,
+    } = this.context;
     const { robot } = this.context;
 
     const activeAlgorithmCallback =
@@ -293,28 +293,34 @@ export default class Visualizer extends Component {
         ? activePathfindingAlgorithm.func
         : undefined;
 
-    if (!activeAlgorithmCallback) return;
+    if (
+      !activeAlgorithmCallback ||
+      convertAvailableStepsToBatteryCapacity() === 0
+    )
+      return;
+    updateState("isRunning", true);
 
-    this.context.updateState("isRunning", true);
+    robot.syncMapLayoutWithGrid(grid);
 
-    const visitedNodesInOrder = activeAlgorithmCallback(
+    /*     const gridCpy = this.context.getGridDeepCopy(grid);
+    const mapCpy = this.context.getGridDeepCopy(robot.map); */
+
+    const robotPath = activeAlgorithmCallback(
       grid,
-      grid[startNode.row][startNode.col],
-      grid[finishNode.row][finishNode.col]
+      robot.map,
+      robot.map[startNode.row][startNode.col],
+      availableSteps
     );
 
     if (simulationType === "map") {
-      robot.updateMap(visitedNodesInOrder);
+      robot.updateMap(robotPath);
     }
-
-    const nodesInShortestPathOrder = getShortestPathNodesInOrder(
-      grid[finishNode.row][finishNode.col]
-    );
-    console.log(visitedNodesInOrder);
-    this.visualize(visitedNodesInOrder, nodesInShortestPathOrder);
+    this.visualize(robotPath);
+    /* this.context.updateState("isRunning", false);
+    this.context.updateState("isFinished", true); */
   };
 
-  handleClearWallsButtonClicked = () => {
+  handleClearWalls = () => {
     const { setClearWallsRequest } = this.props;
     for (let row = 0; row < this.context.gridHeight; row++) {
       for (let col = 0; col < this.context.gridWidth; col++) {
@@ -333,7 +339,7 @@ export default class Visualizer extends Component {
 
   componentDidUpdate() {
     if (this.props.isClearWallsRequested.requested) {
-      this.handleClearWallsButtonClicked();
+      this.handleClearWalls();
     }
     if (this.context.state.layoutLoaded) {
       //intended to detect loadLayout action.
@@ -348,7 +354,7 @@ export default class Visualizer extends Component {
       const { map } = this.context.robot;
       for (let row = 0; row < map.length; row++) {
         for (let col = 0; col < map[0].length; col++) {
-          if (map[row][col]) {
+          if (map[row][col].isMapped) {
             ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
               `highlight`
             );
@@ -375,8 +381,8 @@ export default class Visualizer extends Component {
     return (
       <>
         <Controls
-          onResetButtonClicked={this.handleResetButtonClicked}
-          onPlayButtonClicked={this.handlePlayButtonClicked}
+          onResetButtonClicked={this.handleReset}
+          onPlayButtonClicked={this.handlePlay}
           onSpeedChange={this.handleSpeedChanged}
           onGridSizeChange={this.handleGridSizeChange}
         />

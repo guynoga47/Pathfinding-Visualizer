@@ -2,11 +2,13 @@ import React, { Component } from "react";
 
 import GridContext from "./grid-context";
 import Robot from "../Classes/Robot";
+import { resetGridSearchProperties } from "../Algorithms/algorithmUtils";
+
+import { saveAs } from "file-saver";
 //Grid logical context, everything related to visualizing it is sitting
 //in visualizer.jsx
 const DEFAULT_GRID_HEIGHT = 25;
 const DEFAULT_GRID_WIDTH = 50;
-const DEFAULT_CHARGE = 100;
 
 const calculateDefaultGridEndPointsLocations = (height, width) => {
   const defaultStartNode = {
@@ -45,7 +47,7 @@ class GlobalState extends Component {
 
   componentDidMount() {
     const grid = this.getInitialGrid();
-    this.robot = new Robot(DEFAULT_CHARGE, grid);
+    this.robot = new Robot(grid);
     this.setState({ grid });
   }
 
@@ -57,32 +59,70 @@ class GlobalState extends Component {
       defaultFinishNode,
     } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
     const grid = this.getInitialGrid();
+    this.robot = new Robot(grid);
     this.setState(
       {
         grid,
+        availableSteps: this.gridHeight * this.gridWidth,
         startNode: defaultStartNode,
         finishNode: defaultFinishNode,
+        simulationType: undefined,
+        activeMappingAlgorithm: undefined,
+        activePathfindingAlgorithm: undefined,
         isFinished: false,
+        isRunning: false,
       },
       () => callback && callback(param)
     );
   };
 
-  loadLayout = (newLayout) => {
-    this.gridHeight = newLayout.grid.length;
-    this.gridWidth = newLayout.grid[0].length;
-    for (let row = 0; row < this.gridHeight; row++) {
-      for (let col = 0; col < this.gridWidth; col++) {
-        newLayout.grid[row][col].distance = Infinity;
-        newLayout.grid[row][col].heuristicDistance = Infinity;
+  saveConfiguration = () => {
+    const blob = new Blob([
+      JSON.stringify({
+        grid: this.state.grid,
+        robot: this.robot,
+        availableSteps: this.state.availableSteps,
+        startNode: this.state.startNode,
+        finishNode: this.state.finishNode,
+        simulationType: this.state
+          .simulationType /* 
+        activeMappingAlgorithm: this.state.activeMappingAlgorithm,
+        activePathfindingAlgorithm: this.state.activePathfindingAlgorithm, */,
+      }),
+    ]);
+    const [rows, cols] = [this.gridHeight, this.gridWidth];
+    saveAs(
+      blob,
+      `Grid Snapshot ${rows}*${cols} ${new Date()
+        .toLocaleDateString()
+        .replace(/\./g, "-")} at ${new Date()
+        .toLocaleTimeString()
+        .replace(/:/g, ".")}.json`
+    );
+  };
+
+  loadConfiguration = (config) => {
+    this.robot = new Robot(config.grid);
+    this.robot.map = config.robot.map;
+    this.gridHeight = config.grid.length;
+    this.gridWidth = config.grid[0].length;
+    this.setState(
+      {
+        grid: config.grid,
+        availableSteps: config.availableSteps,
+        startNode: config.startNode,
+        finishNode: config.finishNode,
+        simulationType:
+          config.simulationType /* 
+        activeMappingAlgorithm: config.activeMappingAlgorithm,
+        activePathfindingAlgorithm: config.activePathfindingAlgorithm, */,
+        layoutLoaded: true,
+      },
+      () => {
+        resetGridSearchProperties(this.state.grid);
+        resetGridSearchProperties(this.robot.map);
       }
-    }
-    this.setState({
-      grid: newLayout.grid,
-      startNode: newLayout.startNode,
-      finishNode: newLayout.finishNode,
-      layoutLoaded: true,
-    });
+    );
   };
 
   resetGridKeepWalls = (callback, param) => {
@@ -171,7 +211,8 @@ class GlobalState extends Component {
           updateState: this.updateState,
           getInitialGrid: this.getInitialGrid,
           resizeGrid: this.resizeGrid,
-          loadLayout: this.loadLayout,
+          loadConfiguration: this.loadConfiguration,
+          saveConfiguration: this.saveConfiguration,
           resetGridKeepWalls: this.resetGridKeepWalls,
           gridHeight: this.gridHeight,
           gridWidth: this.gridWidth,

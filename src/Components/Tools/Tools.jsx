@@ -12,8 +12,6 @@ import IconMap from "@material-ui/icons/Map";
 import Popover from "@material-ui/core/Popover";
 import Typography from "@material-ui/core/Typography";
 
-import { saveAs } from "file-saver";
-
 import GridContext from "../../Context/grid-context";
 import InteractiveBattery from "../Tools/InteractiveBattery";
 import BatterySlider from "../SliderBattery/BatterySlider";
@@ -32,8 +30,14 @@ const Tools = (props) => {
   const [anchorElDrawRectangle, setAnchorElDrawRectangle] = React.useState(
     null
   );
-  const [anchorElSaveLayout, setAnchorElSaveLayout] = React.useState(null);
-  const [anchorElLoadLayout, setAnchorElLoadLayout] = React.useState(null);
+  const [
+    anchorElSaveConfiguration,
+    setAnchorElSaveConfiguration,
+  ] = React.useState(null);
+  const [
+    anchorElLoadConfiguration,
+    setAnchorElLoadConfiguration,
+  ] = React.useState(null);
   const [anchorElHighlightMap, setAnchorElHighlightMap] = React.useState(null);
 
   const [anchorElDrawObstacle, setAnchorElDrawObstacle] = React.useState(null);
@@ -67,10 +71,10 @@ const Tools = (props) => {
         setAnchorElDrawObstacle(event.currentTarget);
         break;
       case "btn-save":
-        setAnchorElSaveLayout(event.currentTarget);
+        setAnchorElSaveConfiguration(event.currentTarget);
         break;
       case "btn-load":
-        setAnchorElLoadLayout(event.currentTarget);
+        setAnchorElLoadConfiguration(event.currentTarget);
         break;
       case "btn-map":
         setAnchorElHighlightMap(event.currentTarget);
@@ -95,10 +99,10 @@ const Tools = (props) => {
         setAnchorElDrawObstacle(null);
         break;
       case "btn-save":
-        setAnchorElSaveLayout(null);
+        setAnchorElSaveConfiguration(null);
         break;
       case "btn-load":
-        setAnchorElLoadLayout(null);
+        setAnchorElLoadConfiguration(null);
         break;
       case "btn-map":
         setAnchorElHighlightMap(null);
@@ -122,30 +126,15 @@ const Tools = (props) => {
     );
   };
 
-  const handleSaveLayoutButtonClicked = async () => {
-    const blob = new Blob([
-      JSON.stringify({
-        grid: context.state.grid,
-        startNode: context.state.startNode,
-        finishNode: context.state.finishNode,
-      }),
-    ]);
-
-    saveAs(
-      blob,
-      `Grid Snapshot ${new Date()
-        .toLocaleDateString()
-        .replace(/\./g, "-")} at ${new Date()
-        .toLocaleTimeString()
-        .replace(/:/g, ".")}.json`
-    );
+  const handleSaveConfiguration = async () => {
+    context.saveConfiguration();
   };
 
-  const handleLoadLayoutButtonClicked = (event) => {
+  const handleLoadConfiguration = (event) => {
     const reader = new FileReader();
     reader.onload = () => {
       const newLayout = JSON.parse(reader.result);
-      context.loadLayout(newLayout);
+      context.loadConfiguration(newLayout);
     };
     reader.readAsText(event.target.files[0]);
   };
@@ -202,7 +191,7 @@ const Tools = (props) => {
         accept=".json"
         className={classes.input}
         id="icon-button-load-file"
-        onChange={handleLoadLayoutButtonClicked}
+        onChange={handleLoadConfiguration}
         onClick={(event) => {
           //to allow consecutive selection of same files, we need to clear input value after each click.
           event.target.value = "";
@@ -229,7 +218,7 @@ const Tools = (props) => {
         onMouseEnter={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
         disabled={isRunning}
-        onClick={handleSaveLayoutButtonClicked}
+        onClick={handleSaveConfiguration}
       >
         <IconSave />
       </IconButton>
@@ -262,8 +251,8 @@ const Tools = (props) => {
         classes={{
           paper: classes.paper,
         }}
-        open={Boolean(anchorElSaveLayout)}
-        anchorEl={anchorElSaveLayout}
+        open={Boolean(anchorElSaveConfiguration)}
+        anchorEl={anchorElSaveConfiguration}
         anchorOrigin={{
           vertical: "bottom",
           horizontal: "left",
@@ -275,7 +264,9 @@ const Tools = (props) => {
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
-        <Typography className={classes.popoverText}>Save Layout</Typography>
+        <Typography className={classes.popoverText}>
+          Save Configuration
+        </Typography>
       </Popover>
       <Popover
         id="mouse-over-popover"
@@ -283,8 +274,8 @@ const Tools = (props) => {
         classes={{
           paper: classes.paper,
         }}
-        open={Boolean(anchorElLoadLayout)}
-        anchorEl={anchorElLoadLayout}
+        open={Boolean(anchorElLoadConfiguration)}
+        anchorEl={anchorElLoadConfiguration}
         anchorOrigin={{
           vertical: "bottom",
           horizontal: "left",
@@ -296,7 +287,9 @@ const Tools = (props) => {
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
-        <Typography className={classes.popoverText}>Load Layout</Typography>
+        <Typography className={classes.popoverText}>
+          Load Configuration
+        </Typography>
       </Popover>
       <Popover
         id="mouse-over-popover"
