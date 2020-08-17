@@ -215,7 +215,10 @@ const pushPathToNewStartingNode = (
     map,
     dockingStation
   );
-  if (availableSteps >= pathToStartingNode.length * 2) {
+  if (
+    availableSteps >= pathToStartingNode.length * 2 &&
+    dockingStation.isMapped
+  ) {
     visitedNodesInOrder.push(...pathToStartingNode);
     const newStartingNode = pathToStartingNode[pathToStartingNode.length - 1];
     return [newStartingNode, pathToStartingNode];
