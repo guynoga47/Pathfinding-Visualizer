@@ -1,4 +1,7 @@
-import { bfs, astar } from "./pathfindingAlgorithms";
+import {
+  bfs,
+  astar
+} from "./pathfindingAlgorithms";
 import {
   getAllNodes,
   getGridDeepCopy,
@@ -49,9 +52,14 @@ export const breadthMapping = (grid, startNode) => {
   let currentLocation = startNode;
   //assign bfs result nodes isMapped=true before applying astar and searching through mapped nodes.
   bfsResult.forEach((node) => {
-    let astarResult = astar(grid, currentLocation, node, [
-      { attribute: "isVisited", evaluation: false },
-      { attribute: "isWall", evaluation: false },
+    let astarResult = astar(grid, currentLocation, node, [{
+        attribute: "isVisited",
+        evaluation: false
+      },
+      {
+        attribute: "isWall",
+        evaluation: false
+      },
     ]);
     let path = getShortestPathNodesInOrder(astarResult[astarResult.length - 1]);
     visitedNodesInOrder.push(...path);
@@ -100,7 +108,10 @@ const spiralMap = (grid, map, dockingStation, availableSteps) => {
 
   const accessibleNodesCoords = gridDimensionsLimitedCoords.filter(
     (nodeCoord) => {
-      const { row, col } = nodeCoord;
+      const {
+        row,
+        col
+      } = nodeCoord;
       return accessibleNodes.includes(map[row][col]);
     }
   );
@@ -144,7 +155,10 @@ const calculateSpiralTraversalOffsets = (grid, availableSteps) => {
       -numCols / 2 < col &&
       col <= numCols / 2
     ) {
-      offsets.push({ row, col });
+      offsets.push({
+        row,
+        col
+      });
     }
     if (
       row === col ||
@@ -234,10 +248,18 @@ const resolvePathToStartingNode = (grid, map, dockingStation) => {
       map,
       dockingStation,
       unmappedAreaBufferNode,
-      [
-        { attribute: "isVisited", evaluation: false },
-        { attribute: "isWall", evaluation: false },
-        { attribute: "isMapped", evaluation: true },
+      [{
+          attribute: "isVisited",
+          evaluation: false
+        },
+        {
+          attribute: "isWall",
+          evaluation: false
+        },
+        {
+          attribute: "isMapped",
+          evaluation: true
+        },
       ]
     );
     pathToBufferNode = [];
@@ -286,18 +308,24 @@ const modifyVisitedNodesConsideringBatteryAndReturnPath = (
     let i = Math.min(
       availableSteps - 1,
       visitedNodesConsideringBattery.length - 1
-    );
-    i >= 1;
-    i--
+    ); i >= 1; i--
   ) {
     const node =
       runningMap[visitedNodesConsideringBattery[i].row][
         visitedNodesConsideringBattery[i].col
       ];
-    const searchResult = astar(runningMap, node, startNodeRef, [
-      { attribute: "isVisited", evaluation: false },
-      { attribute: "isWall", evaluation: false },
-      { attribute: "isMapped", evaluation: true },
+    const searchResult = astar(runningMap, node, startNodeRef, [{
+        attribute: "isVisited",
+        evaluation: false
+      },
+      {
+        attribute: "isWall",
+        evaluation: false
+      },
+      {
+        attribute: "isMapped",
+        evaluation: true
+      },
     ]);
 
     if (searchResult) {
@@ -325,16 +353,19 @@ const getRandomBufferNode = (map, grid) => {
   const mappedNodes = allNodes.filter((node) => node.isMapped);
   const unmappedMapAdjacentNodes = mappedNodes.filter((node) => {
     const unmappedNeighbors = getNeighbors(node, grid).filter((neighbor) => {
-      const { row, col } = neighbor;
+      const {
+        row,
+        col
+      } = neighbor;
       return !map[row][col].isMapped && !grid[row][col].isWall;
     });
     return unmappedNeighbors.length > 0;
   });
-  return unmappedMapAdjacentNodes.length > 0
-    ? unmappedMapAdjacentNodes[
-        Math.floor(Math.random() * unmappedMapAdjacentNodes.length)
-      ]
-    : false;
+  return unmappedMapAdjacentNodes.length > 0 ?
+    unmappedMapAdjacentNodes[
+      Math.floor(Math.random() * unmappedMapAdjacentNodes.length)
+    ] :
+    false;
 };
 
 const dfs = (grid, startNode, finishNode, order) => {
@@ -348,7 +379,16 @@ const dfs = (grid, startNode, finishNode, order) => {
     if (!visitedNodesInOrder.includes(currNode))
       visitedNodesInOrder.push(currNode);
     let neighbors = getNeighbors(currNode, grid, order);
+    // priortize by is mapped first in
     neighbors = neighbors.filter((neighbor) => !neighbor.isVisited);
+    neighbors.sort((n1, n2) => {
+      if (n1.isMapped) {
+        return -1;
+      } else {
+        return 1;
+      }
+    });
+
     neighbors.forEach((neighbor) => {
       if (!visitedNodesInOrder.includes(neighbor)) {
         stack.push(neighbor);
@@ -387,16 +427,27 @@ class Stack {
 
 /************************************************************** */
 
-const dfsHelper = (grid, roborMap, startNode, battery) => {
-  let visitedIncludingJumps = dfs(grid, startNode);
-  visitedIncludingJumps.push(startNode);
-  const gridCopy = JSON.parse(JSON.stringify(grid));
-  let visitedNodesInOrder = addShortPathBetweenUneighbours(
+const dfsHelper = (grid, robotMap, startNode, battery) => {
+  const visitedNodesInOrder = []
+
+  let [currStartNode, pathFromDockToStartNode] = pushPathToNewStartingNode(robotMap, robotMap, startNode, visitedNodesInOrder, battery);
+  let newBattery = battery - pathFromDockToStartNode.length;
+
+  //let visitedIncludingJumps = dfs(grid, startNode);
+  let visitedIncludingJumps = dfs(robotMap, currStartNode);
+  //const gridCopy = JSON.parse(JSON.stringify(grid));
+  const gridCopy = JSON.parse(JSON.stringify(robotMap));
+
+  let mappingPath = addShortPathBetweenUneighbours(
     visitedIncludingJumps,
     gridCopy
   );
-  console.log(visitedNodesInOrder);
-  return visitedNodesInOrder;
+
+  visitedNodesInOrder.push(...mappingPath)
+
+  let visitedConsideringBattery = modifyVisitedNodesConsideringBatteryAndReturnPath(visitedNodesInOrder, robotMap, startNode, newBattery);
+
+  return visitedConsideringBattery;
 };
 
 const areNeighbors = (node1, node2, gridCopy) => {
@@ -415,12 +466,12 @@ const areNeighbors = (node1, node2, gridCopy) => {
 const addShortPathBetweenUneighbours = (visitedIncludingJumps, gridCopy) => {
   let fixedVisitedNodesInOrder = [];
   for (let i = 0; i < visitedIncludingJumps.length - 1; i++) {
-    if (
-      !areNeighbors(
-        visitedIncludingJumps[i],
-        visitedIncludingJumps[i + 1],
-        gridCopy
-      )
+    if (!isNeighbors(visitedIncludingJumps[i], visitedIncludingJumps[i + 1])
+      // !areNeighbors(
+      //   visitedIncludingJumps[i],
+      //   visitedIncludingJumps[i + 1],
+      //   gridCopy
+      // )
     ) {
       //find shortest path using astar
       let node1 =
@@ -431,40 +482,45 @@ const addShortPathBetweenUneighbours = (visitedIncludingJumps, gridCopy) => {
         ];
       console.log(
         "i: " +
-          i +
-          " start node is: (" +
-          visitedIncludingJumps[i].row +
-          ", " +
-          visitedIncludingJumps[i].col +
-          ") finish node is: (" +
-          visitedIncludingJumps[i + 1].row +
-          ", " +
-          visitedIncludingJumps[i + 1].col +
-          ")"
+        i +
+        " start node is: (" +
+        visitedIncludingJumps[i].row +
+        ", " +
+        visitedIncludingJumps[i].col +
+        ") finish node is: (" +
+        visitedIncludingJumps[i + 1].row +
+        ", " +
+        visitedIncludingJumps[i + 1].col +
+        ")"
       );
-      let shortestPath = astar(
+      let astarResult = astar(
         gridCopy,
         node1,
         node2,
         //visitedIncludingJumps[i],
         //visitedIncludingJumps[i + 1],
-        [
-          { attribute: "isVisited", evaluation: false },
-          { attribute: "isWall", evaluation: false },
+        [{
+            attribute: "isVisited",
+            evaluation: false
+          },
+          {
+            attribute: "isWall",
+            evaluation: false
+          },
         ]
       );
+      let shortestPath = getShortestPathNodesInOrder(astarResult[astarResult.length - 1]);
       fixedVisitedNodesInOrder.push(...shortestPath);
     } else {
       fixedVisitedNodesInOrder.push(visitedIncludingJumps[i]);
     }
   }
   // insert the last node - "complete the work"
-  fixedVisitedNodesInOrder.push(visitedIncludingJumps[visitedIncludingJumps.length-1]);
+  fixedVisitedNodesInOrder.push(visitedIncludingJumps[visitedIncludingJumps.length - 1]);
   return fixedVisitedNodesInOrder;
 };
 
-export const data = [
-  {
+export const data = [{
     name: "Random Traversal",
     shortened: "Random",
     func: (grid, map, dockingStation, availableSteps) =>
