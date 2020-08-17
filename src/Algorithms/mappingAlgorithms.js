@@ -353,7 +353,7 @@ const dfs = (grid, startNode, finishNode, order) => {
       }
     });
   }
-  console.log(visitedNodesInOrder);
+
   return visitedNodesInOrder;
 };
 
@@ -382,11 +382,13 @@ class Stack {
 
 const dfsHelper = (grid, roborMap, startNode, battery) => {
   let visitedIncludingJumps = dfs(grid, startNode);
+  visitedIncludingJumps.push(startNode);
   const gridCopy = JSON.parse(JSON.stringify(grid));
   let visitedNodesInOrder = addShortPathBetweenUneighbours(
     visitedIncludingJumps,
     gridCopy
   );
+  console.log(visitedNodesInOrder);
   return visitedNodesInOrder;
 };
 
@@ -435,8 +437,10 @@ const addShortPathBetweenUneighbours = (visitedIncludingJumps, gridCopy) => {
       );
       let shortestPath = astar(
         gridCopy,
-        visitedIncludingJumps[i],
-        visitedIncludingJumps[i + 1],
+        node1,
+        node2,
+        //visitedIncludingJumps[i],
+        //visitedIncludingJumps[i + 1],
         [
           { attribute: "isVisited", evaluation: false },
           { attribute: "isWall", evaluation: false },
@@ -447,6 +451,8 @@ const addShortPathBetweenUneighbours = (visitedIncludingJumps, gridCopy) => {
       fixedVisitedNodesInOrder.push(visitedIncludingJumps[i]);
     }
   }
+  // insert the last node - "complete the work"
+  fixedVisitedNodesInOrder.push(visitedIncludingJumps[visitedIncludingJumps.length-1]);
   return fixedVisitedNodesInOrder;
 };
 
@@ -467,5 +473,10 @@ export const data = [
     name: "Spiral Traversal",
     shortened: "Spiral",
     func: spiralMap,
+  },
+  {
+    name: "DFS Traversal",
+    shortened: "DFS",
+    func: dfsHelper,
   },
 ];
