@@ -89,24 +89,7 @@ class Stack {
   }
 }
 
-<<<<<<< HEAD
-export const astar = (grid, startNode, finishNode) => {
-  if (!startNode) {
-    console.log("Bad Starting Node");
-  }
-  if (!finishNode) {
-    console.log("Bad Ending Node");
-  }
-  if (startNode === finishNode) {
-    console.log("StartNode = finishNode");
-  }
-  if (!startNode || !finishNode || startNode === finishNode) {
-    console.log("Bad parameters, unable to calculate path!");
-    return false;
-  }
-=======
 export const astar = (grid, startNode, finishNode, filters) => {
->>>>>>> master
   const visitedNodesInOrder = [];
   resetGridSearchProperties(grid);
   startNode.distance = 0;

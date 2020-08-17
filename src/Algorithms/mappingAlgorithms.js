@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-import { astar } from "./pathfindingAlgorithms";
-export const randomWalk = (grid, startNode, finishNode) => {
-  if (!startNode || !finishNode || startNode === finishNode) {
-    console.log("Bad parameters, unable to calculate path!");
-    return false;
-  }
-=======
 import { bfs, astar } from "./pathfindingAlgorithms";
 import {
   getAllNodes,
@@ -20,7 +12,6 @@ import {
 } from "./algorithmUtils";
 
 export const baseMap = (grid, map, dockingStation, availableSteps, step) => {
->>>>>>> master
   let i = 0;
   const visitedNodesInOrder = [];
 
@@ -353,141 +344,6 @@ const dfs = (grid, startNode, finishNode, order) => {
     if (currNode === finishNode) return visitedNodesInOrder;
     if (!visitedNodesInOrder.includes(currNode))
       visitedNodesInOrder.push(currNode);
-<<<<<<< HEAD
-    const neighbours = getUnvisitedNeighbors(currNode, grid, order);
-    neighbours.forEach((neighbour) => {
-      console.log(neighbour);
-      if (!visitedNodesInOrder.includes(neighbour)) {
-        stack.push(neighbour);
-        neighbour.previousNode = currNode;
-      }
-    });
-  }
-  return visitedNodesInOrder;
-};
-
-// comment in order to see changes in commit
-// need to add a order - vertcal/horizontal - determined by the order that we push to stock (first left right or up down)
-// need to change functions names
-const mappingDfs = (grid, startNode) => {
-  let countInOrderToStopInfinityRun = 0;
-  if (!startNode) {
-    console.log("Bad parameters, unable to calculate path!");
-    return false;
-  }
-
-  const stack = new Stack();
-  const visitedNodesInOrder = [];
-  let parentNode = startNode;
-  let currNode = startNode;
-  console.log(currNode);
-  currNode.previousNode = parentNode;
-  stack.push(currNode);
-  // visitedNodesInOrder.push(currNode);
-
-  while (!stack.isEmpty() && countInOrderToStopInfinityRun !== 40) {
-    countInOrderToStopInfinityRun += 1;
-
-    parentNode = currNode;
-    currNode = stack.pop();
-    const neighbors = getNeighborsTom(currNode, grid);
-    pushRelevantToStack(stack, neighbors, visitedNodesInOrder, currNode);
-
-    if (!isPrevNodeTheParent(parentNode, currNode)) {
-      let shortPathPtoC = astar(grid, parentNode, currNode);
-      console.log(
-        "finding shortest path from " +
-          parentNode.row +
-          "," +
-          parentNode.col +
-          " to-> " +
-          currNode.row +
-          "," +
-          currNode.col +
-          "..."
-      );
-      console.log(shortPathPtoC);
-      //here we need to check that the battery is sufficient to go through this path and get back to the docking station
-      //visitedNodesInOrder.push(shortPathPtoC);
-
-      //function that goes from parent node to currNode only stepping on stepped nodes
-      //using the
-      //shortest path from parent to curr
-
-      visitedNodesInOrder.push(...shortPathPtoC);
-    }
-    visitedNodesInOrder.push(currNode);
-  }
-  console.log(visitedNodesInOrder);
-  return visitedNodesInOrder;
-};
-
-const pushRelevantToStack = (
-  stack,
-  neighbors,
-  visitedNodesInOrder,
-  currNode
-) => {
-  console.log(currNode);
-  console.log(neighbors);
-  neighbors.forEach((neighbour) => {
-    if (!visitedNodesInOrder.includes(neighbour) && !stack.isIn(neighbour)) {
-      neighbour.previousNode = currNode;
-      stack.push(neighbour);
-    }
-  });
-};
-
-const isPrevNodeTheParent = (node1, node2) => {
-  console.log("currNode=" + node2.row + "," + node2.col);
-  console.log(
-    "currNode.previousNode =" +
-      node2.previousNode.row +
-      "," +
-      node2.previousNode.col
-  );
-  console.log("parentNode =" + node1.row + "," + node1.col);
-  console.log("**************************************");
-  return node2.previousNode === node1;
-};
-
-const getNeighborsTom = (node, grid) => {
-  const neighbors = [];
-  const { col, row } = node;
-
-  if (row < grid.length - 1 && !grid[row + 1][col].isWall) {
-    neighbors.push(grid[row + 1][col]);
-  }
-  if (row > 0 && !grid[row - 1][col].isWall) {
-    neighbors.push(grid[row - 1][col]);
-  }
-  if (col > 0 && !grid[row][col - 1].isWall) {
-    neighbors.push(grid[row][col - 1]);
-  }
-  if (col < grid[0].length - 1 && !grid[row][col + 1].isWall) {
-    neighbors.push(grid[row][col + 1]);
-  }
-  return neighbors;
-};
-
-const getUnvisitedNeighbors = (node, grid, order) => {
-  const neighbors = [];
-  const { col, row } = node;
-  if (order === "vertical") {
-    if (col > 0) neighbors.push(grid[row][col - 1]);
-    if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-    if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-    if (row > 0) neighbors.push(grid[row - 1][col]);
-  }
-  if (order === "horizontal") {
-    if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-    if (row > 0) neighbors.push(grid[row - 1][col]);
-    if (col > 0) neighbors.push(grid[row][col - 1]);
-    if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-  }
-  return neighbors;
-  // return neighbors.filter((neighbor) => !neighbor.isVisited);
-=======
     let neighbors = getNeighbors(currNode, grid, order);
     neighbors = neighbors.filter((neighbor) => !neighbor.isVisited);
     neighbors.forEach((neighbor) => {
@@ -499,7 +355,6 @@ const getUnvisitedNeighbors = (node, grid, order) => {
   }
 
   return visitedNodesInOrder;
->>>>>>> master
 };
 
 class Stack {
@@ -607,16 +462,6 @@ const addShortPathBetweenUneighbours = (visitedIncludingJumps, gridCopy) => {
 
 export const data = [
   {
-<<<<<<< HEAD
-    name: "Horizontal Mapping",
-    shortened: "Horizontal",
-    func: (grid, startNode) => mappingDfs(grid, startNode),
-  },
-  {
-    name: "Vertical Mapping",
-    shortened: "Vertical",
-    func: (grid, startNode) => mappingDfs(grid, startNode),
-=======
     name: "Random Traversal",
     shortened: "Random",
     func: (grid, map, dockingStation, availableSteps) =>
@@ -627,7 +472,6 @@ export const data = [
     shortened: "Best First",
     func: (grid, map, dockingStation, availableSteps) =>
       baseMap(grid, map, dockingStation, availableSteps, bestFirst),
->>>>>>> master
   },
   {
     name: "Spiral Traversal",
