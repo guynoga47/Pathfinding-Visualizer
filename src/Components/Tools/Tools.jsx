@@ -268,7 +268,6 @@ const Tools = (props) => {
           Save Configuration
         </Typography>
       </Popover>
-
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
@@ -292,7 +291,6 @@ const Tools = (props) => {
           Load Configuration
         </Typography>
       </Popover>
-
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
@@ -314,7 +312,6 @@ const Tools = (props) => {
       >
         <Typography className={classes.popoverText}>Pen</Typography>
       </Popover>
-
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
@@ -336,7 +333,6 @@ const Tools = (props) => {
       >
         <Typography className={classes.popoverText}>Obstacle</Typography>
       </Popover>
-
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
