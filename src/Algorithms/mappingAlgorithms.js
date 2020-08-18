@@ -1,7 +1,4 @@
-import {
-  bfs,
-  astar
-} from "./pathfindingAlgorithms";
+import { bfs, astar } from "./pathfindingAlgorithms";
 import {
   getAllNodes,
   getGridDeepCopy,
@@ -33,11 +30,20 @@ export const baseMap = (grid, map, dockingStation, availableSteps, step) => {
     currNode.visitCount = !currNode.visitCount ? 1 : currNode.visitCount + 1;
     i++;
   }
+
+  let t0 = performance.now();
+
   const robotPath = modifyVisitedNodesConsideringBatteryAndReturnPath(
     visitedNodesInOrder,
     map,
     dockingStation,
     availableSteps
+  );
+  let t1 = performance.now();
+  console.log(
+    "Call to modifyVisitedNodesConsideringBatteryAndReturnPath took " +
+      (t1 - t0) +
+      " milliseconds."
   );
   return robotPath;
 };
@@ -52,13 +58,14 @@ export const breadthMapping = (grid, startNode) => {
   let currentLocation = startNode;
   //assign bfs result nodes isMapped=true before applying astar and searching through mapped nodes.
   bfsResult.forEach((node) => {
-    let astarResult = astar(grid, currentLocation, node, [{
+    let astarResult = astar(grid, currentLocation, node, [
+      {
         attribute: "isVisited",
-        evaluation: false
+        evaluation: false,
       },
       {
         attribute: "isWall",
-        evaluation: false
+        evaluation: false,
       },
     ]);
     let path = getShortestPathNodesInOrder(astarResult[astarResult.length - 1]);
@@ -108,10 +115,7 @@ const spiralMap = (grid, map, dockingStation, availableSteps) => {
 
   const accessibleNodesCoords = gridDimensionsLimitedCoords.filter(
     (nodeCoord) => {
-      const {
-        row,
-        col
-      } = nodeCoord;
+      const { row, col } = nodeCoord;
       return accessibleNodes.includes(map[row][col]);
     }
   );
@@ -157,7 +161,7 @@ const calculateSpiralTraversalOffsets = (grid, availableSteps) => {
     ) {
       offsets.push({
         row,
-        col
+        col,
       });
     }
     if (
@@ -187,11 +191,6 @@ const randomOptimized = (currNode, map, grid) => {
   );
   const neighborsProbabilities = [];
 
-  /* neighborsDescending.forEach((neighbor, i) => {
-    for (let count = 0; count <= neighbor.visitCount; count++) {
-      neighborsProbabilities.push(neighborsAscending[i]);
-    }
-  }); */
   const multipliers = [70, 20, 5, 5];
   neighborsDescending.forEach((neighbor, i) => {
     for (let count = 0; count <= multipliers[i]; count++) {
@@ -230,14 +229,29 @@ const pushPathToNewStartingNode = (
     dockingStation
   );
   if (
-    availableSteps >= pathToStartingNode.length * 2 &&
-    dockingStation.isMapped
+    isNewStartNodeRequiredAndAccessible(
+      pathToStartingNode,
+      availableSteps,
+      dockingStation
+    )
   ) {
     visitedNodesInOrder.push(...pathToStartingNode);
     const newStartingNode = pathToStartingNode[pathToStartingNode.length - 1];
     return [newStartingNode, pathToStartingNode];
   }
   return [dockingStation, []];
+};
+
+const isNewStartNodeRequiredAndAccessible = (
+  pathToStartingNode,
+  availableSteps,
+  dockingStation
+) => {
+  return (
+    pathToStartingNode.length &&
+    availableSteps >= pathToStartingNode.length * 2 &&
+    dockingStation.isMapped
+  );
 };
 
 const resolvePathToStartingNode = (grid, map, dockingStation) => {
@@ -248,17 +262,18 @@ const resolvePathToStartingNode = (grid, map, dockingStation) => {
       map,
       dockingStation,
       unmappedAreaBufferNode,
-      [{
+      [
+        {
           attribute: "isVisited",
-          evaluation: false
+          evaluation: false,
         },
         {
           attribute: "isWall",
-          evaluation: false
+          evaluation: false,
         },
         {
           attribute: "isMapped",
-          evaluation: true
+          evaluation: true,
         },
       ]
     );
@@ -279,7 +294,10 @@ const modifyVisitedNodesConsideringBatteryAndReturnPath = (
   dockingStation,
   availableSteps
 ) => {
+  let t2 = performance.now();
   const runningMap = getGridDeepCopy(map);
+  let t3 = performance.now();
+  console.log("Call to getGridDeepCopy took " + (t3 - t2) + " milliseconds.");
 
   const startNodeRef = runningMap[dockingStation.row][dockingStation.col];
   /*     visitedNodesInOrder.forEach((visitedNode) => {
@@ -304,29 +322,35 @@ const modifyVisitedNodesConsideringBatteryAndReturnPath = (
     (node) => (runningMap[node.row][node.col].isMapped = true)
   );
 
+  let counter = 0;
+  let t0 = performance.now();
   for (
     let i = Math.min(
       availableSteps - 1,
       visitedNodesConsideringBattery.length - 1
-    ); i >= 1; i--
+    );
+    i >= 1;
+    i--
   ) {
     const node =
       runningMap[visitedNodesConsideringBattery[i].row][
         visitedNodesConsideringBattery[i].col
       ];
-    const searchResult = astar(runningMap, node, startNodeRef, [{
+    const searchResult = astar(runningMap, node, startNodeRef, [
+      {
         attribute: "isVisited",
-        evaluation: false
+        evaluation: false,
       },
       {
         attribute: "isWall",
-        evaluation: false
+        evaluation: false,
       },
       {
         attribute: "isMapped",
-        evaluation: true
+        evaluation: true,
       },
     ]);
+    counter++;
 
     if (searchResult) {
       const pathToDockingStation = getShortestPathNodesInOrder(
@@ -336,12 +360,17 @@ const modifyVisitedNodesConsideringBatteryAndReturnPath = (
         const robotPath = visitedNodesInOrder
           .slice(0, i)
           .concat(pathToDockingStation);
-        console.log("robotPath: ", robotPath);
+        console.log("iteration " + counter);
         removeDuplicateNodes(robotPath);
+        let t1 = performance.now();
+        console.log(
+          "loop in modifiyVisitedNodes took " + (t1 - t0) + " milliseconds."
+        );
         return robotPath;
       }
     }
   }
+
   console.log(
     "error in modifyVisitedNodesConsideringBatteryAndReturnPath in GlobalContext"
   );
@@ -353,19 +382,16 @@ const getRandomBufferNode = (map, grid) => {
   const mappedNodes = allNodes.filter((node) => node.isMapped);
   const unmappedMapAdjacentNodes = mappedNodes.filter((node) => {
     const unmappedNeighbors = getNeighbors(node, grid).filter((neighbor) => {
-      const {
-        row,
-        col
-      } = neighbor;
+      const { row, col } = neighbor;
       return !map[row][col].isMapped && !grid[row][col].isWall;
     });
     return unmappedNeighbors.length > 0;
   });
-  return unmappedMapAdjacentNodes.length > 0 ?
-    unmappedMapAdjacentNodes[
-      Math.floor(Math.random() * unmappedMapAdjacentNodes.length)
-    ] :
-    false;
+  return unmappedMapAdjacentNodes.length > 0
+    ? unmappedMapAdjacentNodes[
+        Math.floor(Math.random() * unmappedMapAdjacentNodes.length)
+      ]
+    : false;
 };
 
 const dfs = (grid, startNode, finishNode, order) => {
@@ -427,100 +453,100 @@ class Stack {
 
 /************************************************************** */
 
-const dfsHelper = (grid, robotMap, startNode, battery) => {
-  const visitedNodesInOrder = []
+const depthMap = (grid, robotMap, startNode, availableSteps) => {
+  const visitedNodesInOrder = [];
 
-  let [currStartNode, pathFromDockToStartNode] = pushPathToNewStartingNode(robotMap, robotMap, startNode, visitedNodesInOrder, battery);
-  let newBattery = battery - pathFromDockToStartNode.length;
-
-  //let visitedIncludingJumps = dfs(grid, startNode);
-  let visitedIncludingJumps = dfs(robotMap, currStartNode);
-  //const gridCopy = JSON.parse(JSON.stringify(grid));
-  const gridCopy = JSON.parse(JSON.stringify(robotMap));
-
-  let mappingPath = addShortPathBetweenUneighbours(
-    visitedIncludingJumps,
-    gridCopy
+  let [currStartNode, pathFromDockToStartNode] = pushPathToNewStartingNode(
+    robotMap,
+    robotMap,
+    startNode,
+    visitedNodesInOrder,
+    availableSteps
   );
 
-  visitedNodesInOrder.push(...mappingPath)
+  availableSteps = availableSteps - pathFromDockToStartNode.length;
 
-  let visitedConsideringBattery = modifyVisitedNodesConsideringBatteryAndReturnPath(visitedNodesInOrder, robotMap, startNode, newBattery);
+  let t0 = performance.now();
+
+  let dfsResult = dfs(robotMap, currStartNode);
+
+  let t1 = performance.now();
+
+  console.log("Call to dfs took " + (t1 - t0) + " milliseconds.");
+
+  t0 = performance.now();
+  let mappingPath = addShortPathBetweenUneighbours(dfsResult, robotMap);
+  t1 = performance.now();
+
+  console.log(
+    "Call to addShortPathBetweenUneighbours took " +
+      (t1 - t0) +
+      " milliseconds."
+  );
+
+  visitedNodesInOrder.push(...mappingPath);
+
+  t0 = performance.now();
+
+  resetGridSearchProperties(robotMap);
+  /*
+  we reset grid properties because modifyVisitedNodes tries to deepcopy the map it gets. after astar the previousNodes
+  in some nodes of the map are pointing to other nodes, so we actually deep copying much more objects then we intend to, 
+  causing a huge unnessecary delay.
+   */
+  let visitedConsideringBattery = modifyVisitedNodesConsideringBatteryAndReturnPath(
+    visitedNodesInOrder,
+    robotMap,
+    startNode,
+    availableSteps
+  );
+  t1 = performance.now();
+  console.log(
+    "Call to modifyVisitedNodesConsideringBattery took " +
+      (t1 - t0) +
+      " milliseconds."
+  );
 
   return visitedConsideringBattery;
-};
-
-const areNeighbors = (node1, node2, gridCopy) => {
-  let node1Neighbors = getNeighbors(node1, gridCopy);
-  for (let i = 0; i < node1Neighbors.length; i++) {
-    if (
-      node1Neighbors[i].row === node2.row &&
-      node1Neighbors[i].col === node2.col
-    ) {
-      return true;
-    }
-  }
-  return false;
 };
 
 const addShortPathBetweenUneighbours = (visitedIncludingJumps, gridCopy) => {
   let fixedVisitedNodesInOrder = [];
   for (let i = 0; i < visitedIncludingJumps.length - 1; i++) {
-    if (!isNeighbors(visitedIncludingJumps[i], visitedIncludingJumps[i + 1])
-      // !areNeighbors(
-      //   visitedIncludingJumps[i],
-      //   visitedIncludingJumps[i + 1],
-      //   gridCopy
-      // )
-    ) {
-      //find shortest path using astar
+    if (!isNeighbors(visitedIncludingJumps[i], visitedIncludingJumps[i + 1])) {
       let node1 =
         gridCopy[visitedIncludingJumps[i].row][visitedIncludingJumps[i].col];
       let node2 =
         gridCopy[visitedIncludingJumps[i + 1].row][
           visitedIncludingJumps[i + 1].col
         ];
-      console.log(
-        "i: " +
-        i +
-        " start node is: (" +
-        visitedIncludingJumps[i].row +
-        ", " +
-        visitedIncludingJumps[i].col +
-        ") finish node is: (" +
-        visitedIncludingJumps[i + 1].row +
-        ", " +
-        visitedIncludingJumps[i + 1].col +
-        ")"
+
+      let astarResult = astar(gridCopy, node1, node2, [
+        {
+          attribute: "isVisited",
+          evaluation: false,
+        },
+        {
+          attribute: "isWall",
+          evaluation: false,
+        },
+      ]);
+      let shortestPath = getShortestPathNodesInOrder(
+        astarResult[astarResult.length - 1]
       );
-      let astarResult = astar(
-        gridCopy,
-        node1,
-        node2,
-        //visitedIncludingJumps[i],
-        //visitedIncludingJumps[i + 1],
-        [{
-            attribute: "isVisited",
-            evaluation: false
-          },
-          {
-            attribute: "isWall",
-            evaluation: false
-          },
-        ]
-      );
-      let shortestPath = getShortestPathNodesInOrder(astarResult[astarResult.length - 1]);
       fixedVisitedNodesInOrder.push(...shortestPath);
     } else {
       fixedVisitedNodesInOrder.push(visitedIncludingJumps[i]);
     }
   }
-  // insert the last node - "complete the work"
-  fixedVisitedNodesInOrder.push(visitedIncludingJumps[visitedIncludingJumps.length - 1]);
+  fixedVisitedNodesInOrder.push(
+    visitedIncludingJumps[visitedIncludingJumps.length - 1]
+  );
   return fixedVisitedNodesInOrder;
 };
 
-export const data = [{
+export const data = [
+  {
     name: "Random Traversal",
     shortened: "Random",
     func: (grid, map, dockingStation, availableSteps) =>
@@ -538,8 +564,8 @@ export const data = [{
     func: spiralMap,
   },
   {
-    name: "DFS Traversal",
-    shortened: "DFS",
-    func: dfsHelper,
+    name: "Depth Traversal",
+    shortened: "Depth",
+    func: depthMap,
   },
 ];
