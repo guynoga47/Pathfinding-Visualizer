@@ -14,8 +14,8 @@ export default class Visualizer extends Component {
   constructor(props) {
     super(props);
     this.speed = DEFAULT_SPEED;
-    this.mouseKeyDown = false;
-    this.endPointKeyDown = "";
+    this.mouseDown = false;
+    this.startNodeMouseDown = false;
   }
 
   handleSpeedChanged = (speed) => {
@@ -72,11 +72,6 @@ export default class Visualizer extends Component {
       else {
         ReactDOM.findDOMNode(this.refs[node]).classList.add(`node-start`);
       }
-      if (!this.context.isFinishNode(row, col))
-        ReactDOM.findDOMNode(this.refs[node]).classList.remove(`node-finish`);
-      else {
-        ReactDOM.findDOMNode(this.refs[node]).classList.add(`node-finish`);
-      }
     }
   };
 
@@ -84,16 +79,11 @@ export default class Visualizer extends Component {
     const { drawingMode } = this.props;
     const { isFinished, isRunning } = this.context.state;
     if (isFinished || isRunning) return;
-    this.mouseKeyDown = true;
-    if (
-      this.context.isStartNode(row, col) ||
-      this.context.isFinishNode(row, col)
-    ) {
-      this.endPointKeyDown = this.context.isStartNode(row, col)
-        ? "start"
-        : "finish";
+    this.mouseDown = true;
+    if (this.context.isStartNode(row, col)) {
+      this.startNodeMouseDown = true;
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
-        `node-${this.endPointKeyDown}`
+        `node-start`
       );
     } else {
       if (drawingMode === "rectangle" || drawingMode === "obstacle") {
@@ -107,20 +97,20 @@ export default class Visualizer extends Component {
     const { drawingMode } = this.props;
     const { isFinished, isRunning } = this.context.state;
     if (isFinished || isRunning) return;
-    if (this.endPointKeyDown) {
+    if (this.startNodeMouseDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
-        `node-${this.endPointKeyDown}`
+        `node-start`
       );
-    } else if (!this.context.isStartNode() && !this.context.isFinishNode()) {
+    } else if (!this.context.isStartNode(row, col)) {
       if (drawingMode === "rectangle") {
-        if (this.mouseKeyDown) {
+        if (this.mouseDown) {
           this.createAndRenderRectangle(row, col, {
             fill: false,
             toggle: true,
           });
         }
       } else if (drawingMode === "obstacle") {
-        if (this.mouseKeyDown) {
+        if (this.mouseDown) {
           this.createAndRenderRectangle(row, col, { fill: true, toggle: true });
         }
       }
@@ -130,10 +120,10 @@ export default class Visualizer extends Component {
   handleMouseEnter = (row, col) => {
     const { drawingMode } = this.props;
     const { isFinished, isRunning } = this.context.state;
-    if (isFinished || !this.mouseKeyDown || isRunning) return;
-    if (this.endPointKeyDown) {
+    if (isFinished || !this.mouseDown || isRunning) return;
+    if (this.startNodeMouseDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
-        `node-${this.endPointKeyDown}`
+        `node-start`
       );
     } else if (drawingMode === "obstacle") {
       this.createAndRenderRectangle(row, col, { fill: true, add: true });
@@ -160,18 +150,18 @@ export default class Visualizer extends Component {
   };
 
   handleMouseUp = (row, col) => {
-    const { isFinished, isRunning, startNode, finishNode } = this.context.state;
+    const { isFinished, isRunning } = this.context.state;
+    const { updateState } = this.context;
+    console.log("mouse up");
     if (isFinished || isRunning) return;
-    if (this.endPointKeyDown) {
-      let endPoint = this.endPointKeyDown === "start" ? startNode : finishNode;
-      endPoint.row = row;
-      endPoint.col = col;
+    if (this.startNodeMouseDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
-        `node-${this.endPointKeyDown}`
+        `node-start`
       );
+      updateState("startNode", { row: row, col: col });
     }
-    this.endPointKeyDown = false;
-    this.mouseKeyDown = false;
+    this.startNodeMouseDown = false;
+    this.mouseDown = false;
   };
 
   calculateRectangleNodes = (row, col, { fill }) => {
@@ -190,8 +180,7 @@ export default class Visualizer extends Component {
               j === endPoint.col ||
               i === startPoint.row ||
               i === endPoint.row) &&
-            !this.context.isStartNode(i, j) &&
-            !this.context.isFinishNode(i, j)
+            !this.context.isStartNode(i, j)
           ) {
             rectangleNodes.push({ row: i, col: j });
           }
@@ -206,20 +195,14 @@ export default class Visualizer extends Component {
   changeNodeWall = (row, col, { toggle, add }) => {
     const node = this.context.state.grid[row][col];
     if (toggle) {
-      if (
-        !this.context.isStartNode(row, col) &&
-        !this.context.isFinishNode(row, col)
-      ) {
+      if (!this.context.isStartNode(row, col)) {
         ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.toggle(
           "node-wall"
         );
         node.isWall = !node.isWall;
       }
     } else if (add) {
-      if (
-        !this.context.isStartNode(row, col) &&
-        !this.context.isFinishNode(row, col)
-      ) {
+      if (!this.context.isStartNode(row, col)) {
         ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
           "node-wall"
         );
@@ -228,9 +211,16 @@ export default class Visualizer extends Component {
     }
   };
 
-  visualize = (visitedNodesInOrder /* nodesInShortestPathOrder */) => {
-    for (let i = 0; i <= visitedNodesInOrder.length; i++) {
-      if (i === visitedNodesInOrder.length) {
+  visualize = (visitedNodesInOrder) => {
+    const visualizationArray = [];
+    visitedNodesInOrder.forEach((node) => {
+      for (let i = 0; i < node.dust; i++) {
+        visualizationArray.push(node);
+      }
+    });
+    for (let i = 0; i <= visualizationArray.length; i++) {
+      const node = visualizationArray[i];
+      if (i === visualizationArray.length) {
         setTimeout(() => {
           this.context.updateState("isRunning", false);
           this.context.updateState("isFinished", true);
@@ -238,19 +228,37 @@ export default class Visualizer extends Component {
         return;
       }
       setTimeout(() => {
-        const node = visitedNodesInOrder[i];
         let { availableSteps } = this.context.state;
         ReactDOM.findDOMNode(
           this.refs[`node-${node.row}-${node.col}`]
         ).classList.add("node-visited");
+        this.removeDust(node);
         this.context.updateState("availableSteps", availableSteps - 1);
       }, this.speed * i);
       setTimeout(() => {
-        const node = visitedNodesInOrder[i];
         ReactDOM.findDOMNode(
           this.refs[`node-${node.row}-${node.col}`]
         ).classList.remove("node-visited");
       }, this.speed * (i + 1));
+    }
+  };
+
+  removeDust = (node) => {
+    const nodeDOM = ReactDOM.findDOMNode(
+      this.refs[`node-${node.row}-${node.col}`]
+    );
+    console.log(nodeDOM);
+    ReactDOM.findDOMNode(
+      this.refs[`node-${node.row}-${node.col}`]
+    ).classList.remove(`dust-${node.dust}`);
+    const x = node.row;
+    const y = node.col;
+    console.log(x, y);
+    if (node.dust > 0) {
+      node.dust--;
+      ReactDOM.findDOMNode(
+        this.refs[`node-${node.row}-${node.col}`]
+      ).classList.add(`dust-${node.dust}`);
     }
   };
 
@@ -302,9 +310,6 @@ export default class Visualizer extends Component {
 
     robot.syncMapLayoutWithGrid(grid);
 
-    /*     const gridCpy = this.context.getGridDeepCopy(grid);
-    const mapCpy = this.context.getGridDeepCopy(robot.map); */
-
     const robotPath = activeAlgorithmCallback(
       grid,
       robot.map,
@@ -324,10 +329,7 @@ export default class Visualizer extends Component {
     const { setClearWallsRequest } = this.props;
     for (let row = 0; row < this.context.gridHeight; row++) {
       for (let col = 0; col < this.context.gridWidth; col++) {
-        if (
-          !this.context.isStartNode(row, col) &&
-          !this.context.isFinishNode(row, col)
-        ) {
+        if (!this.context.isStartNode(row, col)) {
           if (this.context.state.grid[row][col].isWall) {
             this.changeNodeWall(row, col, { toggle: true });
           }
@@ -390,7 +392,7 @@ export default class Visualizer extends Component {
           {grid.map((row, rowIndex) => (
             <div key={rowIndex} className="row">
               {row.map((node) => {
-                const { row, col, isStart, isFinish } = node;
+                const { row, col, isStart, dust } = node;
                 return (
                   <Node
                     key={`node-${row}-${col}`}
@@ -398,7 +400,7 @@ export default class Visualizer extends Component {
                     row={row}
                     col={col}
                     isStart={isStart}
-                    isFinish={isFinish}
+                    dust={dust}
                     onMouseDown={this.handleMouseDown}
                     onMouseEnter={this.handleMouseEnter}
                     onMouseLeave={this.handleMouseLeave}

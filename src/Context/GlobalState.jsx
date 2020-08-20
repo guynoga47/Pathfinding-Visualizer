@@ -10,16 +10,12 @@ import { saveAs } from "file-saver";
 const DEFAULT_GRID_HEIGHT = 25;
 const DEFAULT_GRID_WIDTH = 50;
 
-const calculateDefaultGridEndPointsLocations = (height, width) => {
-  const defaultStartNode = {
+const calculateDefaultDockingStation = (height, width) => {
+  const defaultDockingStation = {
     row: Math.floor(height / 2),
-    col: Math.floor(width / 5),
+    col: Math.floor(width / 2),
   };
-  const defaultFinishNode = {
-    row: Math.floor(height / 2),
-    col: Math.floor((width * 4) / 5),
-  };
-  return { defaultStartNode, defaultFinishNode };
+  return defaultDockingStation;
 };
 
 class GlobalState extends Component {
@@ -27,10 +23,10 @@ class GlobalState extends Component {
     super(props);
     this.gridHeight = DEFAULT_GRID_HEIGHT;
     this.gridWidth = DEFAULT_GRID_WIDTH;
-    const {
-      defaultStartNode,
-      defaultFinishNode,
-    } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
+    const defaultDockingStation = calculateDefaultDockingStation(
+      this.gridHeight,
+      this.gridWidth
+    );
     this.state = {
       grid: [],
       availableSteps: this.gridHeight * this.gridWidth,
@@ -39,8 +35,7 @@ class GlobalState extends Component {
       activePathfindingAlgorithm: undefined,
       isFinished: false,
       isRunning: false,
-      startNode: defaultStartNode,
-      finishNode: defaultFinishNode,
+      startNode: defaultDockingStation,
       layoutLoaded: false,
     };
   }
@@ -54,18 +49,17 @@ class GlobalState extends Component {
   resizeGrid = (height, callback, param) => {
     this.gridHeight = height;
     this.gridWidth = height * 2;
-    const {
-      defaultStartNode,
-      defaultFinishNode,
-    } = calculateDefaultGridEndPointsLocations(this.gridHeight, this.gridWidth);
+    const defaultDockingStation = calculateDefaultDockingStation(
+      this.gridHeight,
+      this.gridWidth
+    );
     const grid = this.getInitialGrid();
     this.robot = new Robot(grid);
     this.setState(
       {
         grid,
         availableSteps: this.gridHeight * this.gridWidth,
-        startNode: defaultStartNode,
-        finishNode: defaultFinishNode,
+        startNode: defaultDockingStation,
         simulationType: undefined,
         activeMappingAlgorithm: undefined,
         activePathfindingAlgorithm: undefined,
@@ -83,7 +77,6 @@ class GlobalState extends Component {
         robot: this.robot,
         availableSteps: this.state.availableSteps,
         startNode: this.state.startNode,
-        finishNode: this.state.finishNode,
         simulationType: this.state
           .simulationType /* 
         activeMappingAlgorithm: this.state.activeMappingAlgorithm,
@@ -111,11 +104,7 @@ class GlobalState extends Component {
         grid: config.grid,
         availableSteps: config.availableSteps,
         startNode: config.startNode,
-        finishNode: config.finishNode,
-        simulationType:
-          config.simulationType /* 
-        activeMappingAlgorithm: config.activeMappingAlgorithm,
-        activePathfindingAlgorithm: config.activePathfindingAlgorithm, */,
+        simulationType: config.simulationType,
         layoutLoaded: true,
       },
       () => {
@@ -158,8 +147,8 @@ class GlobalState extends Component {
       row,
       col,
       isStart: this.isStartNode(row, col),
-      isFinish: this.isFinishNode(row, col),
       distance: Infinity,
+      dust: Math.floor(Math.random() * 10),
       heuristicDistance: Infinity,
       isWall: isWall,
       previousNode: null,
@@ -180,12 +169,6 @@ class GlobalState extends Component {
     return row === this.state.startNode.row && col === this.state.startNode.col;
   };
 
-  isFinishNode = (row, col) => {
-    return (
-      row === this.state.finishNode.row && col === this.state.finishNode.col
-    );
-  };
-
   convertAvailableStepsToBatteryCapacity = () => {
     return Math.floor(
       (this.state.availableSteps / (this.gridHeight * this.gridWidth)) * 100
@@ -203,7 +186,6 @@ class GlobalState extends Component {
           state: this.state,
           robot: this.robot,
           isStartNode: this.isStartNode,
-          isFinishNode: this.isFinishNode,
           convertBatteryCapacityToAvailableSteps: this
             .convertBatteryCapacityToAvailableSteps,
           convertAvailableStepsToBatteryCapacity: this

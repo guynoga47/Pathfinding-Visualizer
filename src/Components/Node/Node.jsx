@@ -12,6 +12,7 @@ export default class Node extends PureComponent {
       onMouseEnter,
       onMouseLeave,
       onMouseUp,
+      dust,
     } = this.props;
     const extraClassName = isStart
       ? "node-start"
@@ -24,7 +25,7 @@ export default class Node extends PureComponent {
     const nodeJSX = (
       <div
         id={`node-${row}-${col}`}
-        className={`node ${extraClassName}`}
+        className={`node ${extraClassName} dust-${dust}`}
         onMouseDown={() => onMouseDown(row, col)}
         onMouseUp={() => onMouseUp(row, col)}
         onMouseEnter={() => onMouseEnter(row, col)}
