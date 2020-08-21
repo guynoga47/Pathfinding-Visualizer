@@ -33,6 +33,8 @@ const Nav = (props) => {
     setHighlightMapRequest,
     drawingMode,
     setDrawingMode,
+    setDrawingElement,
+    drawingElement,
   } = props;
 
   const handleMapAlgorithmSelectionClicked = (event) => {
@@ -203,6 +205,8 @@ const Nav = (props) => {
               drawingMode={drawingMode}
               setDrawingMode={setDrawingMode}
               setHighlightMapRequest={setHighlightMapRequest}
+              drawingElement={drawingElement}
+              setDrawingElement={setDrawingElement}
             />
           </Grid>
         </Grid>

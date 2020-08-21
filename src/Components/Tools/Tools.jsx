@@ -8,7 +8,9 @@ import IconDrawObstacle from "@material-ui/icons/TabUnselected";
 
 import IconSave from "@material-ui/icons/GetApp";
 import IconLoad from "@material-ui/icons/Publish";
+import IconDust from "@material-ui/icons/BlurOn";
 import IconMap from "@material-ui/icons/Map";
+import IconWall from "@material-ui/icons/ViewQuilt";
 import Popover from "@material-ui/core/Popover";
 import Typography from "@material-ui/core/Typography";
 
@@ -24,8 +26,22 @@ const Tools = (props) => {
   const context = useContext(GridContext);
 
   const { isRunning, isFinished } = context.state;
-  const { setHighlightMapRequest, setDrawingMode, drawingMode } = props;
+  const {
+    setHighlightMapRequest,
+    setDrawingMode,
+    drawingMode,
+    setDrawingElement,
+    drawingElement,
+  } = props;
 
+  const [
+    anchorElDrawingElementDust,
+    setAnchorElDrawingElementDust,
+  ] = React.useState(null);
+  const [
+    anchorElDrawingElementWall,
+    setAnchorElDrawingElementWall,
+  ] = React.useState(null);
   const [anchorElDrawFree, setAnchorElDrawFree] = React.useState(null);
   const [anchorElDrawRectangle, setAnchorElDrawRectangle] = React.useState(
     null
@@ -82,6 +98,12 @@ const Tools = (props) => {
       case "btn-battery":
         setAnchorElBatteryCapacityHover(event.currentTarget);
         break;
+      case "btn-dust":
+        setAnchorElDrawingElementDust(event.currentTarget);
+        break;
+      case "btn-wall":
+        setAnchorElDrawingElementWall(event.currentTarget);
+        break;
       default:
         console.log("Default case entered in Tools.jsx: handlePopoverOpen");
     }
@@ -109,11 +131,19 @@ const Tools = (props) => {
         break;
       case "btn-battery":
         setAnchorElBatteryCapacityHover(null);
-
+        break;
+      case "btn-dust":
+        setAnchorElDrawingElementDust(null);
+        break;
+      case "btn-wall":
+        setAnchorElDrawingElementWall(null);
         break;
       default:
         console.log("Default case entered in Tools.jsx: handlePopoverClose");
     }
+  };
+  const handleDrawingElementButtonClicked = (event) => {
+    setDrawingElement(event.currentTarget.id === "btn-wall" ? "dust" : "wall");
   };
 
   const handleDrawingModeButtonClicked = (event) => {
@@ -150,6 +180,30 @@ const Tools = (props) => {
   const classes = useStyles();
   return (
     <div className={classes.tools}>
+      {drawingElement === "dust" ? (
+        <IconButton
+          id={"btn-dust"}
+          className={classes.iconActive}
+          onClick={handleDrawingElementButtonClicked}
+          onMouseEnter={handlePopoverOpen}
+          onMouseLeave={handlePopoverClose}
+          disabled={drawingMode === "wall"}
+        >
+          <IconDust />
+        </IconButton>
+      ) : (
+        <IconButton
+          id={"btn-wall"}
+          className={classes.iconActive}
+          onClick={handleDrawingElementButtonClicked}
+          onMouseEnter={handlePopoverOpen}
+          onMouseLeave={handlePopoverClose}
+          disabled={drawingMode === "dust"}
+        >
+          <IconWall />
+        </IconButton>
+      )}
+      {console.log(drawingElement)}
       <IconButton
         id={"btn-free"}
         className={drawingMode === "free" ? classes.iconActive : classes.icon}
@@ -267,6 +321,48 @@ const Tools = (props) => {
         <Typography className={classes.popoverText}>
           Save Configuration
         </Typography>
+      </Popover>
+      <Popover
+        id="mouse-over-popover"
+        className={classes.popover}
+        classes={{
+          paper: classes.paper,
+        }}
+        open={Boolean(anchorElDrawingElementDust)}
+        anchorEl={anchorElDrawingElementDust}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        onClose={handlePopoverClose}
+        disableRestoreFocus
+      >
+        <Typography className={classes.popoverText}>Dust</Typography>
+      </Popover>
+      <Popover
+        id="mouse-over-popover"
+        className={classes.popover}
+        classes={{
+          paper: classes.paper,
+        }}
+        open={Boolean(anchorElDrawingElementWall)}
+        anchorEl={anchorElDrawingElementWall}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        onClose={handlePopoverClose}
+        disableRestoreFocus
+      >
+        <Typography className={classes.popoverText}>Wall</Typography>
       </Popover>
       <Popover
         id="mouse-over-popover"

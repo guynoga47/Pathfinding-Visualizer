@@ -79,13 +79,6 @@ export const breadthMapping = (grid, startNode) => {
 const spiralMap = (grid, map, dockingStation, availableSteps) => {
   const visitedNodesInOrder = [];
 
-  /*   let [startNode, startingPathLength] = resolvePathToStartingNode(
-    visitedNodesInOrder,
-    grid,
-    map,
-    dockingStation
-  ); */
-
   let [startNode, pathToStartingNode] = pushPathToNewStartingNode(
     grid,
     map,
@@ -560,9 +553,6 @@ const adjList = (grid, map, dockingStation, availableSteps) => {
   for (let i = 0; i < numNodes; i++) {
     adjList.push([]);
     for (let j = 0; j < numNodes; j++) {
-      /* if (nodeRefs[i].isWall || nodeRefs[j].isWall || (nodeRefs[i] === nodeRefs[j])) {
-        adjList[i].push(null);
-      } else { */
       if (isNeighbors(nodeRefs[i], nodeRefs[j])) {
         adjList[i].push({
           u: nodeRefs[i],
@@ -582,15 +572,10 @@ const getOneDimensionalNodeArray = (grid) => {
       array.push(grid[i][j]);
     }
   }
-  return array;
 };
 
 const getWeight = (n1, n2) => {
-  if (n1.isWall || n2.isWall || n1 === n2) {
-    return null;
-  } else {
-    return n2.dust;
-  }
+  return n1.isWall || n2.isWall || n1 === n2 ? null : n2.dust;
 };
 
 export const data = [
@@ -617,7 +602,7 @@ export const data = [
     func: depthMap,
   },
   {
-    name: "Check Adj List",
+    name: "Adjanceny List",
     shortened: "Adj",
     func: adjList,
   },

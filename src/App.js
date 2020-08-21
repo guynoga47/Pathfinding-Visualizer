@@ -17,6 +17,7 @@ const App = () => {
     cleared: true,
   });
   const [drawingMode, setDrawingMode] = useState("free");
+  const [drawingElement, setDrawingElement] = useState("dust");
   const [highlightMapRequest, setHighlightMapRequest] = useState(false);
 
   return (
@@ -30,6 +31,8 @@ const App = () => {
             setHighlightMapRequest={setHighlightMapRequest}
             setDrawingMode={setDrawingMode}
             drawingMode={drawingMode}
+            drawingElement={drawingElement}
+            setDrawingElement={setDrawingElement}
           />
           <Visualizer
             isClearWallsRequested={clearWallsRequest}
@@ -37,6 +40,7 @@ const App = () => {
             isHighlightMapRequested={highlightMapRequest}
             setHighlightMapRequest={setHighlightMapRequest}
             drawingMode={drawingMode}
+            drawingElement={drawingElement}
           />
         </GlobalState>
       </ThemeProvider>

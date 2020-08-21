@@ -9,9 +9,44 @@ cursor: `url(${importAssetName}, auto` for example.
   height: 24px;
   border: 1px solid rgba(0, 0, 0, 0.15);
   cursor: url("../../assets/cursors/cross.cur"), pointer;
-  /* border: 1px solid rgb(175, 216, 248); */
   border-width: thin;
   display: inline-block;
+}
+
+.dust-1 {
+  background-image: url("../../assets/dust/dust-1.png");
+}
+
+.dust-2 {
+  background-image: url("../../assets/dust/dust-2.png");
+}
+
+.dust-3 {
+  background-image: url("../../assets/dust/dust-3.png");
+}
+
+.dust-4 {
+  background-image: url("../../assets/dust/dust-4.png");
+}
+
+.dust-5 {
+  background-image: url("../../assets/dust/dust-5.png");
+}
+
+.dust-6 {
+  background-image: url("../../assets/dust/dust-6.png");
+}
+
+.dust-7 {
+  background-image: url("../../assets/dust/dust-7.png");
+}
+
+.dust-8 {
+  background-image: url("../../assets/dust/dust-8.png");
+}
+
+.dust-9 {
+  background-image: url("../../assets/dust/dust-9.png");
 }
 
 .highlight {
@@ -22,15 +57,11 @@ cursor: `url(${importAssetName}, auto` for example.
 .node-start {
   background-size: 100% auto;
   background-image: url("../../assets/icons/charging-station.svg");
-  /* background-color: red;
-  border-color: red; */
   cursor: url("../../assets/cursors/move.cur"), pointer;
 }
 
 .node-finish {
   background-image: url("../../assets/icons/door.svg");
-  /* background-color: red;
-  border-color: red; */
   cursor: url("../../assets/cursors/move.cur"), pointer;
 }
 
