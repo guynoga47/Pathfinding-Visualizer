@@ -163,6 +163,7 @@ class GlobalState extends Component {
       heuristicDistance: Infinity,
       isWall: isWall,
       previousNode: null,
+      dust: Math.floor(Math.random() * 6), //0-5
     };
   };
 

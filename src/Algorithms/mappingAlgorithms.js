@@ -545,6 +545,54 @@ const addShortPathBetweenUneighbours = (visitedIncludingJumps, gridCopy) => {
   return fixedVisitedNodesInOrder;
 };
 
+const adjList = (grid, map, dockingStation, availableSteps) => {
+  const adjList = [];
+  grid[0][0].dust = 3;
+  grid[0][1].dust = 9;
+  grid[0][2].dust = 7;
+  grid[1][0].dust = 5;
+  grid[1][1].dust = 1;
+  grid[1][2].dust = 2;
+  grid[2][1].dust = 4;
+  grid[2][2].dust = 6;
+  const nodeRefs = getOneDimensionalNodeArray(grid);
+  const numNodes = grid.length * grid[0].length;
+  for (let i = 0; i < numNodes; i++) {
+    adjList.push([]);
+    for (let j = 0; j < numNodes; j++) {
+      /* if (nodeRefs[i].isWall || nodeRefs[j].isWall || (nodeRefs[i] === nodeRefs[j])) {
+        adjList[i].push(null);
+      } else { */
+      if (isNeighbors(nodeRefs[i], nodeRefs[j])) {
+        adjList[i].push({
+          u: nodeRefs[i],
+          v: nodeRefs[j],
+          w: getWeight(nodeRefs[i], nodeRefs[j]),
+        });
+      }
+    }
+  }
+  return adjList;
+};
+
+const getOneDimensionalNodeArray = (grid) => {
+  const array = [];
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[0].length; j++) {
+      array.push(grid[i][j]);
+    }
+  }
+  return array;
+};
+
+const getWeight = (n1, n2) => {
+  if (n1.isWall || n2.isWall || n1 === n2) {
+    return null;
+  } else {
+    return n2.dust;
+  }
+};
+
 export const data = [
   {
     name: "Random Traversal",
@@ -567,5 +615,10 @@ export const data = [
     name: "Depth Traversal",
     shortened: "Depth",
     func: depthMap,
+  },
+  {
+    name: "Check Adj List",
+    shortened: "Adj",
+    func: adjList,
   },
 ];
