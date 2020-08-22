@@ -16,8 +16,12 @@ const App = () => {
     requested: false,
     cleared: true,
   });
+  const [clearDustRequest, setClearDustRequest] = useState({
+    requested: false,
+    cleared: true,
+  });
   const [drawingMode, setDrawingMode] = useState("free");
-  const [drawingElement, setDrawingElement] = useState("dust");
+  const [drawingElement, setDrawingElement] = useState("wall");
   const [highlightMapRequest, setHighlightMapRequest] = useState(false);
 
   return (
@@ -28,6 +32,7 @@ const App = () => {
             mappingAlgorithms={mappingAlgorithms.data}
             pathfindingAlgorithms={pathfindingAlgorithms.data}
             setClearWallsRequest={setClearWallsRequest}
+            setClearDustRequest={setClearDustRequest}
             setHighlightMapRequest={setHighlightMapRequest}
             setDrawingMode={setDrawingMode}
             drawingMode={drawingMode}
@@ -37,6 +42,8 @@ const App = () => {
           <Visualizer
             isClearWallsRequested={clearWallsRequest}
             setClearWallsRequest={setClearWallsRequest}
+            isClearDustRequested={clearDustRequest}
+            setClearDustRequest={setClearDustRequest}
             isHighlightMapRequested={highlightMapRequest}
             setHighlightMapRequest={setHighlightMapRequest}
             drawingMode={drawingMode}

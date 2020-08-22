@@ -30,6 +30,7 @@ const Nav = (props) => {
     mappingAlgorithms,
     pathfindingAlgorithms,
     setClearWallsRequest,
+    setClearDustRequest,
     setHighlightMapRequest,
     drawingMode,
     setDrawingMode,
@@ -58,6 +59,9 @@ const Nav = (props) => {
 
   const handleClearWallsRequested = () => {
     setClearWallsRequest({ cleared: false, requested: true });
+  };
+  const handleClearDustRequested = () => {
+    setClearDustRequest({ cleared: false, requested: true });
   };
 
   return (
@@ -112,15 +116,28 @@ const Nav = (props) => {
                 ? context.state.activePathfindingAlgorithm.shortened
                 : "SELECT SWEEP"}
             </Button>
-            <Button
-              className={classes.navButton}
-              aria-haspopup="true"
-              disabled={context.state.isRunning}
-              variant="contained"
-              onClick={handleClearWallsRequested}
-            >
-              Clear Walls
-            </Button>
+            {drawingElement === "wall" && (
+              <Button
+                className={classes.navButton}
+                aria-haspopup="true"
+                disabled={context.state.isRunning}
+                variant="contained"
+                onClick={handleClearWallsRequested}
+              >
+                Clear Walls
+              </Button>
+            )}
+            {drawingElement === "dust" && (
+              <Button
+                className={classes.navButton}
+                aria-haspopup="true"
+                disabled={context.state.isRunning}
+                variant="contained"
+                onClick={handleClearDustRequested}
+              >
+                Clear Dust
+              </Button>
+            )}
           </Grid>
 
           <StyledMenu

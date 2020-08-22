@@ -142,8 +142,14 @@ const Tools = (props) => {
         console.log("Default case entered in Tools.jsx: handlePopoverClose");
     }
   };
-  const handleDrawingElementButtonClicked = (event) => {
-    setDrawingElement(event.currentTarget.id === "btn-wall" ? "dust" : "wall");
+
+  const handleDustButtonClicked = (event) => {
+    setDrawingElement("wall");
+    setAnchorElDrawingElementDust(null);
+  };
+  const handleWallButtonClicked = (event) => {
+    setDrawingElement("dust");
+    setAnchorElDrawingElementWall(null);
   };
 
   const handleDrawingModeButtonClicked = (event) => {
@@ -152,7 +158,7 @@ const Tools = (props) => {
         ? "free"
         : event.currentTarget.id === "btn-rectangle"
         ? "rectangle"
-        : "obstacle"
+        : "filled rectangle"
     );
   };
 
@@ -171,6 +177,7 @@ const Tools = (props) => {
 
   const handleMapButtonMouseDown = (event) => {
     setHighlightMapRequest(true);
+    console.log(drawingMode);
   };
 
   const handleMapButtonMouseUp = (event) => {
@@ -184,10 +191,9 @@ const Tools = (props) => {
         <IconButton
           id={"btn-dust"}
           className={classes.iconActive}
-          onClick={handleDrawingElementButtonClicked}
-          onMouseEnter={handlePopoverOpen}
+          onClick={handleDustButtonClicked}
+          onMouseOver={handlePopoverOpen}
           onMouseLeave={handlePopoverClose}
-          disabled={drawingMode === "wall"}
         >
           <IconDust />
         </IconButton>
@@ -195,20 +201,18 @@ const Tools = (props) => {
         <IconButton
           id={"btn-wall"}
           className={classes.iconActive}
-          onClick={handleDrawingElementButtonClicked}
-          onMouseEnter={handlePopoverOpen}
+          onClick={handleWallButtonClicked}
+          onMouseOver={handlePopoverOpen}
           onMouseLeave={handlePopoverClose}
-          disabled={drawingMode === "dust"}
         >
           <IconWall />
         </IconButton>
       )}
-      {console.log(drawingElement)}
       <IconButton
         id={"btn-free"}
         className={drawingMode === "free" ? classes.iconActive : classes.icon}
         onClick={handleDrawingModeButtonClicked}
-        onMouseEnter={handlePopoverOpen}
+        onMouseOver={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
         disabled={isRunning || isFinished}
       >
@@ -220,8 +224,9 @@ const Tools = (props) => {
           drawingMode === "rectangle" ? classes.iconActive : classes.icon
         }
         onClick={handleDrawingModeButtonClicked}
-        onMouseEnter={handlePopoverOpen}
+        onMouseOver={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
+        hidden={true}
         disabled={isRunning || isFinished}
       >
         <IconDrawRectangle />
@@ -229,12 +234,12 @@ const Tools = (props) => {
       <IconButton
         id={"btn-obstacle"}
         className={
-          drawingMode === "obstacle" && !isRunning
+          drawingMode === "filled rectangle" && !isRunning
             ? classes.iconActive
             : classes.icon
         }
         onClick={handleDrawingModeButtonClicked}
-        onMouseEnter={handlePopoverOpen}
+        onMouseOver={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
         disabled={isRunning || isFinished}
       >
@@ -256,7 +261,7 @@ const Tools = (props) => {
         <IconButton
           id={"btn-load"}
           className={classes.icon}
-          onMouseEnter={handlePopoverOpen}
+          onMouseOver={handlePopoverOpen}
           onMouseLeave={handlePopoverClose}
           disabled={isRunning}
           component={"span"}
@@ -269,7 +274,7 @@ const Tools = (props) => {
       <IconButton
         id={"btn-save"}
         className={classes.icon}
-        onMouseEnter={handlePopoverOpen}
+        onMouseOver={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
         disabled={isRunning}
         onClick={handleSaveConfiguration}
@@ -280,7 +285,7 @@ const Tools = (props) => {
       <IconButton
         id={"btn-map"}
         className={classes.icon}
-        onMouseEnter={handlePopoverOpen}
+        onMouseOver={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
         disabled={isRunning}
         onMouseDown={handleMapButtonMouseDown}
@@ -293,7 +298,7 @@ const Tools = (props) => {
         id={"btn-battery"}
         className={classes.icon}
         onClick={handleBatteryCapacityButtonClicked}
-        onMouseEnter={handlePopoverOpen}
+        onMouseOver={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
       >
         <InteractiveBattery />
@@ -427,7 +432,9 @@ const Tools = (props) => {
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
-        <Typography className={classes.popoverText}>Obstacle</Typography>
+        <Typography className={classes.popoverText}>
+          Filled Rectangle
+        </Typography>
       </Popover>
       <Popover
         id="mouse-over-popover"
