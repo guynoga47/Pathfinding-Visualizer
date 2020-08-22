@@ -54,7 +54,7 @@ export default class Visualizer extends Component {
       }
       if (resetDust) {
         if (nodeDOM.classList.length > 1) {
-          const dust = nodeDOM.classList[2];
+          const dust = nodeDOM.classList[1];
           nodeDOM.classList.remove(`${dust}`);
         }
       }
