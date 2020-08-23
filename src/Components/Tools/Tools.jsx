@@ -142,8 +142,16 @@ const Tools = (props) => {
         console.log("Default case entered in Tools.jsx: handlePopoverClose");
     }
   };
-  const handleDrawingElementButtonClicked = (event) => {
-    setDrawingElement(event.currentTarget.id === "btn-wall" ? "dust" : "wall");
+
+  const handleDrawDustButtonClicked = (event) => {
+    setDrawingElement("wall");
+    setAnchorElDrawingElementDust(null);
+    setAnchorElDrawingElementWall(event.currentTarget.id);
+  };
+  const handleDrawWallButtonClicked = (event) => {
+    setDrawingElement("dust");
+    setAnchorElDrawingElementWall(null);
+    setAnchorElDrawingElementDust(event.currentTarget.id);
   };
 
   const handleDrawingModeButtonClicked = (event) => {
@@ -184,7 +192,7 @@ const Tools = (props) => {
         <IconButton
           id={"btn-dust"}
           className={classes.iconActive}
-          onClick={handleDrawingElementButtonClicked}
+          onClick={handleDrawDustButtonClicked}
           onMouseEnter={handlePopoverOpen}
           onMouseLeave={handlePopoverClose}
           disabled={drawingMode === "wall"}
@@ -195,7 +203,7 @@ const Tools = (props) => {
         <IconButton
           id={"btn-wall"}
           className={classes.iconActive}
-          onClick={handleDrawingElementButtonClicked}
+          onClick={handleDrawWallButtonClicked}
           onMouseEnter={handlePopoverOpen}
           onMouseLeave={handlePopoverClose}
           disabled={drawingMode === "dust"}
