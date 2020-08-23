@@ -4,6 +4,8 @@ import {
   resetGridSearchProperties,
 } from "./algorithmUtils";
 
+import Stack from "../Classes/Stack.js";
+
 export const bfs = (grid, startNode, finishNode) => {
   startNode.distance = 0;
   const unvisitedNodes = getAllNodes(grid);
@@ -44,50 +46,36 @@ const updateUnvisitedNeighborsDistances = (node, grid) => {
   }
 };
 
-const dfs = (grid, startNode, finishNode) => {
+export const dfs = (grid, startNode) => {
   const stack = new Stack();
   const visitedNodesInOrder = [];
   stack.push(startNode);
   while (!stack.isEmpty()) {
     const currNode = stack.pop();
-    currNode.isVisited = true;
     if (currNode.isWall) continue;
-    if (currNode === finishNode) return visitedNodesInOrder;
     if (!visitedNodesInOrder.includes(currNode))
       visitedNodesInOrder.push(currNode);
-    let neighbors = getNeighbors(currNode, grid).filter(
-      (neighbor) => neighbor.isMapped && !neighbor.isVisited && !neighbor.isWall
-    );
-    neighbors.forEach((neighbour) => {
-      if (!visitedNodesInOrder.includes(neighbour)) {
-        stack.push(neighbour);
-        neighbour.previousNode = currNode;
+    let neighbors = getNeighbors(currNode, grid);
+    // priortize by is mapped first in
+    neighbors = neighbors.filter((neighbor) => !neighbor.isVisited);
+    neighbors.sort((n1, n2) => {
+      if (n1.isMapped) {
+        return -1;
+      } else {
+        return 1;
+      }
+    });
+
+    neighbors.forEach((neighbor) => {
+      if (!visitedNodesInOrder.includes(neighbor)) {
+        stack.push(neighbor);
+        neighbor.previousNode = currNode;
       }
     });
   }
+
   return visitedNodesInOrder;
 };
-
-class Stack {
-  constructor() {
-    this.items = [];
-  }
-  push(item) {
-    this.items.push(item);
-  }
-  pop() {
-    return this.items.length ? this.items.pop() : null;
-  }
-  peek() {
-    return this.items.length ? this.items[this.items.length - 1] : null;
-  }
-  isEmpty() {
-    return this.items.length === 0;
-  }
-  printStack() {
-    this.items.forEach((item) => console.log(item));
-  }
-}
 
 export const astar = (grid, startNode, finishNode, filters) => {
   const visitedNodesInOrder = [];
@@ -148,21 +136,3 @@ const sortNodesByHeuristicDistance = (unvisitedNodes) => {
     (nodeA, nodeB) => nodeA.heuristicDistance - nodeB.heuristicDistance
   );
 };
-
-export const data = [
-  {
-    name: "Depth-first Search",
-    shortened: "DFS",
-    func: dfs,
-  },
-  {
-    name: "Breadth-first Search",
-    shortened: "BFS",
-    func: bfs,
-  },
-  {
-    name: "A* Search",
-    shortened: "A*",
-    func: astar,
-  },
-];

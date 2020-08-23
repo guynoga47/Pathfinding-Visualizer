@@ -12,6 +12,9 @@ import GridContext from "../../Context/grid-context";
 
 export const DEFAULT_SPEED = 200;
 
+const MIN_SPEED = 130;
+const MAX_SPEED = 270;
+
 const useStyles = ControlStyles;
 
 const Controls = (props) => {
@@ -46,20 +49,20 @@ const Controls = (props) => {
           <ResetIcon style={{ fontSize: "2em" }} />
         </IconButton>
       ) : (
-        <IconButton
-          className={classes.button}
-          onClick={onPlayButtonClicked}
-          disabled={
-            !context.state.activeMappingAlgorithm &&
-            !context.state.activePathfindingAlgorithm
-          }
-        >
-          <PlayIcon style={{ fontSize: "2em" }} />
-        </IconButton>
-      )}
+            <IconButton
+              className={classes.button}
+              onClick={onPlayButtonClicked}
+              disabled={
+                !context.state.activeMappingAlgorithm &&
+                !context.state.activeCleaningAlgorithm
+              }
+            >
+              <PlayIcon style={{ fontSize: "2em" }} />
+            </IconButton>
+          )}
       <SpeedSlider
-        min={130}
-        max={240}
+        min={MIN_SPEED}
+        max={MAX_SPEED}
         onSpeedChange={onSpeedChange}
         disabled={context.state.isRunning}
       />

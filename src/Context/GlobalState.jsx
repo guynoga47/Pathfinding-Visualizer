@@ -32,7 +32,7 @@ class GlobalState extends Component {
       availableSteps: this.gridHeight * this.gridWidth,
       simulationType: undefined,
       activeMappingAlgorithm: undefined,
-      activePathfindingAlgorithm: undefined,
+      activeCleaningAlgorithm: undefined,
       isFinished: false,
       isRunning: false,
       startNode: defaultDockingStation,
@@ -62,7 +62,7 @@ class GlobalState extends Component {
         startNode: defaultDockingStation,
         simulationType: undefined,
         activeMappingAlgorithm: undefined,
-        activePathfindingAlgorithm: undefined,
+        activeCleaningAlgorithm: undefined,
         isFinished: false,
         isRunning: false,
       },
@@ -77,10 +77,7 @@ class GlobalState extends Component {
         robot: this.robot,
         availableSteps: this.state.availableSteps,
         startNode: this.state.startNode,
-        simulationType: this.state
-          .simulationType /* 
-        activeMappingAlgorithm: this.state.activeMappingAlgorithm,
-        activePathfindingAlgorithm: this.state.activePathfindingAlgorithm, */,
+        simulationType: this.state.simulationType
       }),
     ]);
     const [rows, cols] = [this.gridHeight, this.gridWidth];
@@ -89,8 +86,8 @@ class GlobalState extends Component {
       `Grid Snapshot ${rows}*${cols} ${new Date()
         .toLocaleDateString()
         .replace(/\./g, "-")} at ${new Date()
-        .toLocaleTimeString()
-        .replace(/:/g, ".")}.json`
+          .toLocaleTimeString()
+          .replace(/:/g, ".")}.json`
     );
   };
 
@@ -148,7 +145,6 @@ class GlobalState extends Component {
       col,
       isStart: this.isStartNode(row, col),
       distance: Infinity,
-      /* dust: Math.floor(Math.random() * 10), */
       dust: 0,
       heuristicDistance: Infinity,
       isWall: isWall,
@@ -187,10 +183,8 @@ class GlobalState extends Component {
           state: this.state,
           robot: this.robot,
           isStartNode: this.isStartNode,
-          convertBatteryCapacityToAvailableSteps: this
-            .convertBatteryCapacityToAvailableSteps,
-          convertAvailableStepsToBatteryCapacity: this
-            .convertAvailableStepsToBatteryCapacity,
+          convertBatteryCapacityToAvailableSteps: this.convertBatteryCapacityToAvailableSteps,
+          convertAvailableStepsToBatteryCapacity: this.convertAvailableStepsToBatteryCapacity,
           updateState: this.updateState,
           getInitialGrid: this.getInitialGrid,
           resizeGrid: this.resizeGrid,

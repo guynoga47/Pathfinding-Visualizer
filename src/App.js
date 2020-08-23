@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Visualizer from "./Components/Visualizer/Visualizer";
 import NavBar from "./Components/Navbar/NavBar.jsx";
 import * as mappingAlgorithms from "./Algorithms/mappingAlgorithms";
-import * as pathfindingAlgorithms from "./Algorithms/pathfindingAlgorithms";
+import * as cleaningAlgorithms from "./Algorithms/cleaningAlgorithms";
 
 import { ThemeProvider } from "@material-ui/core/styles";
 import theme from "./Theme.js";
@@ -30,7 +30,7 @@ const App = () => {
         <GlobalState>
           <NavBar
             mappingAlgorithms={mappingAlgorithms.data}
-            pathfindingAlgorithms={pathfindingAlgorithms.data}
+            cleaningAlgorithms={cleaningAlgorithms.data}
             setClearWallsRequest={setClearWallsRequest}
             setClearDustRequest={setClearDustRequest}
             setHighlightMapRequest={setHighlightMapRequest}

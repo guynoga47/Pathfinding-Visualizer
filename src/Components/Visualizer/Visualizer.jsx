@@ -25,7 +25,6 @@ export default class Visualizer extends Component {
   handleReset = () => {
     this.context.updateState("isFinished", false);
     this.context.resetGridKeepWalls(this.resetNodeStyles, {
-      /* resetWalls: false, */
       setWalls: true,
     });
   };
@@ -278,25 +277,28 @@ export default class Visualizer extends Component {
   };
 
   visualize = (visitedNodesInOrder) => {
+    if (!visitedNodesInOrder || visitedNodesInOrder.length === 0) {
+      this.unlockControls();
+      return;
+    }
     const visualizationArray = [];
     visitedNodesInOrder.forEach((node) => {
       for (let i = 0; i < node.dust + 1; i++) {
         visualizationArray.push(node);
       }
     });
-    for (let i = 0; i < visualizationArray.length; i++) {
+    for (let i = 0; i <= visitedNodesInOrder.length; i++) {
+      if (i === visualizationArray.length) {
+        setTimeout(() => {
+          this.unlockControls();
+        }, this.speed * i);
+        return;
+      }
       const node = visualizationArray[i];
       const { row, col } = node;
       const nodeDOM = ReactDOM.findDOMNode(
         this.refs[`node-${node.row}-${node.col}`]
       );
-      if (i === visualizationArray.length) {
-        setTimeout(() => {
-          this.context.updateState("isRunning", false);
-          this.context.updateState("isFinished", true);
-        }, this.speed * i);
-        return;
-      }
       setTimeout(() => {
         let { availableSteps } = this.context.state;
         nodeDOM.classList.add("node-visited");
@@ -309,6 +311,7 @@ export default class Visualizer extends Component {
     }
   };
 
+
   /* removeDust = (node) => {
     const nodeDOM = ReactDOM.findDOMNode(
       this.refs[`node-${node.row}-${node.col}`]
@@ -320,44 +323,32 @@ export default class Visualizer extends Component {
     }
   }; */
 
-  visualizeShortestPath = (nodesInShortestPathOrder) => {
-    for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
-      if (i === nodesInShortestPathOrder.length - 1) {
-        setTimeout(() => {
-          this.context.updateState("isRunning", false);
-          this.context.updateState("isFinished", true);
-        }, (this.speed + 30) * i);
-      }
-      setTimeout(() => {
-        const node = nodesInShortestPathOrder[i];
-        ReactDOM.findDOMNode(
-          this.refs[`node-${node.row}-${node.col}`]
-        ).classList.add("node-shortest-path");
-      }, (this.speed + 30) * i);
-    }
-  };
+  unlockControls = () => {
+    this.context.updateState("isRunning", false);
+    this.context.updateState("isFinished", true);
+  }
 
   handlePlay = () => {
     const {
       simulationType,
       availableSteps,
       activeMappingAlgorithm,
-      activePathfindingAlgorithm,
+      activeCleaningAlgorithm,
       startNode,
       grid,
     } = this.context.state;
     const {
       convertAvailableStepsToBatteryCapacity,
       updateState,
+      robot
     } = this.context;
-    const { robot } = this.context;
 
     const activeAlgorithmCallback =
       simulationType === "map"
         ? activeMappingAlgorithm.func
         : simulationType === "sweep"
-        ? activePathfindingAlgorithm.func
-        : undefined;
+          ? activeCleaningAlgorithm.func
+          : undefined;
 
     if (
       !activeAlgorithmCallback ||
