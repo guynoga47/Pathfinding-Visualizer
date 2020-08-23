@@ -192,6 +192,7 @@ const Tools = (props) => {
           id={"btn-dust"}
           className={classes.iconActive}
           onClick={handleDustButtonClicked}
+          disabled={isRunning}
           onMouseOver={handlePopoverOpen}
           onMouseLeave={handlePopoverClose}
         >
@@ -202,6 +203,7 @@ const Tools = (props) => {
           id={"btn-wall"}
           className={classes.iconActive}
           onClick={handleWallButtonClicked}
+          disabled={isRunning}
           onMouseOver={handlePopoverOpen}
           onMouseLeave={handlePopoverClose}
         >

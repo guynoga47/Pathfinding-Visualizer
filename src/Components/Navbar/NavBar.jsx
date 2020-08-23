@@ -86,36 +86,49 @@ const Nav = (props) => {
                 ? context.state.simulationType
                 : "SIMULATION TYPE"}
             </Button>
-            <Button
-              className={classes.navButton}
-              aria-controls="customized-menu"
-              aria-haspopup="true"
-              variant="contained"
-              disabled={
-                context.state.isRunning ||
-                !(context.state.simulationType === "map")
-              }
-              onClick={handleMapAlgorithmSelectionClicked}
-            >
-              {context.state.activeMappingAlgorithm
-                ? context.state.activeMappingAlgorithm.shortened
-                : "SELECT MAP"}
-            </Button>
-            <Button
-              className={classes.navButton}
-              aria-controls="customized-menu"
-              aria-haspopup="true"
-              variant="contained"
-              disabled={
-                context.state.isRunning ||
-                !(context.state.simulationType === "sweep")
-              }
-              onClick={handlePathfindingAlgorithmSelectionClicked}
-            >
-              {context.state.activePathfindingAlgorithm
-                ? context.state.activePathfindingAlgorithm.shortened
-                : "SELECT SWEEP"}
-            </Button>
+            {context.state.simulationType !== "map" &&
+              context.state.simulationType !== "sweep" && (
+                <Button
+                  className={classes.navButton}
+                  aria-controls="customized-menu"
+                  aria-haspopup="true"
+                  variant="contained"
+                  disabled={true}
+                >
+                  SELECT
+                </Button>
+              )}
+            {context.state.simulationType === "map" && (
+              <Button
+                className={classes.navButton}
+                aria-controls="customized-menu"
+                aria-haspopup="true"
+                variant="contained"
+                disabled={context.state.isRunning}
+                onClick={handleMapAlgorithmSelectionClicked}
+              >
+                {context.state.activeMappingAlgorithm
+                  ? context.state.activeMappingAlgorithm.shortened
+                  : "ALGORITHM"}
+              </Button>
+            )}
+            {context.state.simulationType === "sweep" && (
+              <Button
+                className={classes.navButton}
+                aria-controls="customized-menu"
+                aria-haspopup="true"
+                variant="contained"
+                disabled={
+                  context.state.isRunning ||
+                  !(context.state.simulationType === "sweep")
+                }
+                onClick={handlePathfindingAlgorithmSelectionClicked}
+              >
+                {context.state.activePathfindingAlgorithm
+                  ? context.state.activePathfindingAlgorithm.shortened
+                  : "ALGORITHM"}
+              </Button>
+            )}
             {drawingElement === "wall" && (
               <Button
                 className={classes.navButton}

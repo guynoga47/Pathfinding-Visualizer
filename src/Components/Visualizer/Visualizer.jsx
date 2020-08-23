@@ -284,7 +284,7 @@ export default class Visualizer extends Component {
         visualizationArray.push(node);
       }
     });
-    for (let i = 0; i <= visualizationArray.length; i++) {
+    for (let i = 0; i < visualizationArray.length; i++) {
       const node = visualizationArray[i];
       const { row, col } = node;
       const nodeDOM = ReactDOM.findDOMNode(
