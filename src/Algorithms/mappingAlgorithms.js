@@ -9,6 +9,7 @@ import {
   isValidCoordinates,
   fillPathGapsInNodeList,
   removeDuplicateNodes,
+  shuffle,
 } from "./algorithmUtils";
 
 export const baseMap = (grid, map, dockingStation, availableSteps, step) => {
@@ -145,9 +146,12 @@ const randomOptimized = (currNode, map, grid) => {
   const neighbors = getNeighbors(currNode, map).filter(
     (neighbor) => !grid[neighbor.row][neighbor.col].isWall
   );
-  if (!neighbors.length || !neighbors) {
-    alert("No neighbors found");
-  }
+
+  /* shuffling neighbors to compensate for prioritizing certain paths 
+  when dust is evenly distributed around the dockingStation (mostly went left and down) */
+
+  shuffle(neighbors);
+
   const neighborsAscending = [...neighbors].sort(
     (n1, n2) => n1.visitCount - n2.visitCount
   );
