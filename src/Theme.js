@@ -15,28 +15,6 @@ export default createMuiTheme({
         },
       },
     },
-
-    /*     MuiSpeedDial: {
-      fab: {
-        boxShadow: "none",
-        margin: 0,
-        "&:hover": {
-          color: "#66FCF1",
-        },
-      },
-      actions: {
-        paddingTop: "100px",
-      },
-    },
-    MuiSpeedDialAction: {
-      staticTooltip: {
-        margin: "30px",
-      },
-      staticTooltipLabel: {
-        margin: "30px",
-      },
-    }, */
-
     MuiButton: {
       root: {
         margin: "1em",

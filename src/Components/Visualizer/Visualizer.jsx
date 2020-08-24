@@ -27,8 +27,6 @@ export default class Visualizer extends Component {
     this.context.resetGridKeepWalls(this.resetNodeStyles, {
       /* resetWalls: false, */
       setWalls: true,
-      resetVisited: true,
-      resetShortestPath: true,
     });
   };
 
@@ -36,13 +34,13 @@ export default class Visualizer extends Component {
     if (height === this.context.gridHeight) return;
     this.context.resizeGrid(height, this.resetNodeStyles, {
       resetWalls: true,
-      resetVisited: true,
-      resetShortestPath: true,
+      resetDust: true,
     });
   };
 
   resetNodeStyles = ({
     resetWalls,
+    resetDust,
     setWalls,
     resetVisited,
     resetShortestPath,
@@ -50,33 +48,38 @@ export default class Visualizer extends Component {
     for (let node in this.refs) {
       const row = parseInt(node.split("-")[1]);
       const col = parseInt(node.split("-")[2]);
+      const nodeDOM = ReactDOM.findDOMNode(this.refs[node]);
       if (resetWalls) {
-        ReactDOM.findDOMNode(this.refs[node]).classList.remove("node-wall");
+        nodeDOM.classList.remove("node-wall");
+      }
+      if (resetDust) {
+        if (nodeDOM.classList.length > 1) {
+          const dust = nodeDOM.classList[1];
+          nodeDOM.classList.remove(`${dust}`);
+        }
       }
       if (setWalls) {
-        ReactDOM.findDOMNode(this.refs[node]).classList.remove("node-wall");
+        nodeDOM.classList.remove("node-wall");
         if (this.context.state.grid[row][col].isWall)
-          ReactDOM.findDOMNode(this.refs[node]).classList.add("node-wall");
+          nodeDOM.classList.add("node-wall");
       }
       if (resetVisited) {
-        ReactDOM.findDOMNode(this.refs[node]).classList.remove(`node-visited`);
+        nodeDOM.classList.remove(`node-visited`);
       }
       if (resetShortestPath) {
-        ReactDOM.findDOMNode(this.refs[node]).classList.remove(
-          `node-shortest-path`
-        );
+        nodeDOM.classList.remove(`node-shortest-path`);
       }
 
       if (!this.context.isStartNode(row, col))
-        ReactDOM.findDOMNode(this.refs[node]).classList.remove(`node-start`);
+        nodeDOM.classList.remove(`node-start`);
       else {
-        ReactDOM.findDOMNode(this.refs[node]).classList.add(`node-start`);
+        nodeDOM.classList.add(`node-start`);
       }
     }
   };
 
   handleMouseDown = (row, col) => {
-    const { drawingMode } = this.props;
+    const { drawingMode, drawingElement } = this.props;
     const { isFinished, isRunning } = this.context.state;
     if (isFinished || isRunning) return;
     this.mouseDown = true;
@@ -85,11 +88,41 @@ export default class Visualizer extends Component {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-start`
       );
+      console.log(
+        `removed startNode in handleMouseDown from node-${row}-${col}`
+      );
     } else {
-      if (drawingMode === "rectangle" || drawingMode === "obstacle") {
+      if (drawingMode === "rectangle" || drawingMode === "filled rectangle") {
         this.rectLocStart = { row, col };
       }
-      this.changeNodeWall(row, col, { toggle: true });
+      if (drawingElement === "wall") {
+        this.changeNodeWall(row, col, { toggle: true });
+      }
+      if (drawingElement === "dust") {
+        this.changeNodeDust(row, col, { add: true });
+      }
+    }
+  };
+
+  handleMouseEnter = (row, col) => {
+    const { drawingMode, drawingElement } = this.props;
+    const { isFinished, isRunning } = this.context.state;
+    if (isFinished || !this.mouseDown || isRunning) return;
+    if (this.startNodeMouseDown) {
+      ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
+        `node-start`
+      );
+    } else if (drawingMode === "filled rectangle") {
+      this.createAndRenderRectangle(row, col, { fill: true, add: true });
+    } else if (drawingMode === "rectangle") {
+      this.createAndRenderRectangle(row, col, { fill: false, add: true });
+    } else if (drawingMode === "free") {
+      if (drawingElement === "wall") {
+        this.changeNodeWall(row, col, { toggle: true });
+      }
+      if (drawingElement === "dust") {
+        this.changeNodeDust(row, col, { add: true });
+      }
     }
   };
 
@@ -101,63 +134,71 @@ export default class Visualizer extends Component {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-start`
       );
-    } else if (!this.context.isStartNode(row, col)) {
+      console.log(
+        "removed node-start in handleMouseLeave from node" + row + "-" + col
+      );
+    } else if (this.mouseDown) {
       if (drawingMode === "rectangle") {
-        if (this.mouseDown) {
-          this.createAndRenderRectangle(row, col, {
-            fill: false,
-            toggle: true,
-          });
-        }
-      } else if (drawingMode === "obstacle") {
-        if (this.mouseDown) {
-          this.createAndRenderRectangle(row, col, { fill: true, toggle: true });
-        }
+        this.createAndRenderRectangle(row, col, {
+          fill: false,
+          toggle: true,
+        });
+      } else if (drawingMode === "filled rectangle") {
+        this.createAndRenderRectangle(row, col, { fill: true, toggle: true });
       }
     }
   };
 
-  handleMouseEnter = (row, col) => {
-    const { drawingMode } = this.props;
-    const { isFinished, isRunning } = this.context.state;
-    if (isFinished || !this.mouseDown || isRunning) return;
-    if (this.startNodeMouseDown) {
-      ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
-        `node-start`
-      );
-    } else if (drawingMode === "obstacle") {
-      this.createAndRenderRectangle(row, col, { fill: true, add: true });
-    } else if (drawingMode === "rectangle") {
-      this.createAndRenderRectangle(row, col, { fill: false, add: true });
-    } else if (drawingMode === "free") {
-      this.changeNodeWall(row, col, { toggle: true });
-    }
-  };
-
   createAndRenderRectangle = (row, col, { fill, add, toggle }) => {
+    const { drawingElement } = this.props;
     const rectangleNodes = this.calculateRectangleNodes(row, col, {
       fill,
     });
     if (add) {
-      rectangleNodes.forEach((node) =>
-        this.changeNodeWall(node.row, node.col, { add })
-      );
+      if (drawingElement === "wall") {
+        rectangleNodes.forEach((node) =>
+          this.changeNodeWall(node.row, node.col, { add: true })
+        );
+      }
+      if (drawingElement === "dust") {
+        rectangleNodes.forEach((node) =>
+          this.changeNodeDust(node.row, node.col, { add: true })
+        );
+      }
     } else {
-      rectangleNodes.forEach((node) =>
-        this.changeNodeWall(node.row, node.col, { toggle })
-      );
+      if (drawingElement === "wall") {
+        rectangleNodes.forEach((node) =>
+          this.changeNodeWall(node.row, node.col, { toggle: true })
+        );
+      }
+      if (drawingElement === "dust") {
+        rectangleNodes.forEach((node) =>
+          this.changeNodeDust(node.row, node.col, { remove: true })
+        );
+      }
     }
   };
 
   handleMouseUp = (row, col) => {
-    const { isFinished, isRunning } = this.context.state;
+    const { isFinished, isRunning, grid } = this.context.state;
     const { updateState } = this.context;
-    console.log("mouse up");
+    const node = grid[row][col];
+    const nodeDOM = ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]);
+    console.log(this.context.state.grid[row][col]);
+    console.log(
+      ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList
+    );
+    console.log(this.context.state.grid[row][col].dust);
+
     if (isFinished || isRunning) return;
     if (this.startNodeMouseDown) {
-      ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
-        `node-start`
-      );
+      if (node.isWall) {
+        this.changeNodeWall(row, col, { remove: true });
+      }
+      if (node.dust) {
+        this.changeNodeDust(row, col, { remove: true });
+      }
+      nodeDOM.classList.add(`node-start`);
       updateState("startNode", { row: row, col: col });
     }
     this.startNodeMouseDown = false;
@@ -192,21 +233,46 @@ export default class Visualizer extends Component {
     return rectangleNodes;
   };
 
-  changeNodeWall = (row, col, { toggle, add }) => {
+  changeNodeWall = (row, col, { toggle, add, remove }) => {
     const node = this.context.state.grid[row][col];
-    if (toggle) {
-      if (!this.context.isStartNode(row, col)) {
-        ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.toggle(
-          "node-wall"
-        );
-        node.isWall = !node.isWall;
+    const nodeDOM = ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]);
+
+    if (!this.context.isStartNode(row, col)) {
+      if (node.dust) {
+        this.changeNodeDust(row, col, { remove: true });
       }
-    } else if (add) {
-      if (!this.context.isStartNode(row, col)) {
-        ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
-          "node-wall"
-        );
+      if (toggle) {
+        nodeDOM.classList.toggle("node-wall");
+        node.isWall = !node.isWall;
+      } else if (add) {
+        nodeDOM.classList.add("node-wall");
         node.isWall = true;
+      } else if (remove) {
+        nodeDOM.classList.remove("node-wall");
+        node.isWall = false;
+      }
+    }
+  };
+  changeNodeDust = (row, col, { remove, add, fixed }) => {
+    const node = this.context.state.grid[row][col];
+    if (node.isWall) return;
+    const nodeDOM = ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]);
+    if (!this.context.isStartNode(row, col)) {
+      const dust = node.dust;
+      if (add) {
+        if (node.dust < 9) {
+          nodeDOM.classList.add(`dust-${dust + 1}`);
+          if (dust > 0) {
+            nodeDOM.classList.remove(`dust-${dust}`);
+          }
+          node.dust++;
+        } else if (node.dust === 9) {
+          nodeDOM.classList.remove(`dust-9`);
+          node.dust = 0;
+        }
+      } else if (remove) {
+        nodeDOM.classList.remove(`dust-${dust}`);
+        node.dust = 0;
       }
     }
   };
@@ -214,12 +280,16 @@ export default class Visualizer extends Component {
   visualize = (visitedNodesInOrder) => {
     const visualizationArray = [];
     visitedNodesInOrder.forEach((node) => {
-      for (let i = 0; i < node.dust; i++) {
+      for (let i = 0; i < node.dust + 1; i++) {
         visualizationArray.push(node);
       }
     });
-    for (let i = 0; i <= visualizationArray.length; i++) {
+    for (let i = 0; i < visualizationArray.length; i++) {
       const node = visualizationArray[i];
+      const { row, col } = node;
+      const nodeDOM = ReactDOM.findDOMNode(
+        this.refs[`node-${node.row}-${node.col}`]
+      );
       if (i === visualizationArray.length) {
         setTimeout(() => {
           this.context.updateState("isRunning", false);
@@ -229,38 +299,26 @@ export default class Visualizer extends Component {
       }
       setTimeout(() => {
         let { availableSteps } = this.context.state;
-        ReactDOM.findDOMNode(
-          this.refs[`node-${node.row}-${node.col}`]
-        ).classList.add("node-visited");
-        this.removeDust(node);
+        nodeDOM.classList.add("node-visited");
+        this.changeNodeDust(row, col, { remove: true });
         this.context.updateState("availableSteps", availableSteps - 1);
       }, this.speed * i);
       setTimeout(() => {
-        ReactDOM.findDOMNode(
-          this.refs[`node-${node.row}-${node.col}`]
-        ).classList.remove("node-visited");
+        nodeDOM.classList.remove("node-visited");
       }, this.speed * (i + 1));
     }
   };
 
-  removeDust = (node) => {
+  /* removeDust = (node) => {
     const nodeDOM = ReactDOM.findDOMNode(
       this.refs[`node-${node.row}-${node.col}`]
     );
-    console.log(nodeDOM);
-    ReactDOM.findDOMNode(
-      this.refs[`node-${node.row}-${node.col}`]
-    ).classList.remove(`dust-${node.dust}`);
-    const x = node.row;
-    const y = node.col;
-    console.log(x, y);
+    nodeDOM.classList.remove(`dust-${node.dust}`);
     if (node.dust > 0) {
       node.dust--;
-      ReactDOM.findDOMNode(
-        this.refs[`node-${node.row}-${node.col}`]
-      ).classList.add(`dust-${node.dust}`);
+      nodeDOM.classList.add(`dust-${node.dust}`);
     }
-  };
+  }; */
 
   visualizeShortestPath = (nodesInShortestPathOrder) => {
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
@@ -331,20 +389,35 @@ export default class Visualizer extends Component {
       for (let col = 0; col < this.context.gridWidth; col++) {
         if (!this.context.isStartNode(row, col)) {
           if (this.context.state.grid[row][col].isWall) {
-            this.changeNodeWall(row, col, { toggle: true });
+            this.changeNodeWall(row, col, { remove: true });
           }
         }
       }
     }
     setClearWallsRequest({ requested: false, cleared: true });
   };
+  handleClearDust = () => {
+    const { setClearDustRequest } = this.props;
+    for (let row = 0; row < this.context.gridHeight; row++) {
+      for (let col = 0; col < this.context.gridWidth; col++) {
+        if (!this.context.isStartNode(row, col)) {
+          if (this.context.state.grid[row][col].dust) {
+            this.changeNodeDust(row, col, { remove: true });
+          }
+        }
+      }
+    }
+    setClearDustRequest({ requested: false, cleared: true });
+  };
 
   componentDidUpdate() {
     if (this.props.isClearWallsRequested.requested) {
       this.handleClearWalls();
     }
+    if (this.props.isClearDustRequested.requested) {
+      this.handleClearDust();
+    }
     if (this.context.state.layoutLoaded) {
-      //intended to detect loadLayout action.
       this.resetNodeStyles({
         setWalls: true,
         resetVisited: true,
