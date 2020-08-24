@@ -34,38 +34,16 @@ const Tools = (props) => {
     drawingElement,
   } = props;
 
-  const [
-    anchorElDrawingElementDust,
-    setAnchorElDrawingElementDust,
-  ] = React.useState(null);
-  const [
-    anchorElDrawingElementWall,
-    setAnchorElDrawingElementWall,
-  ] = React.useState(null);
+  const [anchorElDrawingElementDust, setAnchorElDrawingElementDust] = React.useState(null);
+  const [anchorElDrawingElementWall, setAnchorElDrawingElementWall] = React.useState(null);
   const [anchorElDrawFree, setAnchorElDrawFree] = React.useState(null);
-  const [anchorElDrawRectangle, setAnchorElDrawRectangle] = React.useState(
-    null
-  );
-  const [
-    anchorElSaveConfiguration,
-    setAnchorElSaveConfiguration,
-  ] = React.useState(null);
-  const [
-    anchorElLoadConfiguration,
-    setAnchorElLoadConfiguration,
-  ] = React.useState(null);
+  const [anchorElDrawRectangle, setAnchorElDrawRectangle] = React.useState(null);
+  const [anchorElSaveConfiguration, setAnchorElSaveConfiguration] = React.useState(null);
+  const [anchorElLoadConfiguration, setAnchorElLoadConfiguration] = React.useState(null);
   const [anchorElHighlightMap, setAnchorElHighlightMap] = React.useState(null);
-
   const [anchorElDrawObstacle, setAnchorElDrawObstacle] = React.useState(null);
-
-  const [
-    anchorElBatteryCapacityClick,
-    setAnchorElBatteryCapacityClick,
-  ] = React.useState(null);
-  const [
-    anchorElBatteryCapacityHover,
-    setAnchorElBatteryCapacityHover,
-  ] = React.useState(null);
+  const [anchorElBatteryCapacityClick, setAnchorElBatteryCapacityClick] = React.useState(null);
+  const [anchorElBatteryCapacityHover, setAnchorElBatteryCapacityHover] = React.useState(null);
 
   const handleBatteryCapacityButtonClicked = (event) => {
     setAnchorElBatteryCapacityClick(event.currentTarget);
@@ -157,8 +135,8 @@ const Tools = (props) => {
       event.currentTarget.id === "btn-free"
         ? "free"
         : event.currentTarget.id === "btn-rectangle"
-        ? "rectangle"
-        : "filled rectangle"
+          ? "rectangle"
+          : "filled rectangle"
     );
   };
 
@@ -199,17 +177,17 @@ const Tools = (props) => {
           <IconDust />
         </IconButton>
       ) : (
-        <IconButton
-          id={"btn-wall"}
-          className={classes.iconActive}
-          onClick={handleWallButtonClicked}
-          disabled={isRunning}
-          onMouseOver={handlePopoverOpen}
-          onMouseLeave={handlePopoverClose}
-        >
-          <IconWall />
-        </IconButton>
-      )}
+          <IconButton
+            id={"btn-wall"}
+            className={classes.iconActive}
+            onClick={handleWallButtonClicked}
+            disabled={isRunning}
+            onMouseOver={handlePopoverOpen}
+            onMouseLeave={handlePopoverClose}
+          >
+            <IconWall />
+          </IconButton>
+        )}
       <IconButton
         id={"btn-free"}
         className={drawingMode === "free" ? classes.iconActive : classes.icon}

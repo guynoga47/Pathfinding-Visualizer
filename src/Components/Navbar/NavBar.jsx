@@ -19,7 +19,7 @@ const useStyles = NavBarStyles;
 
 const Nav = (props) => {
   const [anchorElMapAlgMenu, setAnchorElMapAlgMenu] = React.useState(null);
-  const [anchorElPathAlgMenu, setAnchorElPathAlgMenu] = React.useState(null);
+  const [anchorElCleanAlgMenu, setAnchorElCleanAlgMenu] = React.useState(null);
   const [
     anchorElSimulationTypeMenu,
     setAnchorElSimulationType,
@@ -28,7 +28,7 @@ const Nav = (props) => {
   const classes = useStyles();
   const {
     mappingAlgorithms,
-    pathfindingAlgorithms,
+    cleaningAlgorithms,
     setClearWallsRequest,
     setClearDustRequest,
     setHighlightMapRequest,
@@ -44,11 +44,11 @@ const Nav = (props) => {
   const handleMapMenuClose = () => {
     setAnchorElMapAlgMenu(null);
   };
-  const handlePathfindingAlgorithmSelectionClicked = (event) => {
-    setAnchorElPathAlgMenu(event.currentTarget);
+  const handleCleaningAlgorithSelectionClicked = (event) => {
+    setAnchorElCleanAlgMenu(event.currentTarget);
   };
-  const handlePathMenuClose = () => {
-    setAnchorElPathAlgMenu(null);
+  const handleCleanAlgMenu = () => {
+    setAnchorElCleanAlgMenu(null);
   };
   const handleSimulationTypeSelectionClicked = (event) => {
     setAnchorElSimulationType(event.currentTarget);
@@ -122,10 +122,10 @@ const Nav = (props) => {
                   context.state.isRunning ||
                   !(context.state.simulationType === "sweep")
                 }
-                onClick={handlePathfindingAlgorithmSelectionClicked}
+                onClick={handleCleaningAlgorithSelectionClicked}
               >
-                {context.state.activePathfindingAlgorithm
-                  ? context.state.activePathfindingAlgorithm.shortened
+                {context.state.activeCleaningAlgorithm
+                  ? context.state.activeCleaningAlgorithm.shortened
                   : "ALGORITHM"}
               </Button>
             )}
@@ -207,18 +207,18 @@ const Nav = (props) => {
           <StyledMenu
             className={classes.menu}
             id="customized-menu"
-            anchorEl={anchorElPathAlgMenu}
+            anchorEl={anchorElCleanAlgMenu}
             keepMounted
-            open={Boolean(anchorElPathAlgMenu)}
-            onClose={handlePathMenuClose}
+            open={Boolean(anchorElCleanAlgMenu)}
+            onClose={handleCleanAlgMenu}
           >
-            {pathfindingAlgorithms.map((algorithm) => (
+            {cleaningAlgorithms.map((algorithm) => (
               <MenuItem
                 key={algorithm.name}
                 className={classes.menuItem}
                 onClick={() => {
-                  context.updateState("activePathfindingAlgorithm", algorithm);
-                  handlePathMenuClose();
+                  context.updateState("activeCleaningAlgorithm", algorithm);
+                  handleCleanAlgMenu();
                 }}
               >
                 <ListItemText
