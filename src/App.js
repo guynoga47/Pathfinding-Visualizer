@@ -21,7 +21,7 @@ const App = () => {
     cleared: true,
   });
   const [drawingMode, setDrawingMode] = useState("free");
-  const [drawingElement, setDrawingElement] = useState("wall");
+  const [drawingElement, setDrawingElement] = useState("dust");
   const [highlightMapRequest, setHighlightMapRequest] = useState(false);
 
   return (

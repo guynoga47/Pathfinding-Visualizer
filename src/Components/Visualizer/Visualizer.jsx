@@ -287,7 +287,7 @@ export default class Visualizer extends Component {
         visualizationArray.push(node);
       }
     });
-    for (let i = 0; i <= visitedNodesInOrder.length; i++) {
+    for (let i = 0; i <= visualizationArray.length; i++) {
       if (i === visualizationArray.length) {
         setTimeout(() => {
           this.unlockControls();
@@ -311,7 +311,6 @@ export default class Visualizer extends Component {
     }
   };
 
-
   /* removeDust = (node) => {
     const nodeDOM = ReactDOM.findDOMNode(
       this.refs[`node-${node.row}-${node.col}`]
@@ -326,7 +325,7 @@ export default class Visualizer extends Component {
   unlockControls = () => {
     this.context.updateState("isRunning", false);
     this.context.updateState("isFinished", true);
-  }
+  };
 
   handlePlay = () => {
     const {
@@ -340,15 +339,15 @@ export default class Visualizer extends Component {
     const {
       convertAvailableStepsToBatteryCapacity,
       updateState,
-      robot
+      robot,
     } = this.context;
 
     const activeAlgorithmCallback =
       simulationType === "map"
         ? activeMappingAlgorithm.func
         : simulationType === "sweep"
-          ? activeCleaningAlgorithm.func
-          : undefined;
+        ? activeCleaningAlgorithm.func
+        : undefined;
 
     if (
       !activeAlgorithmCallback ||

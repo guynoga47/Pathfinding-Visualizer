@@ -49,17 +49,17 @@ const Controls = (props) => {
           <ResetIcon style={{ fontSize: "2em" }} />
         </IconButton>
       ) : (
-            <IconButton
-              className={classes.button}
-              onClick={onPlayButtonClicked}
-              disabled={
-                !context.state.activeMappingAlgorithm &&
-                !context.state.activeCleaningAlgorithm
-              }
-            >
-              <PlayIcon style={{ fontSize: "2em" }} />
-            </IconButton>
-          )}
+        <IconButton
+          className={classes.button}
+          onClick={onPlayButtonClicked}
+          disabled={
+            !context.state.activeMappingAlgorithm &&
+            !context.state.activeCleaningAlgorithm
+          }
+        >
+          <PlayIcon style={{ fontSize: "2em" }} />
+        </IconButton>
+      )}
       <SpeedSlider
         min={MIN_SPEED}
         max={MAX_SPEED}

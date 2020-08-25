@@ -77,6 +77,7 @@ const Nav = (props) => {
           <Grid item>
             <Button
               className={classes.navButton}
+              style={{ marginLeft: "10em" }}
               aria-controls="customized-menu"
               aria-haspopup="true"
               variant="contained"

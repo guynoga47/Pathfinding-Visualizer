@@ -25,6 +25,7 @@ export default class Robot {
         const gridNode = grid[row][col];
         mapNode.isWall = gridNode.isWall;
         mapNode.isMapped = gridNode.isWall ? false : mapNode.isMapped;
+        mapNode.dust = gridNode.dust;
       }
     }
   };
