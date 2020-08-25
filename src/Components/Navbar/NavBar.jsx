@@ -8,6 +8,8 @@ import Typography from "@material-ui/core/Typography";
 import ListItemText from "@material-ui/core/ListItemText";
 import MenuItem from "@material-ui/core/MenuItem";
 
+import Editor from "../Editor/Editor";
+
 import Tools from "../Tools/Tools";
 
 import StyledMenu from "./StyledMenu";
@@ -24,6 +26,7 @@ const Nav = (props) => {
     anchorElSimulationTypeMenu,
     setAnchorElSimulationType,
   ] = React.useState(null);
+  const [codeEditorOpen, setCodeEditorOpen] = React.useState(false);
   const context = useContext(GridContext);
   const classes = useStyles();
   const {
@@ -47,7 +50,7 @@ const Nav = (props) => {
   const handleCleaningAlgorithSelectionClicked = (event) => {
     setAnchorElCleanAlgMenu(event.currentTarget);
   };
-  const handleCleanAlgMenu = () => {
+  const handleCleanAlgMenuClose = () => {
     setAnchorElCleanAlgMenu(null);
   };
   const handleSimulationTypeSelectionClicked = (event) => {
@@ -204,6 +207,18 @@ const Nav = (props) => {
                 />
               </MenuItem>
             ))}
+            <MenuItem
+              className={classes.menuItem}
+              onClick={() => {
+                setCodeEditorOpen(true);
+                handleMapMenuClose();
+              }}
+            >
+              <ListItemText
+                primary="Do It Yourself!"
+                className={classes.menuItemText}
+              />
+            </MenuItem>
           </StyledMenu>
           <StyledMenu
             className={classes.menu}
@@ -211,7 +226,7 @@ const Nav = (props) => {
             anchorEl={anchorElCleanAlgMenu}
             keepMounted
             open={Boolean(anchorElCleanAlgMenu)}
-            onClose={handleCleanAlgMenu}
+            onClose={handleCleanAlgMenuClose}
           >
             {cleaningAlgorithms.map((algorithm) => (
               <MenuItem
@@ -219,7 +234,7 @@ const Nav = (props) => {
                 className={classes.menuItem}
                 onClick={() => {
                   context.updateState("activeCleaningAlgorithm", algorithm);
-                  handleCleanAlgMenu();
+                  handleCleanAlgMenuClose();
                 }}
               >
                 <ListItemText
@@ -228,7 +243,25 @@ const Nav = (props) => {
                 />
               </MenuItem>
             ))}
+            <MenuItem
+              className={classes.menuItem}
+              onClick={() => {
+                setCodeEditorOpen(true);
+                handleMapMenuClose();
+              }}
+            >
+              <ListItemText
+                primary="Do It Yourself!"
+                className={classes.menuItemText}
+              />
+            </MenuItem>
           </StyledMenu>
+          <Grid item hidden>
+            <Editor
+              setCodeEditorOpen={setCodeEditorOpen}
+              open={codeEditorOpen}
+            />
+          </Grid>
           <Grid item>
             <Tools
               isRunning={context.state.isRunning}

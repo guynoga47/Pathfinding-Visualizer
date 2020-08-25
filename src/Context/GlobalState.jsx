@@ -33,6 +33,9 @@ class GlobalState extends Component {
       simulationType: undefined,
       activeMappingAlgorithm: undefined,
       activeCleaningAlgorithm: undefined,
+      userScript: `function buildPath(grid, map, dockingStation, availableSteps) {
+        /*Your code here...*/ 
+}`,
       isFinished: false,
       isRunning: false,
       startNode: defaultDockingStation,
@@ -77,7 +80,7 @@ class GlobalState extends Component {
         robot: this.robot,
         availableSteps: this.state.availableSteps,
         startNode: this.state.startNode,
-        simulationType: this.state.simulationType
+        simulationType: this.state.simulationType,
       }),
     ]);
     const [rows, cols] = [this.gridHeight, this.gridWidth];
@@ -86,8 +89,8 @@ class GlobalState extends Component {
       `Grid Snapshot ${rows}*${cols} ${new Date()
         .toLocaleDateString()
         .replace(/\./g, "-")} at ${new Date()
-          .toLocaleTimeString()
-          .replace(/:/g, ".")}.json`
+        .toLocaleTimeString()
+        .replace(/:/g, ".")}.json`
     );
   };
 
@@ -183,8 +186,10 @@ class GlobalState extends Component {
           state: this.state,
           robot: this.robot,
           isStartNode: this.isStartNode,
-          convertBatteryCapacityToAvailableSteps: this.convertBatteryCapacityToAvailableSteps,
-          convertAvailableStepsToBatteryCapacity: this.convertAvailableStepsToBatteryCapacity,
+          convertBatteryCapacityToAvailableSteps: this
+            .convertBatteryCapacityToAvailableSteps,
+          convertAvailableStepsToBatteryCapacity: this
+            .convertAvailableStepsToBatteryCapacity,
           updateState: this.updateState,
           getInitialGrid: this.getInitialGrid,
           resizeGrid: this.resizeGrid,
