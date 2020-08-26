@@ -281,12 +281,10 @@ export default class Visualizer extends Component {
       this.unlockControls();
       return;
     }
-    const visualizationArray = [];
-    visitedNodesInOrder.forEach((node) => {
-      for (let i = 0; i < node.dust + 1; i++) {
-        visualizationArray.push(node);
-      }
-    });
+    const visualizationArray = this.inflateFirstNodeOccurencesAccordingToDust(
+      visitedNodesInOrder
+    );
+
     for (let i = 0; i <= visualizationArray.length; i++) {
       if (i === visualizationArray.length) {
         setTimeout(() => {
@@ -311,16 +309,21 @@ export default class Visualizer extends Component {
     }
   };
 
-  /* removeDust = (node) => {
-    const nodeDOM = ReactDOM.findDOMNode(
-      this.refs[`node-${node.row}-${node.col}`]
-    );
-    nodeDOM.classList.remove(`dust-${node.dust}`);
-    if (node.dust > 0) {
-      node.dust--;
-      nodeDOM.classList.add(`dust-${node.dust}`);
-    }
-  }; */
+  inflateFirstNodeOccurencesAccordingToDust = (visitedNodesInOrder) => {
+    const set = new Set();
+    const visualizationArray = [];
+    visitedNodesInOrder.forEach((node) => {
+      if (!set.has(node)) {
+        for (let i = 0; i < node.dust + 1; i++) {
+          set.add(node);
+          visualizationArray.push(node);
+        }
+      } else {
+        visualizationArray.push(node);
+      }
+    });
+    return visualizationArray;
+  };
 
   unlockControls = () => {
     this.context.updateState("isRunning", false);

@@ -48,10 +48,14 @@ const Editor = (props) => {
     code = currentCode;
   };
 
-  const handleRun = () => {
+  const handleRun = (grid, map, dockingStation, availableSteps) => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
     handleClose();
-    eval(`const func = ${code}`);
+    let func = (grid, map, dockingStation, availableSteps) => 5;
+    let funcEval;
+    eval(`funcEval = ${code}`);
+    const x = func(grid, map, dockingStation, availableSteps);
+    const y = funcEval(grid, map, dockingStation, availableSteps);
   };
 
   const handleClose = () => {
