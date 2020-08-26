@@ -18,6 +18,8 @@ import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/theme-monokai";
 import "ace-builds/src-noconflict/ext-language_tools";
 
+import "ace-builds/webpack-resolver";
+
 /*
 TODO: 
 1. add CLEAR button.
@@ -36,7 +38,7 @@ const Editor = (props) => {
   let code = userScript;
 
   /*
-   no need to deep copy, because strings management is probably managed with ref count, so code is detached from userScript as soon as onChange
+  no need to deep copy, because strings management is probably managed with ref count, so code is detached from userScript as soon as onChange
   happens, and we avoid changing the state directly
   */
 
@@ -48,8 +50,8 @@ const Editor = (props) => {
 
   const handleRun = () => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
-
     handleClose();
+    eval(`const func = ${code}`);
   };
 
   const handleClose = () => {
