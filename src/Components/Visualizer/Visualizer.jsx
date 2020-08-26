@@ -37,17 +37,12 @@ export default class Visualizer extends Component {
     });
   };
 
-  resetNodeStyles = ({
-    resetWalls,
-    resetDust,
-    setWalls,
-    resetVisited,
-    resetShortestPath,
-  }) => {
-    for (let node in this.refs) {
-      const row = parseInt(node.split("-")[1]);
-      const col = parseInt(node.split("-")[2]);
-      const nodeDOM = ReactDOM.findDOMNode(this.refs[node]);
+  resetNodeStyles = ({ resetWalls, resetDust, setWalls, setDust }) => {
+    for (let nodeRef in this.refs) {
+      const row = parseInt(nodeRef.split("-")[1]);
+      const col = parseInt(nodeRef.split("-")[2]);
+      const node = this.context.state.grid[row][col];
+      const nodeDOM = ReactDOM.findDOMNode(this.refs[nodeRef]);
       if (resetWalls) {
         nodeDOM.classList.remove("node-wall");
       }
@@ -59,16 +54,15 @@ export default class Visualizer extends Component {
       }
       if (setWalls) {
         nodeDOM.classList.remove("node-wall");
-        if (this.context.state.grid[row][col].isWall)
+        if (node.isWall) {
           nodeDOM.classList.add("node-wall");
+        }
       }
-      if (resetVisited) {
-        nodeDOM.classList.remove(`node-visited`);
+      if (setDust) {
+        if (node.dust) {
+          nodeDOM.classList.add(`dust-${node.dust}`);
+        }
       }
-      if (resetShortestPath) {
-        nodeDOM.classList.remove(`node-shortest-path`);
-      }
-
       if (!this.context.isStartNode(row, col))
         nodeDOM.classList.remove(`node-start`);
       else {
@@ -281,6 +275,11 @@ export default class Visualizer extends Component {
       this.unlockControls();
       return;
     }
+    /* 
+    this inflation motive is to express a delay to the robot when cleaning dusty nodes, and we only want to do it
+    on the first occurences, because on later occurences the dust is already cleaned 
+    */
+
     const visualizationArray = this.inflateFirstNodeOccurencesAccordingToDust(
       visitedNodesInOrder
     );
@@ -301,7 +300,9 @@ export default class Visualizer extends Component {
         let { availableSteps } = this.context.state;
         nodeDOM.classList.add("node-visited");
         this.changeNodeDust(row, col, { remove: true });
-        this.context.updateState("availableSteps", availableSteps - 1);
+        if (node !== visualizationArray[i - 1]) {
+          this.context.updateState("availableSteps", availableSteps - 1);
+        }
       }, this.speed * i);
       setTimeout(() => {
         nodeDOM.classList.remove("node-visited");
@@ -413,8 +414,7 @@ export default class Visualizer extends Component {
     if (this.context.state.layoutLoaded) {
       this.resetNodeStyles({
         setWalls: true,
-        resetVisited: true,
-        resetShortestPath: true,
+        setDust: true,
       });
       this.context.updateState("layoutLoaded", false);
     }
@@ -458,7 +458,7 @@ export default class Visualizer extends Component {
           {grid.map((row, rowIndex) => (
             <div key={rowIndex} className="row">
               {row.map((node) => {
-                const { row, col, isStart, dust } = node;
+                const { row, col, isStart } = node;
                 return (
                   <Node
                     key={`node-${row}-${col}`}
@@ -466,7 +466,6 @@ export default class Visualizer extends Component {
                     row={row}
                     col={col}
                     isStart={isStart}
-                    dust={dust}
                     onMouseDown={this.handleMouseDown}
                     onMouseEnter={this.handleMouseEnter}
                     onMouseLeave={this.handleMouseLeave}
