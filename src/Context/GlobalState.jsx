@@ -33,9 +33,10 @@ class GlobalState extends Component {
       simulationType: undefined,
       activeMappingAlgorithm: undefined,
       activeCleaningAlgorithm: undefined,
-      userScript: `function buildPath(grid, map, dockingStation, availableSteps) {
-        /*Your code here...*/ 
-}`,
+      userScript: `function buildPath(grid, map, dockingStation, availableSteps){
+        grid[0][0].isWall = true;
+        return [grid[0][0]];
+     }`,
       isFinished: false,
       isRunning: false,
       startNode: defaultDockingStation,

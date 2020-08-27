@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useRef } from "react";
 
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -11,6 +11,12 @@ import CloseIcon from "@material-ui/icons/Close";
 import editorStyles, { Transition } from "./Editor.Styles";
 
 import AceEditor from "react-ace";
+import {
+  restrictEditingSegment,
+  setInterpreterScope,
+  EXECUTE,
+} from "./editorUtils.js";
+import Interpreter from "js-interpreter";
 
 import GridContext from "../../Context/grid-context";
 
@@ -32,11 +38,10 @@ const useStyles = editorStyles;
 const Editor = (props) => {
   const classes = useStyles();
   const context = useContext(GridContext);
-
+  let ace = useRef(null);
   const { userScript } = context.state;
 
   let code = userScript;
-
   /*
   no need to deep copy, because strings management is probably managed with ref count, so code is detached from userScript as soon as onChange
   happens, and we avoid changing the state directly
@@ -48,14 +53,39 @@ const Editor = (props) => {
     code = currentCode;
   };
 
-  const handleRun = (grid, map, dockingStation, availableSteps) => {
+  const handleRun = () => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
     handleClose();
-    let func = (grid, map, dockingStation, availableSteps) => 5;
-    let funcEval;
-    eval(`funcEval = ${code}`);
-    const x = func(grid, map, dockingStation, availableSteps);
-    const y = funcEval(grid, map, dockingStation, availableSteps);
+
+    code += EXECUTE;
+    var myInterpreter = new Interpreter(code);
+
+    setInterpreterScope(context, myInterpreter);
+
+    let count;
+    /*     for (count = 0; count < 10000000; count++) {
+      let x = myInterpreter.step();
+    } */
+    try {
+      myInterpreter.run();
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+    var r = myInterpreter.pseudoToNative(myInterpreter.value);
+    console.log(r);
+
+    if (count === 10000000) {
+      /*handle time frame loop - throw error timeout limit exceeded*/
+      return;
+    }
+
+    /*
+    use interpreter to check for infinite loops.
+    use try catch block to detect and show runtime errors.
+    we can try to still sandbox the code by strictly defining the context. either sending window (global),
+    or sending an object of objects like {grid:grid, map:map...} and the function.
+     */
   };
 
   const handleClose = () => {
@@ -88,6 +118,7 @@ const Editor = (props) => {
           </Toolbar>
         </AppBar>
         <AceEditor
+          ref={ace}
           name="ace-editor"
           mode="javascript"
           theme="monokai"
@@ -95,6 +126,7 @@ const Editor = (props) => {
           height={"100%"}
           value={userScript}
           fontSize={18}
+          onLoad={restrictEditingSegment}
           showPrintMargin={false}
           onChange={onChange}
           setOptions={{
