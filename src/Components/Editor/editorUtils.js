@@ -1,6 +1,7 @@
+import scopeFunctions from "../../Algorithms/algorithmUtils";
+
 export const DEFAULT_EDITOR_MARKUP = `function buildPath(grid, map, dockingStation, availableSteps){
-    grid[0][0].isWall = true;
-    return [grid[12][25],grid[12][26],grid[12][27],grid[12][28],grid[12][29],grid[12][30]];
+    return getNeighbors(grid[0][0], grid);
 }`;
 export const EXECUTE = `buildPath(grid,map,dockingStation,availableSteps);`;
 
@@ -18,9 +19,38 @@ export const restrictEditingSegment = (editor) => {
   });
 };
 
+/* export const establishEnvironment = () => {
+  const initApi = (interpreter, globalObject) => {
+    // Add an API function for the alert() block.
+    console.log(getNeighbors.toString());
+
+    let wrapper = function (node, grid) {
+      return interpreter.createPrimitive(getNeighbors(node, grid));
+    };
+        interpreter.setProperty(
+      globalObject,
+      "getNeighbors",
+      interpreter.createNativeFunction(wrapper)
+    );
+    wrapper = function (text) {
+      return interpreter.createPrimitive(alert(text));
+    };
+    interpreter.setProperty(
+      globalObject,
+      "alert",
+      interpreter.createNativeFunction(wrapper)
+    );
+
+    // Add an API function for the prompt() block.
+
+  };
+  return initApi;
+}; */
+
 export const setInterpreterScope = (context, interpreter) => {
   const { grid, availableSteps, startNode } = context.state;
   const { robot } = context;
+  /*   console.log(getNeighbors.toString()); */
   interpreter.setValueToScope("grid", interpreter.nativeToPseudo(grid));
   interpreter.setValueToScope("map", interpreter.nativeToPseudo(robot.map));
   interpreter.setValueToScope(
@@ -28,6 +58,18 @@ export const setInterpreterScope = (context, interpreter) => {
     interpreter.nativeToPseudo(robot.map[startNode.row][startNode.col])
   );
   interpreter.setValueToScope("availableSteps", availableSteps);
+  /* interpreter.setValueToScope(
+    "getNeighbors",
+    interpreter.nativeToPseudo(getNeighbors)
+  );
+  interpreter.setValueToScope(
+    "isNeighbors",
+    interpreter.nativeToPseudo(isNeighbors)
+  ); */
+
+  for (const func of scopeFunctions) {
+    interpreter.setValueToScope(func.name, interpreter.nativeToPseudo(func));
+  }
 };
 
 function Exception(message) {

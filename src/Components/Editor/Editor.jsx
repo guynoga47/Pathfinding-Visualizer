@@ -16,7 +16,6 @@ import Interpreter from "js-interpreter";
 import {
   DEFAULT_EDITOR_MARKUP,
   EXECUTE,
-  TIME_LIMIT,
   checkTimeLimitExceeded,
   restrictEditingSegment,
   setInterpreterScope,
@@ -46,6 +45,13 @@ const Editor = (props) => {
   let ace = useRef(null);
   const { userScript } = context.state;
   let code = userScript;
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.7.7/babel.min.js"></script>
+<script text="text/babel">
+var input = 'const getMessage = () => "Hello World";';
+var output = Babel.transform(input, { presets: ['es2015'] }).code;
+console.log(output);
+</script>
+  console.log(output);
 
   /*
   no need to deep copy, because strings management is probably managed with ref count, so code is detached from userScript as soon as onChange
@@ -60,15 +66,23 @@ const Editor = (props) => {
 
   const handleLoad = () => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
-
     let myInterpreter = new Interpreter(code);
     myInterpreter.appendCode(EXECUTE);
+    /* myInterpreter.appendCode(`function getNeighbors(node, grid) {
+        let x = 1;
+        return x + 2;
+      }`); */
     setInterpreterScope(context, myInterpreter);
 
     try {
       checkTimeLimitExceeded(myInterpreter);
       myInterpreter.run();
       const res = myInterpreter.pseudoToNative(myInterpreter.value);
+
+      alert(res);
+      console.log(res);
+      handleClose();
+
       validateResult(context, res);
       context.updateState("userRun", { path: res });
       handleClose();
