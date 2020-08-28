@@ -11,12 +11,17 @@ import CloseIcon from "@material-ui/icons/Close";
 import editorStyles, { Transition } from "./Editor.Styles";
 
 import AceEditor from "react-ace";
+import Interpreter from "js-interpreter";
+
 import {
+  DEFAULT_EDITOR_MARKUP,
+  EXECUTE,
+  TIME_LIMIT,
+  checkTimeLimitExceeded,
   restrictEditingSegment,
   setInterpreterScope,
-  EXECUTE,
+  validateResult,
 } from "./editorUtils.js";
-import Interpreter from "js-interpreter";
 
 import GridContext from "../../Context/grid-context";
 
@@ -40,8 +45,8 @@ const Editor = (props) => {
   const context = useContext(GridContext);
   let ace = useRef(null);
   const { userScript } = context.state;
-
   let code = userScript;
+
   /*
   no need to deep copy, because strings management is probably managed with ref count, so code is detached from userScript as soon as onChange
   happens, and we avoid changing the state directly
@@ -53,42 +58,33 @@ const Editor = (props) => {
     code = currentCode;
   };
 
-  const handleRun = () => {
+  const handleLoad = () => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
-    handleClose();
 
-    code += EXECUTE;
-    var myInterpreter = new Interpreter(code);
-
+    let myInterpreter = new Interpreter(code);
+    myInterpreter.appendCode(EXECUTE);
     setInterpreterScope(context, myInterpreter);
 
-    let count;
-    /*     for (count = 0; count < 10000000; count++) {
-      let x = myInterpreter.step();
-    } */
     try {
+      checkTimeLimitExceeded(myInterpreter);
       myInterpreter.run();
+      const res = myInterpreter.pseudoToNative(myInterpreter.value);
+      validateResult(context, res);
+      context.updateState("userRun", { path: res });
+      handleClose();
     } catch (error) {
-      console.log(error);
-      return;
+      //display error in Modal.
+      alert(error.message);
     }
-    var r = myInterpreter.pseudoToNative(myInterpreter.value);
-    console.log(r);
+  };
 
-    if (count === 10000000) {
-      /*handle time frame loop - throw error timeout limit exceeded*/
-      return;
-    }
-
-    /*
-    use interpreter to check for infinite loops.
-    use try catch block to detect and show runtime errors.
-    we can try to still sandbox the code by strictly defining the context. either sending window (global),
-    or sending an object of objects like {grid:grid, map:map...} and the function.
-     */
+  const handleClear = () => {
+    code = DEFAULT_EDITOR_MARKUP;
+    context.updateState("userScript", code);
   };
 
   const handleClose = () => {
+    /*To avoid appending EXECUTE substring on consequetive LOAD commands without running. */
     context.updateState("userScript", code);
     setCodeEditorOpen(false);
   };
@@ -112,8 +108,11 @@ const Editor = (props) => {
               <CloseIcon />
             </IconButton>
             <Typography variant="h6" className={classes.title}></Typography>
-            <Button autoFocus color="inherit" onClick={handleRun}>
-              RUN
+            <Button autoFocus color="inherit" onClick={handleClear}>
+              CLEAR
+            </Button>
+            <Button autoFocus color="inherit" onClick={handleLoad}>
+              LOAD
             </Button>
           </Toolbar>
         </AppBar>

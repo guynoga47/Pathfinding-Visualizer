@@ -54,7 +54,8 @@ const Controls = (props) => {
           onClick={onPlayButtonClicked}
           disabled={
             !context.state.activeMappingAlgorithm &&
-            !context.state.activeCleaningAlgorithm
+            !context.state.activeCleaningAlgorithm &&
+            !context.state.userRun
           }
         >
           <PlayIcon style={{ fontSize: "2em" }} />

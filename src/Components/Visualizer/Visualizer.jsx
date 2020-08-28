@@ -275,14 +275,16 @@ export default class Visualizer extends Component {
       this.unlockControls();
       return;
     }
+    const { simulationType } = this.context.state;
     /* 
     this inflation motive is to express a delay to the robot when cleaning dusty nodes, and we only want to do it
     on the first occurences, because on later occurences the dust is already cleaned 
     */
 
-    const visualizationArray = this.inflateFirstNodeOccurencesAccordingToDust(
-      visitedNodesInOrder
-    );
+    const visualizationArray =
+      simulationType === "sweep"
+        ? this.inflateFirstNodeOccurencesAccordingToDust(visitedNodesInOrder)
+        : visitedNodesInOrder;
 
     for (let i = 0; i <= visualizationArray.length; i++) {
       if (i === visualizationArray.length) {
@@ -299,7 +301,8 @@ export default class Visualizer extends Component {
       setTimeout(() => {
         let { availableSteps } = this.context.state;
         nodeDOM.classList.add("node-visited");
-        this.changeNodeDust(row, col, { remove: true });
+        if (simulationType === "sweep")
+          this.changeNodeDust(row, col, { remove: true });
         if (node !== visualizationArray[i - 1]) {
           this.context.updateState("availableSteps", availableSteps - 1);
         }
@@ -329,6 +332,7 @@ export default class Visualizer extends Component {
   unlockControls = () => {
     this.context.updateState("isRunning", false);
     this.context.updateState("isFinished", true);
+    this.context.updateState("userRun", false);
   };
 
   handlePlay = () => {
@@ -338,6 +342,7 @@ export default class Visualizer extends Component {
       activeMappingAlgorithm,
       activeCleaningAlgorithm,
       startNode,
+      userRun,
       grid,
     } = this.context.state;
     const {
@@ -347,27 +352,25 @@ export default class Visualizer extends Component {
     } = this.context;
 
     const activeAlgorithmCallback =
-      simulationType === "map"
+      simulationType === "map" && !userRun
         ? activeMappingAlgorithm.func
-        : simulationType === "sweep"
+        : simulationType === "sweep" && !userRun
         ? activeCleaningAlgorithm.func
         : undefined;
 
-    if (
-      !activeAlgorithmCallback ||
-      convertAvailableStepsToBatteryCapacity() === 0
-    )
-      return;
+    if (convertAvailableStepsToBatteryCapacity() === 0) return;
     updateState("isRunning", true);
 
     robot.syncMapLayoutWithGrid(grid);
 
-    const robotPath = activeAlgorithmCallback(
-      grid,
-      robot.map,
-      robot.map[startNode.row][startNode.col],
-      availableSteps
-    );
+    const robotPath = userRun
+      ? userRun.path
+      : activeAlgorithmCallback(
+          grid,
+          robot.map,
+          robot.map[startNode.row][startNode.col],
+          availableSteps
+        );
 
     if (simulationType === "map") {
       robot.updateMap(robotPath);

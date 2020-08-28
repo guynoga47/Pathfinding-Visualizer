@@ -1,23 +1,18 @@
 import React, { Component } from "react";
 
 import GridContext from "./grid-context";
+import {
+  DEFAULT_GRID_HEIGHT,
+  DEFAULT_GRID_WIDTH,
+  calculateDefaultDockingStation,
+} from "./GlobalStateUtils";
+import { DEFAULT_EDITOR_MARKUP } from "../Components/Editor/editorUtils";
 import Robot from "../Classes/Robot";
 import { resetGridSearchProperties } from "../Algorithms/algorithmUtils";
 
 import { saveAs } from "file-saver";
 //Grid logical context, everything related to visualizing it is sitting
 //in visualizer.jsx
-const DEFAULT_GRID_HEIGHT = 25;
-const DEFAULT_GRID_WIDTH = 50;
-
-const calculateDefaultDockingStation = (height, width) => {
-  const defaultDockingStation = {
-    row: Math.floor(height / 2),
-    col: Math.floor(width / 2),
-  };
-  return defaultDockingStation;
-};
-
 class GlobalState extends Component {
   constructor(props) {
     super(props);
@@ -33,10 +28,8 @@ class GlobalState extends Component {
       simulationType: undefined,
       activeMappingAlgorithm: undefined,
       activeCleaningAlgorithm: undefined,
-      userScript: `function buildPath(grid, map, dockingStation, availableSteps){
-        grid[0][0].isWall = true;
-        return [grid[0][0]];
-     }`,
+      userScript: DEFAULT_EDITOR_MARKUP,
+      userRun: false,
       isFinished: false,
       isRunning: false,
       startNode: defaultDockingStation,
