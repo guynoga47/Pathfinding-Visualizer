@@ -332,7 +332,7 @@ export default class Visualizer extends Component {
   unlockControls = () => {
     this.context.updateState("isRunning", false);
     this.context.updateState("isFinished", true);
-    this.context.updateState("userRun", false);
+    /* this.context.updateState("userRun", false); */
   };
 
   handlePlay = () => {

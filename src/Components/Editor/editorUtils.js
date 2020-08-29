@@ -1,8 +1,13 @@
 /* eslint-disable no-undef */
 import scopeFunctions from "../../Algorithms/algorithmUtils";
 import validators from "./validators";
+import Exception from "../../Classes/Exception";
 export const DEFAULT_EDITOR_MARKUP = `function buildPath(grid, map, dockingStation, availableSteps){
-    return getNeighbors(grid[0][0], grid);
+
+  const visitedNodesInOrder = [grid[12][25], grid[12][26], grid[12][27], grid[12][28], grid[12][29], grid[12][28], grid[12][27], grid[12][26], grid[12][25]];
+
+  return visitedNodesInOrder;
+
 }`;
 export const EXECUTE = `buildPath(grid,map,dockingStation,availableSteps);`;
 
@@ -81,17 +86,13 @@ export const validateResult = (result, context) => {
 
 export const checkTimeLimitExceeded = (interpreter) => {
   const start = new Date().getTime();
-  while (true) {
-    if (interpreter.step()) {
-      let now = new Date().getTime() - start;
-      let secondsPassed = Math.floor((now / 1000) % 60);
-      if (secondsPassed === 3) {
-        throw new Exception(
-          "Timelimit exception, check for infinite loops or performance bottlenecks!"
-        );
-      }
-    } else {
-      break;
+  while (interpreter.step()) {
+    let now = new Date().getTime() - start;
+    let secondsPassed = Math.floor((now / 1000) % 60);
+    if (secondsPassed === 3) {
+      throw new Exception(
+        "Time limit exceeded, check for infinite loops or performance bottlenecks!"
+      );
     }
   }
 };

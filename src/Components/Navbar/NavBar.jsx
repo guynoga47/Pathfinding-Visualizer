@@ -7,6 +7,7 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import ListItemText from "@material-ui/core/ListItemText";
 import MenuItem from "@material-ui/core/MenuItem";
+import CodeIcon from "@material-ui/icons/Code";
 
 import Editor from "../Editor/Editor";
 
@@ -198,6 +199,7 @@ const Nav = (props) => {
                 className={classes.menuItem}
                 onClick={() => {
                   context.updateState("activeMappingAlgorithm", algorithm);
+                  context.updateState("userRun", false);
                   handleMapMenuClose();
                 }}
               >
@@ -215,9 +217,10 @@ const Nav = (props) => {
               }}
             >
               <ListItemText
-                primary="Do It Yourself!"
+                primary="Try it yourself!"
                 className={classes.menuItemText}
               />
+              <CodeIcon />
             </MenuItem>
           </StyledMenu>
           <StyledMenu
@@ -234,6 +237,7 @@ const Nav = (props) => {
                 className={classes.menuItem}
                 onClick={() => {
                   context.updateState("activeCleaningAlgorithm", algorithm);
+                  context.updateState("userRun", false);
                   handleCleanAlgMenuClose();
                 }}
               >
@@ -251,7 +255,7 @@ const Nav = (props) => {
               }}
             >
               <ListItemText
-                primary="Do It Yourself!"
+                primary="Try it yourself!"
                 className={classes.menuItemText}
               />
             </MenuItem>

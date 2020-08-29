@@ -68,15 +68,14 @@ const Editor = (props) => {
 
     try {
       checkTimeLimitExceeded(myInterpreter);
+
       myInterpreter.run();
       const result = myInterpreter.pseudoToNative(myInterpreter.value);
 
-      alert(result);
-      console.log(result);
-      handleClose();
-
       validateResult(result, context);
+
       context.updateState("userRun", { path: result });
+
       handleClose();
     } catch (error) {
       alert(error.message);
@@ -109,6 +108,7 @@ const Editor = (props) => {
         <AppBar className={classes.topAppBar}>
           <Toolbar>
             <IconButton
+              className={classes.editorBtn}
               edge="start"
               color="inherit"
               onClick={handleClose}
@@ -117,10 +117,20 @@ const Editor = (props) => {
               <CloseIcon />
             </IconButton>
             <Typography variant="h6" className={classes.title}></Typography>
-            <Button autoFocus color="inherit" onClick={handleClear}>
+            <Button
+              autoFocus
+              className={classes.editorBtn}
+              color="inherit"
+              onClick={handleClear}
+            >
               CLEAR
             </Button>
-            <Button autoFocus color="inherit" onClick={handleLoad}>
+            <Button
+              autoFocus
+              className={classes.editorBtn}
+              color="inherit"
+              onClick={handleLoad}
+            >
               LOAD
             </Button>
           </Toolbar>

@@ -45,12 +45,12 @@ const validateCyclicPath = (result, context) => {
   const { startNode } = context.state;
   const { isStartNode } = context;
   const [firstNode, lastNode] = [result[0], result[result.length - 1]];
-  if (!isStartNode(firstNode)) {
+  if (!isStartNode(firstNode.row, firstNode.col)) {
     throw new Exception(
       `Invalid starting node. returned path must start from the docking station, position: [${startNode.row},${startNode.col}]\n Current starting position is [${firstNode.row},${firstNode.col}]`
     );
   }
-  if (!isStartNode(lastNode)) {
+  if (!isStartNode(lastNode.row, lastNode.col)) {
     throw new Exception(
       `Invalid ending node. returned path must end in the docking station, position: [${startNode.row},${startNode.col}]\n Current ending position is [${lastNode.row},${lastNode.col}]`
     );
