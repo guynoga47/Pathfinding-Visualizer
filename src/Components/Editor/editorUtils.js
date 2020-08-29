@@ -1,9 +1,33 @@
+/* eslint-disable no-undef */
 import scopeFunctions from "../../Algorithms/algorithmUtils";
-
+import validators from "./validators";
 export const DEFAULT_EDITOR_MARKUP = `function buildPath(grid, map, dockingStation, availableSteps){
     return getNeighbors(grid[0][0], grid);
 }`;
 export const EXECUTE = `buildPath(grid,map,dockingStation,availableSteps);`;
+
+export const loadScript = (url, callback) => {
+  let script = document.createElement("script");
+  script.type = "text/javascript";
+
+  if (script.readyState) {
+    //IE
+    script.onreadystatechange = function () {
+      if (script.readyState === "loaded" || script.readyState === "complete") {
+        script.onreadystatechange = null;
+        callback && callback();
+      }
+    };
+  } else {
+    //Others
+    script.onload = function () {
+      callback && callback();
+    };
+  }
+
+  script.src = url;
+  document.getElementsByTagName("head")[0].appendChild(script);
+};
 
 export const restrictEditingSegment = (editor) => {
   // inline must be true to syntax highlight PHP without opening <?php tag
@@ -19,77 +43,42 @@ export const restrictEditingSegment = (editor) => {
   });
 };
 
-/* export const establishEnvironment = () => {
-  const initApi = (interpreter, globalObject) => {
-    // Add an API function for the alert() block.
-    console.log(getNeighbors.toString());
+export const compileToES5 = (code) => {
+  return Babel.transform(code, {
+    presets: ["es2015"],
+    sourceType: "script",
+  }).code;
+};
 
-    let wrapper = function (node, grid) {
-      return interpreter.createPrimitive(getNeighbors(node, grid));
-    };
-        interpreter.setProperty(
-      globalObject,
-      "getNeighbors",
-      interpreter.createNativeFunction(wrapper)
-    );
-    wrapper = function (text) {
-      return interpreter.createPrimitive(alert(text));
-    };
-    interpreter.setProperty(
-      globalObject,
-      "alert",
-      interpreter.createNativeFunction(wrapper)
-    );
-
-    // Add an API function for the prompt() block.
-
-  };
-  return initApi;
-}; */
-
-export const setInterpreterScope = (context, interpreter) => {
+export const establishEnvironment = (context, interpreter) => {
   const { grid, availableSteps, startNode } = context.state;
   const { robot } = context;
-  /*   console.log(getNeighbors.toString()); */
-  interpreter.setValueToScope("grid", interpreter.nativeToPseudo(grid));
-  interpreter.setValueToScope("map", interpreter.nativeToPseudo(robot.map));
-  interpreter.setValueToScope(
-    "dockingStation",
-    interpreter.nativeToPseudo(robot.map[startNode.row][startNode.col])
-  );
-  interpreter.setValueToScope("availableSteps", availableSteps);
-  /* interpreter.setValueToScope(
-    "getNeighbors",
-    interpreter.nativeToPseudo(getNeighbors)
-  );
-  interpreter.setValueToScope(
-    "isNeighbors",
-    interpreter.nativeToPseudo(isNeighbors)
-  ); */
 
-  for (const func of scopeFunctions) {
-    interpreter.setValueToScope(func.name, interpreter.nativeToPseudo(func));
-  }
-};
+  const args = [
+    { name: "grid", value: grid },
+    { name: "map", value: robot.map },
+    { name: "dockingStation", value: robot.map[startNode.row][startNode.col] },
+    { name: "availableSteps", availableSteps },
+  ];
 
-function Exception(message) {
-  this.message = message;
-  this.name = "Exception";
-}
-
-export const validateResult = (context, result) => {
-  if (!Array.isArray(result)) {
-    throw new Exception(
-      `Result is typeof ${typeof result}. Array return type is required.`
+  args.forEach((arg) => {
+    interpreter.setValueToScope(
+      arg.name,
+      interpreter.nativeToPseudo(arg.value)
     );
-  } else if (result.length === 0) {
-    throw new Exception(`Returned array should not be empty.`);
-  } else {
-    //Check that any of the nodes got the appropriate parameters.
-    //Check that the first and last nodes are dockingStation.
-    //Check that every i,i+1 nodes, are neighbors.
+  });
+
+  scopeFunctions.forEach((func) => {
+    interpreter.setValueToScope(func.name, interpreter.nativeToPseudo(func));
+  });
+};
+
+export const validateResult = (result, context) => {
+  for (const validate of validators) {
+    validate(result, context);
   }
 };
+
 export const checkTimeLimitExceeded = (interpreter) => {
   const start = new Date().getTime();
   while (true) {

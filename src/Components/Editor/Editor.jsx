@@ -1,4 +1,5 @@
-import React, { useContext, useRef } from "react";
+/* eslint-disable no-undef */
+import React, { useContext, useEffect, useRef } from "react";
 
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -16,9 +17,11 @@ import Interpreter from "js-interpreter";
 import {
   DEFAULT_EDITOR_MARKUP,
   EXECUTE,
+  compileToES5,
+  loadScript,
   checkTimeLimitExceeded,
   restrictEditingSegment,
-  setInterpreterScope,
+  establishEnvironment,
   validateResult,
 } from "./editorUtils.js";
 
@@ -40,53 +43,11 @@ TODO:
 const useStyles = editorStyles;
 
 const Editor = (props) => {
-  function loadScript(url, callback) {
-    let script = document.createElement("script");
-    script.type = "text/javascript";
-
-    if (script.readyState) {
-      //IE
-      script.onreadystatechange = function () {
-        if (
-          script.readyState === "loaded" ||
-          script.readyState === "complete"
-        ) {
-          script.onreadystatechange = null;
-          callback();
-        }
-      };
-    } else {
-      //Others
-      script.onload = function () {
-        callback();
-      };
-    }
-
-    script.src = url;
-    document.getElementsByTagName("head")[0].appendChild(script);
-  }
-
-  loadScript("https://unpkg.com/@babel/standalone/babel.min.js", (e) => {
-    // eslint-disable-next-line no-undef
-
-    // eslint-disable-next-line no-undef
-    console.log(Babel);
-  });
-
   const classes = useStyles();
   const context = useContext(GridContext);
   let ace = useRef(null);
   const { userScript } = context.state;
   let code = userScript;
-
-  /*   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.7.7/babel.min.js"></script>
-<script text="text/babel">
-var input = 'const getMessage = () => "Hello World";';
-var output = Babel.transform(input, { presets: ['es2015'] }).code;
-console.log(output);
-</script>
-  console.log(output); */
-
   /*
   no need to deep copy, because strings management is probably managed with ref count, so code is detached from userScript as soon as onChange
   happens, and we avoid changing the state directly
@@ -100,29 +61,24 @@ console.log(output);
 
   const handleLoad = () => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
-    let myInterpreter = new Interpreter(code);
-    myInterpreter.appendCode(EXECUTE);
 
-    /* myInterpreter.appendCode(`function getNeighbors(node, grid) {
-        let x = 1;
-        return x + 2;
-      }`); */
-    setInterpreterScope(context, myInterpreter);
+    let myInterpreter = new Interpreter(compileToES5(code));
+    myInterpreter.appendCode(EXECUTE);
+    establishEnvironment(context, myInterpreter);
 
     try {
       checkTimeLimitExceeded(myInterpreter);
       myInterpreter.run();
-      const res = myInterpreter.pseudoToNative(myInterpreter.value);
+      const result = myInterpreter.pseudoToNative(myInterpreter.value);
 
-      alert(res);
-      console.log(res);
+      alert(result);
+      console.log(result);
       handleClose();
 
-      validateResult(context, res);
-      context.updateState("userRun", { path: res });
+      validateResult(result, context);
+      context.updateState("userRun", { path: result });
       handleClose();
     } catch (error) {
-      //display error in Modal.
       alert(error.message);
     }
   };
@@ -133,10 +89,14 @@ console.log(output);
   };
 
   const handleClose = () => {
-    /*To avoid appending EXECUTE substring on consequetive LOAD commands without running. */
     context.updateState("userScript", code);
     setCodeEditorOpen(false);
   };
+
+  useEffect(() => {
+    const loadBabel = loadScript;
+    loadBabel("https://unpkg.com/@babel/standalone/babel.min.js");
+  }, []);
 
   return (
     <div>
