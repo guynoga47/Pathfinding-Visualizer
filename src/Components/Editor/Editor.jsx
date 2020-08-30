@@ -22,6 +22,7 @@ import {
   loadScript,
   checkTimeLimitExceeded,
   restrictEditingSegment,
+  extendAutocomplete,
   establishEnvironment,
   validateResult,
 } from "./editorUtils.js";
@@ -156,7 +157,10 @@ const Editor = (props) => {
           height={"100%"}
           value={userScript}
           fontSize={18}
-          onLoad={restrictEditingSegment}
+          onLoad={(editor) => {
+            restrictEditingSegment(editor);
+            extendAutocomplete(editor);
+          }}
           showPrintMargin={false}
           onChange={onChange}
           setOptions={{
@@ -164,7 +168,7 @@ const Editor = (props) => {
             enableSnippets: true,
             enableLiveAutocompletion: true,
             showLineNumbers: true,
-            tabSize: 4,
+            tabSize: 2,
           }}
         />
         <Message

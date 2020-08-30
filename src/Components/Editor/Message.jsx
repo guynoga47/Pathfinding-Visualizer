@@ -15,7 +15,7 @@ const Message = (props) => {
   return (
     <Modal
       className={classes.modal}
-      open={message}
+      open={Boolean(message)}
       onClose={() => setMessage("")}
       disableEnforceFocus
       disableAutoFocus
@@ -25,7 +25,7 @@ const Message = (props) => {
         timeout: 500,
       }}
     >
-      <Fade in={message} timeout={{ enter: 500, exit: 0 }}>
+      <Fade in={Boolean(message)} timeout={{ enter: 500, exit: 0 }}>
         <div className={classes.paper}>
           <Alert variant={variant} severity={severity}>
             <AlertTitle>{messageTitle}</AlertTitle>

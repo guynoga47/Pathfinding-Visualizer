@@ -1,6 +1,6 @@
 import { astar } from "./pathfindingAlgorithms";
 
-export function getShortestPathNodesInOrder(finishNode) {
+export const getShortestPathNodesInOrder = (finishNode) => {
   const shortestPathInOrder = [];
   let currentNode = finishNode;
   if (!finishNode) {
@@ -12,29 +12,29 @@ export function getShortestPathNodesInOrder(finishNode) {
     currentNode = currentNode.previousNode ? currentNode.previousNode : null;
   }
   return shortestPathInOrder;
-}
+};
 
-export function getAllNodes(grid) {
+export const getAllNodes = (grid) => {
   return [].concat(...grid);
-}
+};
 
-export function isNeighbors(n1, n2) {
+export const isNeighbors = (node1, node2) => {
   return (
-    (n1.row === n2.row && Math.abs(n1.col - n2.col) <= 1) ||
-    (n1.col === n2.col && Math.abs(n1.row - n2.row) <= 1)
+    (node1.row === node2.row && Math.abs(node1.col - node2.col) <= 1) ||
+    (node1.col === node2.col && Math.abs(node1.row - node2.row) <= 1)
   );
-}
+};
 
-export function isValidCoordinates(node, grid) {
+export const isValidCoordinates = (node, grid) => {
   return (
     node.row < grid.length &&
     node.row >= 0 &&
     node.col < grid[0].length &&
     node.col >= 0
   );
-}
+};
 
-export function getNeighbors(node, grid) {
+export const getNeighbors = (node, grid) => {
   const neighbors = [];
   const { col, row } = node;
   if (col > 0) neighbors.push(grid[row][col - 1]);
@@ -42,9 +42,9 @@ export function getNeighbors(node, grid) {
   if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
   if (row > 0) neighbors.push(grid[row - 1][col]);
   return neighbors;
-}
+};
 
-export function resetGridSearchProperties(grid) {
+export const resetGridSearchProperties = (grid) => {
   for (let row = 0; row < grid.length; row++) {
     for (let col = 0; col < grid[0].length; col++) {
       grid[row][col].previousNode = null;
@@ -53,15 +53,15 @@ export function resetGridSearchProperties(grid) {
       grid[row][col].heuristicDistance = Infinity;
     }
   }
-}
+};
 
-export function getGridDeepCopy(grid) {
+export const getGridDeepCopy = (grid) => {
   const gridCopy = JSON.parse(JSON.stringify(grid));
   resetGridSearchProperties(gridCopy);
   return gridCopy;
-}
+};
 
-export function fillPathGapsInNodeList(map, nodeList, visitedNodesInOrder) {
+export const fillPathGapsInNodeList = (map, nodeList, visitedNodesInOrder) => {
   for (let i = 0; i < nodeList.length; i++) {
     const currNode = nodeList[i];
     const prevNode = i > 0 ? nodeList[i - 1] : currNode;
@@ -87,22 +87,22 @@ export function fillPathGapsInNodeList(map, nodeList, visitedNodesInOrder) {
       visitedNodesInOrder.push(currNode);
     }
   }
-}
+};
 
-export function removeDuplicateNodes(path) {
+export const removeDuplicateNodes = (path) => {
   for (let i = 0; i < path.length - 1; i++) {
     if (path[i] === path[i + 1]) {
       path.splice(i, 1);
     }
   }
-}
+};
 
-export function shuffle(array) {
+export const shuffle = (array) => {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
-}
+};
 
 export default [
   getShortestPathNodesInOrder,
