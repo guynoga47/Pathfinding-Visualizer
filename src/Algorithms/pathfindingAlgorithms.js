@@ -78,6 +78,12 @@ export const dfs = (grid, startNode) => {
 };
 
 export const astar = (grid, startNode, finishNode, filters) => {
+  if (!filters) {
+    filters = [
+      { attribute: "isVisited", evaluation: false },
+      { attribute: "isWall", evaluation: false },
+    ];
+  }
   const visitedNodesInOrder = [];
   resetGridSearchProperties(grid);
   startNode.distance = 0;

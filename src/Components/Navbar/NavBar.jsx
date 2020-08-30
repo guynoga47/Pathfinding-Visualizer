@@ -114,7 +114,9 @@ const Nav = (props) => {
               >
                 {context.state.activeMappingAlgorithm
                   ? context.state.activeMappingAlgorithm.shortened
-                  : "ALGORITHM"}
+                  : context.state.userRun
+                  ? "USER SCRIPT"
+                  : "SELECT"}
               </Button>
             )}
             {context.state.simulationType === "sweep" && (
@@ -131,7 +133,9 @@ const Nav = (props) => {
               >
                 {context.state.activeCleaningAlgorithm
                   ? context.state.activeCleaningAlgorithm.shortened
-                  : "ALGORITHM"}
+                  : context.state.userRun
+                  ? "USER SCRIPT"
+                  : "SELECT"}
               </Button>
             )}
             {drawingElement === "wall" && (

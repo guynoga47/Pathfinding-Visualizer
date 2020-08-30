@@ -115,4 +115,5 @@ export default [
   fillPathGapsInNodeList,
   removeDuplicateNodes,
   shuffle,
+  astar,
 ];

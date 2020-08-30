@@ -1,15 +1,16 @@
 /* eslint-disable no-undef */
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
-
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import CloseIcon from "@material-ui/icons/Close";
+
 import editorStyles, { Transition } from "./Editor.Styles";
+import Message from "./Message";
 
 import AceEditor from "react-ace";
 import Interpreter from "js-interpreter";
@@ -35,9 +36,11 @@ import "ace-builds/webpack-resolver";
 
 /*
 TODO: 
-1. add CLEAR button.
-2. Save script (as js file, optional)
-3. Style all buttons.
+
+1. Save script (as js file, optional)
+2. Verification on CLEAR commands. Modal with ACCEPT CANCEL buttons.
+3. Look in the scope if there are any functions that use other function we didn't include.
+4. Adjust auto complete of editor to include the functions we added to the scope.
 */
 
 const useStyles = editorStyles;
@@ -45,9 +48,13 @@ const useStyles = editorStyles;
 const Editor = (props) => {
   const classes = useStyles();
   const context = useContext(GridContext);
+  const [error, setError] = useState(false);
+  const [success, setSuccess] = useState(false);
+
   let ace = useRef(null);
   const { userScript } = context.state;
   let code = userScript;
+
   /*
   no need to deep copy, because strings management is probably managed with ref count, so code is detached from userScript as soon as onChange
   happens, and we avoid changing the state directly
@@ -61,7 +68,7 @@ const Editor = (props) => {
 
   const handleLoad = () => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
-
+    context.updateState("userScript", code);
     let myInterpreter = new Interpreter(compileToES5(code));
     myInterpreter.appendCode(EXECUTE);
     establishEnvironment(context, myInterpreter);
@@ -74,11 +81,14 @@ const Editor = (props) => {
 
       validateResult(result, context);
 
+      setSuccess(`Well done!
+      You may exit the editor and click the Play button.`);
       context.updateState("userRun", { path: result });
-
-      handleClose();
-    } catch (error) {
-      alert(error.message);
+      /* setTimeout(() => {
+        handleClose();
+      }, 4000); */
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -88,6 +98,8 @@ const Editor = (props) => {
   };
 
   const handleClose = () => {
+    setError("");
+    setSuccess("");
     context.updateState("userScript", code);
     setCodeEditorOpen(false);
   };
@@ -154,6 +166,20 @@ const Editor = (props) => {
             showLineNumbers: true,
             tabSize: 4,
           }}
+        />
+        <Message
+          message={error}
+          setMessage={setError}
+          messageTitle={`Error!\n`}
+          variant="filled"
+          severity="error"
+        />
+        <Message
+          message={success}
+          setMessage={setSuccess}
+          messageTitle={`Loading Completed!\n`}
+          variant="filled"
+          severity="success"
         />
       </Dialog>
     </div>
