@@ -70,7 +70,7 @@ const Editor = (props) => {
     // eslint-disable-next-line no-undef
 
     // eslint-disable-next-line no-undef
-    console.log(Babel);
+    console.log(Babel.transform);
   });
 
   const classes = useStyles();
