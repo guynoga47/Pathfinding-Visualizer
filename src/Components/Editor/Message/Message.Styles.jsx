@@ -12,6 +12,6 @@ export default makeStyles((theme) => ({
     outline: "none",
   },
   alertIcon: {
-    paddingTop: "11.5px",
+    paddingTop: "12px",
   },
 }));

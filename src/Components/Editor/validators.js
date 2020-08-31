@@ -53,6 +53,18 @@ const validateContinuousPath = (result, context) => {
     }
   }
 };
+
+const validateStepLimitExceeded = (result, context) => {
+  return result.length <= context.state.availableSteps;
+};
+
+const validateNoWalls = (result, context) => {
+  for (const node of result) {
+    if (node.isWall === true) return false;
+  }
+  return true;
+};
+
 const validateCyclicPath = (result, context) => {
   const { startNode } = context.state;
   const { isStartNode } = context;
@@ -77,10 +89,17 @@ const validateCyclicPath = (result, context) => {
   }
 };
 
+/* 
+The order of validators is important:
+we want the less demanding checks to be done first, so the editor would feel more responsive when throwing error messages
+according to the failed test. furthermore, some of the checks are dependent on passing previous checks in order to finish.
+*/
 export default [
   validateReturnType,
   validateIsEmpty,
   validateIsGridNodes,
+  validateStepLimitExceeded,
   validateCyclicPath,
+  validateNoWalls,
   validateContinuousPath,
 ];
