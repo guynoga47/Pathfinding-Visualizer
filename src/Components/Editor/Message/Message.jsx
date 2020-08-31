@@ -15,6 +15,7 @@ const Message = (props) => {
   const {
     message,
     setMessage,
+    onClose,
     topTitle,
     bottomTitle,
     variant,
@@ -25,7 +26,10 @@ const Message = (props) => {
     <Modal
       className={classes.modal}
       open={Boolean(message)}
-      onClose={() => setMessage("")}
+      onClose={() => {
+        setMessage("");
+        onClose && onClose();
+      }}
       disableEnforceFocus
       disableAutoFocus
       closeAfterTransition
@@ -36,11 +40,16 @@ const Message = (props) => {
     >
       <Fade in={Boolean(message)} timeout={{ enter: animationDelay, exit: 0 }}>
         <div className={classes.paper}>
-          <Alert variant={variant} severity={severity}>
-            <AlertTitle>
+          <Alert
+            classes={{ icon: classes.alertIcon }}
+            variant={variant}
+            severity={severity}
+          >
+            <AlertTitle className={classes.alert}>
               <Typography variant="h5">{topTitle}</Typography>
             </AlertTitle>
             {message}
+            {props.children}
             <Typography variant="h6">{bottomTitle}</Typography>
           </Alert>
         </div>

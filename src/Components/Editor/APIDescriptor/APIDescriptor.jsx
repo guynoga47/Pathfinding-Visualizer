@@ -12,7 +12,10 @@ import Descriptor from "./Descriptor.jsx";
 
 import parameters from "./parameters";
 import functions from "./functions";
-import APIDescriptorStyles from "./APIDescriptor.Styles.jsx";
+
+import APIDescriptorStyles, {
+  PaperComponent,
+} from "./APIDescriptor.Styles.jsx";
 
 const useStyles = APIDescriptorStyles;
 
@@ -36,6 +39,7 @@ const APIDescriptor = (props) => {
   return (
     <Dialog
       open={showAPI}
+      PaperComponent={PaperComponent}
       scroll="paper"
       maxWidth="md"
       fullWidth
@@ -43,8 +47,8 @@ const APIDescriptor = (props) => {
       aria-describedby="scroll-dialog-description"
     >
       <DialogTitle
-        id="scroll-dialog-title"
-        textAlign="center"
+        id="draggable-dialog-title"
+        className={classes.dialogTitle}
         disableTypography
       >
         <Typography variant="h4" className={classes.topTitle}>
@@ -54,11 +58,12 @@ const APIDescriptor = (props) => {
       <DialogContent dividers>
         <Typography variant="h6">Parameters:</Typography>
         <Divider className={classes.divider} variant="inset" />
-        {parameters.map((property) => (
+        {parameters.map((param) => (
           <Descriptor
-            name={property.name}
-            snippet={property.snippet}
-            description={property.description}
+            key={param.name}
+            name={param.name}
+            snippet={param.snippet}
+            description={param.description}
             descriptionElementRef={descriptionElementRef}
           />
         ))}
@@ -67,6 +72,7 @@ const APIDescriptor = (props) => {
         <Divider className={classes.divider} variant="inset" />
         {functions.map((func) => (
           <Descriptor
+            key={func.name}
             name={func.name}
             description={func.description}
             snippet={func.snippet}

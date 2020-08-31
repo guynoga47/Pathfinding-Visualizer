@@ -28,6 +28,10 @@ export default makeStyles((theme) => ({
     /*border: "2px solid #000", */
     boxShadow: theme.shadows[5],
   },
+  warnMsgBtn: {
+    marginBottom: 0,
+    fontWeight: 500,
+  },
 }));
 
 export const Transition = React.forwardRef(function Transition(props, ref) {

@@ -6,9 +6,9 @@ export default [
   col: number,
   dust: number,
   isWall: boolean, 
-  isMapped: boolean,  /*true only for nodes which we visited in previous runs*/
+  isMapped: boolean,        /*indicates if we visited this node in any of the previous mapping runs*/
   isVisited: boolean,       /*control variable for graph path finding algorithms*/
-  distance: number          /*a variable which can be used in graph path finding algorithms
+  distance: number          /*a variable which can be used in graph path finding algorithms*/
   heuristicDistance: number /*a variable which is used in astar algorithm*/
   previousNode: node        /*a variable which is used in several path finding algorithms, to track paths
 }`,

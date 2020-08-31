@@ -13,7 +13,7 @@ const Descriptor = (props) => {
       id="scroll-dialog-description"
       ref={props.descriptionElementRef}
       tabIndex={-1}
-      style={{ width: "55em" }}
+      style={{ width: "55em", outline: "none" }}
     >
       <Typography>
         <strong>{`${name}:`}</strong>

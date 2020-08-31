@@ -50,5 +50,10 @@ export default createMuiTheme({
       contrastText: "#fff",
       disabled: "#C5C6C7",
     },
+    secondary: {
+      main: "#fff",
+      contrastText: "#fff",
+      disabled: "#C5C6C7",
+    },
   },
 });

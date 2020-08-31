@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import React, { useContext, useEffect, useState, useRef } from "react";
 
+import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import AppBar from "@material-ui/core/AppBar";
@@ -49,7 +50,9 @@ const useStyles = editorStyles;
 const Editor = (props) => {
   const classes = useStyles();
   const context = useContext(GridContext);
+  const [firstMount, setFirstMount] = useState(true);
   const [showError, setShowError] = useState("");
+  const [showClearWarning, setShowClearWarning] = useState("");
   const [showSuccess, setShowSuccess] = useState("");
   const [showInfo, setShowInfo] = useState(infoMessage);
   const [showAPI, setShowAPI] = useState(false);
@@ -57,7 +60,6 @@ const Editor = (props) => {
   let ace = useRef(null);
   const { userScript } = context.state;
   let code = userScript;
-
   /*
   no need to deep copy, because strings management is probably managed with ref count, so code is detached from userScript as soon as onChange
   happens, and we avoid changing the state directly
@@ -93,7 +95,12 @@ const Editor = (props) => {
     }
   };
 
-  const handleClear = () => {
+  const handleCancelClearRequest = () => {
+    setShowClearWarning("");
+  };
+
+  const handleConfirmClearRequest = () => {
+    setShowClearWarning("");
     code = DEFAULT_EDITOR_MARKUP;
     context.updateState("userScript", code);
   };
@@ -150,7 +157,12 @@ const Editor = (props) => {
               autoFocus
               className={classes.editorBtn}
               color="inherit"
-              onClick={handleClear}
+              onClick={() => {
+                context.updateState("userScript", code);
+                setShowClearWarning(
+                  "Are you sure you want to restore code back to default?"
+                );
+              }}
             >
               CLEAR
             </Button>
@@ -206,12 +218,44 @@ const Editor = (props) => {
         <Message
           message={showInfo}
           setMessage={setShowInfo}
-          animationDelay={2000}
+          onClose={() => setFirstMount(false)}
+          animationDelay={firstMount ? 1500 : 500}
           topTitle={`Welcome!\n`}
           bottomTitle={`Enjoy and code carefully!`}
           variant="filled"
           severity="info"
         />
+        <Message
+          message={showClearWarning}
+          setMessage={setShowClearWarning}
+          animationDelay={500}
+          topTitle={`Warning!\n`}
+          variant="filled"
+          severity="warning"
+        >
+          <Grid container direction="row" justify="flex-end">
+            <Grid item>
+              <Button
+                className={classes.warnMsgBtn}
+                variant="outlined"
+                color="secondary"
+                onClick={handleCancelClearRequest}
+              >
+                CANCEL
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                className={classes.warnMsgBtn}
+                variant="outlined"
+                color="secondary"
+                onClick={handleConfirmClearRequest}
+              >
+                CONFIRM
+              </Button>
+            </Grid>
+          </Grid>
+        </Message>
         <APIDescriptor showAPI={showAPI} setShowAPI={setShowAPI} />
       </Dialog>
     </div>
