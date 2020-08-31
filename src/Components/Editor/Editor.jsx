@@ -8,9 +8,11 @@ import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import CloseIcon from "@material-ui/icons/Close";
+import APIDescriptor from "./APIDescriptor/APIDescriptor";
 
 import editorStyles, { Transition } from "./Editor.Styles";
-import Message from "./Message";
+import Message from "./Message/Message";
+import { infoMessage } from "./Message/messages";
 
 import AceEditor from "react-ace";
 import Interpreter from "js-interpreter";
@@ -40,8 +42,6 @@ TODO:
 
 1. Save script (as js file, optional)
 2. Verification on CLEAR commands. Modal with ACCEPT CANCEL buttons.
-3. Look in the scope if there are any functions that use other function we didn't include.
-4. Adjust auto complete of editor to include the functions we added to the scope.
 */
 
 const useStyles = editorStyles;
@@ -49,8 +49,10 @@ const useStyles = editorStyles;
 const Editor = (props) => {
   const classes = useStyles();
   const context = useContext(GridContext);
-  const [error, setError] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [showError, setShowError] = useState("");
+  const [showSuccess, setShowSuccess] = useState("");
+  const [showInfo, setShowInfo] = useState(infoMessage);
+  const [showAPI, setShowAPI] = useState(false);
 
   let ace = useRef(null);
   const { userScript } = context.state;
@@ -82,14 +84,12 @@ const Editor = (props) => {
 
       validateResult(result, context);
 
-      setSuccess(`Well done!
+      setShowSuccess(`Well done!
       You may exit the editor and click the Play button.`);
       context.updateState("userRun", { path: result });
-      /* setTimeout(() => {
-        handleClose();
-      }, 4000); */
     } catch (err) {
-      setError(err.message);
+      setShowError(err.message);
+      context.updateState("userRun", false);
     }
   };
 
@@ -99,8 +99,8 @@ const Editor = (props) => {
   };
 
   const handleClose = () => {
-    setError("");
-    setSuccess("");
+    setShowError("");
+    setShowSuccess("");
     context.updateState("userScript", code);
     setCodeEditorOpen(false);
   };
@@ -130,6 +130,22 @@ const Editor = (props) => {
               <CloseIcon />
             </IconButton>
             <Typography variant="h6" className={classes.title}></Typography>
+            <Button
+              autoFocus
+              className={classes.editorBtn}
+              onClick={() => setShowInfo(infoMessage)}
+              color="inherit"
+            >
+              INFO
+            </Button>
+            <Button
+              autoFocus
+              className={classes.editorBtn}
+              color="inherit"
+              onClick={() => setShowAPI(true)}
+            >
+              API
+            </Button>
             <Button
               autoFocus
               className={classes.editorBtn}
@@ -172,19 +188,31 @@ const Editor = (props) => {
           }}
         />
         <Message
-          message={error}
-          setMessage={setError}
-          messageTitle={`Error!\n`}
+          message={showError}
+          setMessage={setShowError}
+          animationDelay={500}
+          topTitle={`Error!\n`}
           variant="filled"
           severity="error"
         />
         <Message
-          message={success}
-          setMessage={setSuccess}
-          messageTitle={`Loading Completed!\n`}
+          message={showSuccess}
+          setMessage={setShowSuccess}
+          animationDelay={500}
+          topTitle={`Loading Completed!\n`}
           variant="filled"
           severity="success"
         />
+        <Message
+          message={showInfo}
+          setMessage={setShowInfo}
+          animationDelay={2000}
+          topTitle={`Welcome!\n`}
+          bottomTitle={`Enjoy and code carefully!`}
+          variant="filled"
+          severity="info"
+        />
+        <APIDescriptor showAPI={showAPI} setShowAPI={setShowAPI} />
       </Dialog>
     </div>
   );

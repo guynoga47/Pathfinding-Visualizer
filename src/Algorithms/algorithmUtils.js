@@ -61,7 +61,18 @@ export const getGridDeepCopy = (grid) => {
   return gridCopy;
 };
 
-export const fillPathGapsInNodeList = (map, nodeList, visitedNodesInOrder) => {
+export const fillPathGapsInNodeList = (
+  map,
+  nodeList,
+  visitedNodesInOrder,
+  filters
+) => {
+  if (!filters) {
+    filters = [
+      { attribute: "isVisited", evaluation: false },
+      { attribute: "isWall", evaluation: false },
+    ];
+  }
   for (let i = 0; i < nodeList.length; i++) {
     const currNode = nodeList[i];
     const prevNode = i > 0 ? nodeList[i - 1] : currNode;
@@ -69,10 +80,7 @@ export const fillPathGapsInNodeList = (map, nodeList, visitedNodesInOrder) => {
       console.log(
         `not neighbors found: node-${currNode.row}-${currNode.col}, node-${prevNode.row}-${prevNode.col}`
       );
-      const astarResult = astar(map, prevNode, currNode, [
-        { attribute: "isVisited", evaluation: false },
-        { attribute: "isWall", evaluation: false },
-      ]);
+      const astarResult = astar(map, prevNode, currNode, filters);
       const path = getShortestPathNodesInOrder(
         astarResult[astarResult.length - 1]
       );

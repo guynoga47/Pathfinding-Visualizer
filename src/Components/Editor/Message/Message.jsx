@@ -6,12 +6,21 @@ import Fade from "@material-ui/core/Fade";
 import { Alert, AlertTitle } from "@material-ui/lab";
 
 import messageStyles from "./Message.Styles";
+import { Typography } from "@material-ui/core";
 
 const useStyles = messageStyles;
 
 const Message = (props) => {
   const classes = useStyles();
-  const { message, setMessage, messageTitle, variant, severity } = props;
+  const {
+    message,
+    setMessage,
+    topTitle,
+    bottomTitle,
+    variant,
+    severity,
+    animationDelay,
+  } = props;
   return (
     <Modal
       className={classes.modal}
@@ -25,11 +34,14 @@ const Message = (props) => {
         timeout: 500,
       }}
     >
-      <Fade in={Boolean(message)} timeout={{ enter: 500, exit: 0 }}>
+      <Fade in={Boolean(message)} timeout={{ enter: animationDelay, exit: 0 }}>
         <div className={classes.paper}>
           <Alert variant={variant} severity={severity}>
-            <AlertTitle>{messageTitle}</AlertTitle>
+            <AlertTitle>
+              <Typography variant="h5">{topTitle}</Typography>
+            </AlertTitle>
             {message}
+            <Typography variant="h6">{bottomTitle}</Typography>
           </Alert>
         </div>
       </Fade>

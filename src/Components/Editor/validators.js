@@ -21,9 +21,16 @@ const validateIsEmpty = (result, context) => {
 
 const validateIsGridNodes = (result, context) => {
   const { grid } = context.state;
+  const isObject = (elem) => {
+    return typeof elem === "object" && !Array.isArray(elem) && elem !== null;
+  };
   for (let [i, elem] of result.entries()) {
-    if (!elem) {
-      throw new Exception(`Array[${i}] is ${typeof elem}.`);
+    if (!isObject(elem)) {
+      throw new Exception(
+        `Array[${i}] is of type '${
+          elem === null ? "null" : Array.isArray(elem) ? "Array" : typeof elem
+        } '.`
+      );
     } else {
       if (!Number.isInteger(elem.row) || !Number.isInteger(elem.col)) {
         throw new Exception(`Invalid properties in Array[${i}].`);
