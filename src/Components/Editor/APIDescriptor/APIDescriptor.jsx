@@ -1,20 +1,24 @@
 import React from "react";
+
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Divider from "@material-ui/core/Divider";
-
 import Typography from "@material-ui/core/Typography";
 
 import Descriptor from "./Descriptor.jsx";
 
 import parameters from "./parameters";
 import functions from "./functions";
+import APIDescriptorStyles from "./APIDescriptor.Styles.jsx";
 
-export default function ScrollDialog(props) {
+const useStyles = APIDescriptorStyles;
+
+const APIDescriptor = (props) => {
   const { showAPI, setShowAPI } = props;
+  const classes = useStyles();
   const handleClose = () => {
     setShowAPI(false);
   };
@@ -42,18 +46,14 @@ export default function ScrollDialog(props) {
         id="scroll-dialog-title"
         textAlign="center"
         disableTypography
-        style={{ letterSpacing: 0 }}
       >
-        <Typography variant="h4" style={{ textAlign: "center" }}>
+        <Typography variant="h4" className={classes.topTitle}>
           API Description
         </Typography>
       </DialogTitle>
       <DialogContent dividers>
         <Typography variant="h6">Parameters:</Typography>
-        <Divider
-          variant="inset"
-          style={{ marginLeft: 0, marginBottom: "1em" }}
-        />
+        <Divider className={classes.divider} variant="inset" />
         {parameters.map((property) => (
           <Descriptor
             name={property.name}
@@ -64,10 +64,7 @@ export default function ScrollDialog(props) {
         ))}
 
         <Typography variant="h6">Functions:</Typography>
-        <Divider
-          variant="inset"
-          style={{ marginLeft: 0, marginBottom: "1em" }}
-        />
+        <Divider className={classes.divider} variant="inset" />
         {functions.map((func) => (
           <Descriptor
             name={func.name}
@@ -84,4 +81,6 @@ export default function ScrollDialog(props) {
       </DialogActions>
     </Dialog>
   );
-}
+};
+
+export default APIDescriptor;
