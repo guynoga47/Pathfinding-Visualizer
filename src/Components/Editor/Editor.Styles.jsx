@@ -10,6 +10,24 @@ export default makeStyles((theme) => ({
     marginLeft: theme.spacing(2),
     flex: 1,
   },
+  editorBtn: {
+    color: "white",
+    "&:hover": {
+      color: "#66FCF1 !important",
+      background: "#1f2833",
+      borderColor: "black !important",
+      transition: "all 0.4s ease 0s",
+    },
+  },
+  modal: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  paper: {
+    /*border: "2px solid #000", */
+    boxShadow: theme.shadows[5],
+  },
 }));
 
 export const Transition = React.forwardRef(function Transition(props, ref) {

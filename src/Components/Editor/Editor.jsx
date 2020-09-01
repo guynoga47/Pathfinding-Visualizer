@@ -1,14 +1,16 @@
-import React, { useContext, useRef } from "react";
+/* eslint-disable no-undef */
+import React, { useContext, useEffect, useState, useRef } from "react";
 
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
-
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import CloseIcon from "@material-ui/icons/Close";
+
 import editorStyles, { Transition } from "./Editor.Styles";
+import Message from "./Message";
 
 import AceEditor from "react-ace";
 import Interpreter from "js-interpreter";
@@ -16,9 +18,11 @@ import Interpreter from "js-interpreter";
 import {
   DEFAULT_EDITOR_MARKUP,
   EXECUTE,
+  compileToES5,
+  loadScript,
   checkTimeLimitExceeded,
   restrictEditingSegment,
-  setInterpreterScope,
+  establishEnvironment,
   validateResult,
 } from "./editorUtils.js";
 
@@ -32,60 +36,24 @@ import "ace-builds/webpack-resolver";
 
 /*
 TODO: 
-1. add CLEAR button.
-2. Save script (as js file, optional)
-3. Style all buttons.
+
+1. Save script (as js file, optional)
+2. Verification on CLEAR commands. Modal with ACCEPT CANCEL buttons.
+3. Look in the scope if there are any functions that use other function we didn't include.
+4. Adjust auto complete of editor to include the functions we added to the scope.
 */
 
 const useStyles = editorStyles;
 
 const Editor = (props) => {
-  function loadScript(url, callback) {
-    let script = document.createElement("script");
-    script.type = "text/javascript";
-
-    if (script.readyState) {
-      //IE
-      script.onreadystatechange = function () {
-        if (
-          script.readyState === "loaded" ||
-          script.readyState === "complete"
-        ) {
-          script.onreadystatechange = null;
-          callback();
-        }
-      };
-    } else {
-      //Others
-      script.onload = function () {
-        callback();
-      };
-    }
-
-    script.src = url;
-    document.getElementsByTagName("head")[0].appendChild(script);
-  }
-
-  loadScript("https://unpkg.com/@babel/standalone/babel.min.js", (e) => {
-    // eslint-disable-next-line no-undef
-
-    // eslint-disable-next-line no-undef
-    console.log(Babel.transform);
-  });
-
   const classes = useStyles();
   const context = useContext(GridContext);
+  const [error, setError] = useState(false);
+  const [success, setSuccess] = useState(false);
+
   let ace = useRef(null);
   const { userScript } = context.state;
   let code = userScript;
-
-  /*   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.7.7/babel.min.js"></script>
-<script text="text/babel">
-var input = 'const getMessage = () => "Hello World";';
-var output = Babel.transform(input, { presets: ['es2015'] }).code;
-console.log(output);
-</script>
-  console.log(output); */
 
   /*
   no need to deep copy, because strings management is probably managed with ref count, so code is detached from userScript as soon as onChange
@@ -100,30 +68,27 @@ console.log(output);
 
   const handleLoad = () => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
-    let myInterpreter = new Interpreter(code);
+    context.updateState("userScript", code);
+    let myInterpreter = new Interpreter(compileToES5(code));
     myInterpreter.appendCode(EXECUTE);
-
-    /* myInterpreter.appendCode(`function getNeighbors(node, grid) {
-        let x = 1;
-        return x + 2;
-      }`); */
-    setInterpreterScope(context, myInterpreter);
+    establishEnvironment(context, myInterpreter);
 
     try {
       checkTimeLimitExceeded(myInterpreter);
+
       myInterpreter.run();
-      const res = myInterpreter.pseudoToNative(myInterpreter.value);
+      const result = myInterpreter.pseudoToNative(myInterpreter.value);
 
-      alert(res);
-      console.log(res);
-      handleClose();
+      validateResult(result, context);
 
-      validateResult(context, res);
-      context.updateState("userRun", { path: res });
-      handleClose();
-    } catch (error) {
-      //display error in Modal.
-      alert(error.message);
+      setSuccess(`Well done!
+      You may exit the editor and click the Play button.`);
+      context.updateState("userRun", { path: result });
+      /* setTimeout(() => {
+        handleClose();
+      }, 4000); */
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -133,10 +98,16 @@ console.log(output);
   };
 
   const handleClose = () => {
-    /*To avoid appending EXECUTE substring on consequetive LOAD commands without running. */
+    setError("");
+    setSuccess("");
     context.updateState("userScript", code);
     setCodeEditorOpen(false);
   };
+
+  useEffect(() => {
+    const loadBabel = loadScript;
+    loadBabel("https://unpkg.com/@babel/standalone/babel.min.js");
+  }, []);
 
   return (
     <div>
@@ -149,6 +120,7 @@ console.log(output);
         <AppBar className={classes.topAppBar}>
           <Toolbar>
             <IconButton
+              className={classes.editorBtn}
               edge="start"
               color="inherit"
               onClick={handleClose}
@@ -157,10 +129,20 @@ console.log(output);
               <CloseIcon />
             </IconButton>
             <Typography variant="h6" className={classes.title}></Typography>
-            <Button autoFocus color="inherit" onClick={handleClear}>
+            <Button
+              autoFocus
+              className={classes.editorBtn}
+              color="inherit"
+              onClick={handleClear}
+            >
               CLEAR
             </Button>
-            <Button autoFocus color="inherit" onClick={handleLoad}>
+            <Button
+              autoFocus
+              className={classes.editorBtn}
+              color="inherit"
+              onClick={handleLoad}
+            >
               LOAD
             </Button>
           </Toolbar>
@@ -184,6 +166,20 @@ console.log(output);
             showLineNumbers: true,
             tabSize: 4,
           }}
+        />
+        <Message
+          message={error}
+          setMessage={setError}
+          messageTitle={`Error!\n`}
+          variant="filled"
+          severity="error"
+        />
+        <Message
+          message={success}
+          setMessage={setSuccess}
+          messageTitle={`Loading Completed!\n`}
+          variant="filled"
+          severity="success"
         />
       </Dialog>
     </div>

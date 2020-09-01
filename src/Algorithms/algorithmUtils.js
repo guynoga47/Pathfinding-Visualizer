@@ -20,9 +20,8 @@ export function getAllNodes(grid) {
 
 export function isNeighbors(n1, n2) {
   return (
-    ((n1.row === n2.row && Math.abs(n1.col - n2.col) <= 1) ||
-      (n1.col === n2.col && Math.abs(n1.row - n2.row) <= 1)) &&
-    n1 !== n2
+    (n1.row === n2.row && Math.abs(n1.col - n2.col) <= 1) ||
+    (n1.col === n2.col && Math.abs(n1.row - n2.row) <= 1)
   );
 }
 
@@ -116,4 +115,5 @@ export default [
   fillPathGapsInNodeList,
   removeDuplicateNodes,
   shuffle,
+  astar,
 ];
