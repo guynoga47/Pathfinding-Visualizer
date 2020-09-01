@@ -21,9 +21,16 @@ const validateIsEmpty = (result, context) => {
 
 const validateIsGridNodes = (result, context) => {
   const { grid } = context.state;
+  const isObject = (elem) => {
+    return typeof elem === "object" && !Array.isArray(elem) && elem !== null;
+  };
   for (let [i, elem] of result.entries()) {
-    if (!elem) {
-      throw new Exception(`Array[${i}] is ${typeof elem}.`);
+    if (!isObject(elem)) {
+      throw new Exception(
+        `Array[${i}] is of type '${
+          elem === null ? "null" : Array.isArray(elem) ? "Array" : typeof elem
+        } '.`
+      );
     } else {
       if (!Number.isInteger(elem.row) || !Number.isInteger(elem.col)) {
         throw new Exception(`Invalid properties in Array[${i}].`);
@@ -46,6 +53,18 @@ const validateContinuousPath = (result, context) => {
     }
   }
 };
+
+const validateStepLimitExceeded = (result, context) => {
+  return result.length <= context.state.availableSteps;
+};
+
+const validateNoWalls = (result, context) => {
+  for (const node of result) {
+    if (node.isWall === true) return false;
+  }
+  return true;
+};
+
 const validateCyclicPath = (result, context) => {
   const { startNode } = context.state;
   const { isStartNode } = context;
@@ -70,10 +89,17 @@ const validateCyclicPath = (result, context) => {
   }
 };
 
+/* 
+The order of validators is important:
+we want the less demanding checks to be done first, so the editor would feel more responsive when throwing error messages
+according to the failed test. furthermore, some of the checks are dependent on passing previous checks in order to finish.
+*/
 export default [
   validateReturnType,
   validateIsEmpty,
   validateIsGridNodes,
+  validateStepLimitExceeded,
   validateCyclicPath,
+  validateNoWalls,
   validateContinuousPath,
 ];

@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import React, { useContext, useEffect, useState, useRef } from "react";
 
+import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import AppBar from "@material-ui/core/AppBar";
@@ -8,9 +9,11 @@ import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import CloseIcon from "@material-ui/icons/Close";
+import APIDescriptor from "./APIDescriptor/APIDescriptor";
 
 import editorStyles, { Transition } from "./Editor.Styles";
-import Message from "./Message";
+import Message from "./Message/Message";
+import { infoMessage } from "./Message/messages";
 
 import AceEditor from "react-ace";
 import Interpreter from "js-interpreter";
@@ -22,6 +25,7 @@ import {
   loadScript,
   checkTimeLimitExceeded,
   restrictEditingSegment,
+  extendAutocomplete,
   establishEnvironment,
   validateResult,
 } from "./editorUtils.js";
@@ -39,8 +43,6 @@ TODO:
 
 1. Save script (as js file, optional)
 2. Verification on CLEAR commands. Modal with ACCEPT CANCEL buttons.
-3. Look in the scope if there are any functions that use other function we didn't include.
-4. Adjust auto complete of editor to include the functions we added to the scope.
 */
 
 const useStyles = editorStyles;
@@ -48,13 +50,16 @@ const useStyles = editorStyles;
 const Editor = (props) => {
   const classes = useStyles();
   const context = useContext(GridContext);
-  const [error, setError] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [firstMount, setFirstMount] = useState(true);
+  const [showError, setShowError] = useState("");
+  const [showClearWarning, setShowClearWarning] = useState("");
+  const [showSuccess, setShowSuccess] = useState("");
+  const [showInfo, setShowInfo] = useState(infoMessage);
+  const [showAPI, setShowAPI] = useState(false);
 
   let ace = useRef(null);
   const { userScript } = context.state;
   let code = userScript;
-
   /*
   no need to deep copy, because strings management is probably managed with ref count, so code is detached from userScript as soon as onChange
   happens, and we avoid changing the state directly
@@ -81,25 +86,28 @@ const Editor = (props) => {
 
       validateResult(result, context);
 
-      setSuccess(`Well done!
+      setShowSuccess(`Well done!
       You may exit the editor and click the Play button.`);
       context.updateState("userRun", { path: result });
-      /* setTimeout(() => {
-        handleClose();
-      }, 4000); */
     } catch (err) {
-      setError(err.message);
+      setShowError(err.message);
+      context.updateState("userRun", false);
     }
   };
 
-  const handleClear = () => {
+  const handleCancelClearRequest = () => {
+    setShowClearWarning("");
+  };
+
+  const handleConfirmClearRequest = () => {
+    setShowClearWarning("");
     code = DEFAULT_EDITOR_MARKUP;
     context.updateState("userScript", code);
   };
 
   const handleClose = () => {
-    setError("");
-    setSuccess("");
+    setShowError("");
+    setShowSuccess("");
     context.updateState("userScript", code);
     setCodeEditorOpen(false);
   };
@@ -132,8 +140,29 @@ const Editor = (props) => {
             <Button
               autoFocus
               className={classes.editorBtn}
+              onClick={() => setShowInfo(infoMessage)}
               color="inherit"
-              onClick={handleClear}
+            >
+              INFO
+            </Button>
+            <Button
+              autoFocus
+              className={classes.editorBtn}
+              color="inherit"
+              onClick={() => setShowAPI(true)}
+            >
+              API
+            </Button>
+            <Button
+              autoFocus
+              className={classes.editorBtn}
+              color="inherit"
+              onClick={() => {
+                context.updateState("userScript", code);
+                setShowClearWarning(
+                  "Are you sure you want to restore code back to default?"
+                );
+              }}
             >
               CLEAR
             </Button>
@@ -156,7 +185,10 @@ const Editor = (props) => {
           height={"100%"}
           value={userScript}
           fontSize={18}
-          onLoad={restrictEditingSegment}
+          onLoad={(editor) => {
+            restrictEditingSegment(editor);
+            extendAutocomplete(editor);
+          }}
           showPrintMargin={false}
           onChange={onChange}
           setOptions={{
@@ -164,23 +196,67 @@ const Editor = (props) => {
             enableSnippets: true,
             enableLiveAutocompletion: true,
             showLineNumbers: true,
-            tabSize: 4,
+            tabSize: 2,
           }}
         />
         <Message
-          message={error}
-          setMessage={setError}
-          messageTitle={`Error!\n`}
+          message={showError}
+          setMessage={setShowError}
+          animationDelay={500}
+          topTitle={`Error!\n`}
           variant="filled"
           severity="error"
         />
         <Message
-          message={success}
-          setMessage={setSuccess}
-          messageTitle={`Loading Completed!\n`}
+          message={showSuccess}
+          setMessage={setShowSuccess}
+          animationDelay={500}
+          topTitle={`Loading Completed!\n`}
           variant="filled"
           severity="success"
         />
+        <Message
+          message={showInfo}
+          setMessage={setShowInfo}
+          onClose={() => setFirstMount(false)}
+          animationDelay={firstMount ? 1500 : 500}
+          topTitle={`Welcome!\n`}
+          bottomTitle={`Enjoy and code carefully!`}
+          variant="filled"
+          severity="info"
+        />
+        <Message
+          message={showClearWarning}
+          setMessage={setShowClearWarning}
+          animationDelay={500}
+          topTitle={`Warning!\n`}
+          variant="filled"
+          severity="warning"
+        >
+          <Grid container direction="row" justify="flex-end">
+            <Grid item>
+              <Button
+                className={classes.warnMsgBtn}
+                variant="outlined"
+                color="secondary"
+                onClick={handleCancelClearRequest}
+              >
+                CANCEL
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                className={classes.warnMsgBtn}
+                variant="outlined"
+                color="secondary"
+                onClick={handleConfirmClearRequest}
+              >
+                CONFIRM
+              </Button>
+            </Grid>
+          </Grid>
+        </Message>
+        <APIDescriptor showAPI={showAPI} setShowAPI={setShowAPI} />
       </Dialog>
     </div>
   );

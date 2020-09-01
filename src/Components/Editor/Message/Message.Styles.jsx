@@ -9,5 +9,9 @@ export default makeStyles((theme) => ({
   },
   paper: {
     boxShadow: theme.shadows[5],
+    outline: "none",
+  },
+  alertIcon: {
+    paddingTop: "12px",
   },
 }));

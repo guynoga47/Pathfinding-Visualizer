@@ -35,17 +35,56 @@ export const loadScript = (url, callback) => {
 };
 
 export const restrictEditingSegment = (editor) => {
-  // inline must be true to syntax highlight PHP without opening <?php tag
   editor.getSession().setMode({ path: "ace/mode/javascript", inline: true });
-
   // Prevent editing first and last line of editor
   editor.commands.on("exec", function (e) {
-    var rowCol = editor.selection.getCursor();
-    if (rowCol.row === 0 || rowCol.row + 1 === editor.session.getLength()) {
+    const position = editor.selection.getCursor();
+    if (position.row === 0 || position.row + 1 === editor.session.getLength()) {
       e.preventDefault();
       e.stopPropagation();
     }
   });
+};
+export const extendAutocomplete = (editor) => {
+  const funcProtoString = (func) => {
+    const parsedFunc = func.toString();
+    const args = parsedFunc.substring(0, parsedFunc.indexOf("=") - 1);
+    const numArgs = args.split(",").length - 1;
+    const resArgs = numArgs ? args : `(${args})`;
+    return `${func.name}${resArgs};`;
+  };
+
+  const createWordsArray = (session, scopeFunctions, localKeywords) => [
+    ...scopeFunctions.map((func) => {
+      return {
+        caption: func.name,
+        value: funcProtoString(func),
+        meta: "function",
+      };
+    }),
+    ...session.$mode.$highlightRules.$keywordList.map(function (word) {
+      return {
+        caption: word,
+        value: word,
+        meta: "keyword",
+      };
+    }),
+    ...localKeywords.map((word) => {
+      return {
+        caption: word,
+        value: word,
+        meta: "local",
+      };
+    }),
+  ];
+
+  const localKeywords = ["grid", "map", "availableSteps", "dockingStation"];
+  const autoComplete = {
+    getCompletions: (editor, session, pos, prefix, callback) => {
+      callback(null, createWordsArray(session, scopeFunctions, localKeywords));
+    },
+  };
+  editor.completers = [autoComplete];
 };
 
 export const compileToES5 = (code) => {
