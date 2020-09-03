@@ -42,7 +42,7 @@ import "ace-builds/webpack-resolver";
 TODO: 
 
 1. Save script (as js file, optional)
-2. Verification on CLEAR commands. Modal with ACCEPT CANCEL buttons.
+
 */
 
 const useStyles = editorStyles;
@@ -58,10 +58,10 @@ const Editor = (props) => {
   const [showAPI, setShowAPI] = useState(false);
 
   let ace = useRef(null);
-  const { userScript } = context.state;
-  let code = userScript;
+  const { editorScript } = context.state;
+  let code = editorScript;
   /*
-  no need to deep copy, because strings management is probably managed with ref count, so code is detached from userScript as soon as onChange
+  no need to deep copy, because strings management is probably managed with ref count, so code is detached from editorScript as soon as onChange
   happens, and we avoid changing the state directly
   */
 
@@ -73,7 +73,7 @@ const Editor = (props) => {
 
   const handleLoad = () => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
-    context.updateState("userScript", code);
+    context.updateState("editorScript", code);
     let myInterpreter = new Interpreter(compileToES5(code));
     myInterpreter.appendCode(EXECUTE);
     establishEnvironment(context, myInterpreter);
@@ -88,10 +88,10 @@ const Editor = (props) => {
 
       setShowSuccess(`Well done!
       You may exit the editor and click the Play button.`);
-      context.updateState("userRun", { path: result });
+      context.updateState("userAlgorithmResult", { path: result });
     } catch (err) {
       setShowError(err.message);
-      context.updateState("userRun", false);
+      context.updateState("userAlgorithmResult", false);
     }
   };
 
@@ -102,13 +102,13 @@ const Editor = (props) => {
   const handleConfirmClearRequest = () => {
     setShowClearWarning("");
     code = DEFAULT_EDITOR_MARKUP;
-    context.updateState("userScript", code);
+    context.updateState("editorScript", code);
   };
 
   const handleClose = () => {
     setShowError("");
     setShowSuccess("");
-    context.updateState("userScript", code);
+    context.updateState("editorScript", code);
     setCodeEditorOpen(false);
   };
 
@@ -158,7 +158,7 @@ const Editor = (props) => {
               className={classes.editorBtn}
               color="inherit"
               onClick={() => {
-                context.updateState("userScript", code);
+                context.updateState("editorScript", code);
                 setShowClearWarning(
                   "Are you sure you want to restore code back to default?"
                 );
@@ -183,7 +183,7 @@ const Editor = (props) => {
           theme="monokai"
           width={"100%"}
           height={"100%"}
-          value={userScript}
+          value={editorScript}
           fontSize={18}
           onLoad={(editor) => {
             restrictEditingSegment(editor);

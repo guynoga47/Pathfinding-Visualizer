@@ -9,7 +9,7 @@ import Slider from "@material-ui/core/Slider";
 import Tooltip from "@material-ui/core/Tooltip";
 import Typography from "@material-ui/core/Typography";
 
-import GridContext from "../../Context/grid-context";
+import GridContext from "../../../Context/grid-context";
 
 const useStyles = makeStyles((theme) => ({
   root: {
