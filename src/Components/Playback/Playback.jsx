@@ -1,13 +1,13 @@
 import React, { useContext } from "react";
 
-import SpeedSlider from "../SliderContinuous/ContinuousSlider";
-import GridSizeSlider from "../SliderRestricted/RestrictedSlider";
+import SpeedSlider from "./SpeedSlider/SpeedSlider";
+import GridSizeSlider from "./GridSizeSlider/GridSizeSlider";
 import IconButton from "@material-ui/core/IconButton";
 import PlayIcon from "@material-ui/icons/PlayCircleFilledWhite";
 import ResetIcon from "@material-ui/icons/RotateLeftTwoTone";
-import Spinner from "../Spinner/Spinner";
+import Spinner from "./Spinner/Spinner";
 
-import ControlStyles from "./Controls.Styles";
+import ControlStyles from "./Playback.Styles";
 import GridContext from "../../Context/grid-context";
 
 export const DEFAULT_SPEED = 200;
@@ -20,12 +20,7 @@ const useStyles = ControlStyles;
 const Controls = (props) => {
   const context = useContext(GridContext);
   const classes = useStyles();
-  const {
-    onResetButtonClicked,
-    onPlayButtonClicked,
-    onSpeedChange,
-    onGridSizeChange,
-  } = props;
+  const { onReset, onPlay, onSpeedChange, onGridSizeChange } = props;
 
   return (
     <div
@@ -45,17 +40,15 @@ const Controls = (props) => {
           <Spinner />
         </IconButton>
       ) : context.state.isFinished ? (
-        <IconButton className={classes.button} onClick={onResetButtonClicked}>
+        <IconButton className={classes.button} onClick={onReset}>
           <ResetIcon style={{ fontSize: "2em" }} />
         </IconButton>
       ) : (
         <IconButton
           className={classes.button}
-          onClick={onPlayButtonClicked}
+          onClick={onPlay}
           disabled={
-            !context.state.activeMappingAlgorithm &&
-            !context.state.activeCleaningAlgorithm &&
-            !context.state.userRun
+            !context.state.activeAlgorithm && !context.state.userAlgorithmResult
           }
         >
           <PlayIcon style={{ fontSize: "2em" }} />

@@ -14,13 +14,16 @@ import Editor from "../Editor/Editor";
 import Tools from "../Tools/Tools";
 
 import StyledMenu from "./StyledMenu";
-import NavBarStyles from "./NavBar.Styles";
+import controllerStyles from "./Controller.Styles";
 
 import GridContext from "../../Context/grid-context";
 
-const useStyles = NavBarStyles;
+import * as mappingAlgorithms from "../../Algorithms/mappingAlgorithms";
+import * as cleaningAlgorithms from "../../Algorithms/cleaningAlgorithms";
 
-const Nav = (props) => {
+const useStyles = controllerStyles;
+
+const Controller = (props) => {
   const [anchorElMapAlgMenu, setAnchorElMapAlgMenu] = React.useState(null);
   const [anchorElCleanAlgMenu, setAnchorElCleanAlgMenu] = React.useState(null);
   const [
@@ -31,8 +34,6 @@ const Nav = (props) => {
   const context = useContext(GridContext);
   const classes = useStyles();
   const {
-    mappingAlgorithms,
-    cleaningAlgorithms,
     setClearWallsRequest,
     setClearDustRequest,
     setHighlightMapRequest,
@@ -42,15 +43,17 @@ const Nav = (props) => {
     drawingElement,
   } = props;
 
-  const handleMapAlgorithmSelectionClicked = (event) => {
-    setAnchorElMapAlgMenu(event.currentTarget);
+  const handleAlgorithmSelected = (event) => {
+    if (context.state.simulationType === "map") {
+      setAnchorElMapAlgMenu(event.currentTarget);
+    } else {
+      setAnchorElCleanAlgMenu(event.currentTarget);
+    }
   };
   const handleMapMenuClose = () => {
     setAnchorElMapAlgMenu(null);
   };
-  const handleCleaningAlgorithSelectionClicked = (event) => {
-    setAnchorElCleanAlgMenu(event.currentTarget);
-  };
+
   const handleCleanAlgMenuClose = () => {
     setAnchorElCleanAlgMenu(null);
   };
@@ -103,37 +106,19 @@ const Nav = (props) => {
                   SELECT
                 </Button>
               )}
-            {context.state.simulationType === "map" && (
+            {(context.state.simulationType === "map" ||
+              context.state.simulationType === "sweep") && (
               <Button
                 className={classes.navButton}
                 aria-controls="customized-menu"
                 aria-haspopup="true"
                 variant="contained"
                 disabled={context.state.isRunning}
-                onClick={handleMapAlgorithmSelectionClicked}
+                onClick={handleAlgorithmSelected}
               >
-                {context.state.activeMappingAlgorithm
-                  ? context.state.activeMappingAlgorithm.shortened
-                  : context.state.userRun
-                  ? "USER SCRIPT"
-                  : "SELECT"}
-              </Button>
-            )}
-            {context.state.simulationType === "sweep" && (
-              <Button
-                className={classes.navButton}
-                aria-controls="customized-menu"
-                aria-haspopup="true"
-                variant="contained"
-                disabled={
-                  context.state.isRunning ||
-                  !(context.state.simulationType === "sweep")
-                }
-                onClick={handleCleaningAlgorithSelectionClicked}
-              >
-                {context.state.activeCleaningAlgorithm
-                  ? context.state.activeCleaningAlgorithm.shortened
-                  : context.state.userRun
+                {context.state.activeAlgorithm
+                  ? context.state.activeAlgorithm.shortened
+                  : context.state.userAlgorithmResult
                   ? "USER SCRIPT"
                   : "SELECT"}
               </Button>
@@ -197,13 +182,13 @@ const Nav = (props) => {
             open={Boolean(anchorElMapAlgMenu)}
             onClose={handleMapMenuClose}
           >
-            {mappingAlgorithms.map((algorithm) => (
+            {mappingAlgorithms.data.map((algorithm) => (
               <MenuItem
                 key={algorithm.name}
                 className={classes.menuItem}
                 onClick={() => {
-                  context.updateState("activeMappingAlgorithm", algorithm);
-                  context.updateState("userRun", false);
+                  context.updateState("activeAlgorithm", algorithm);
+                  context.updateState("userAlgorithmResult", false);
                   handleMapMenuClose();
                 }}
               >
@@ -235,13 +220,13 @@ const Nav = (props) => {
             open={Boolean(anchorElCleanAlgMenu)}
             onClose={handleCleanAlgMenuClose}
           >
-            {cleaningAlgorithms.map((algorithm) => (
+            {cleaningAlgorithms.data.map((algorithm) => (
               <MenuItem
                 key={algorithm.name}
                 className={classes.menuItem}
                 onClick={() => {
-                  context.updateState("activeCleaningAlgorithm", algorithm);
-                  context.updateState("userRun", false);
+                  context.updateState("activeAlgorithm", algorithm);
+                  context.updateState("userAlgorithmResult", false);
                   handleCleanAlgMenuClose();
                 }}
               >
@@ -287,4 +272,4 @@ const Nav = (props) => {
   );
 };
 
-export default Nav;
+export default Controller;

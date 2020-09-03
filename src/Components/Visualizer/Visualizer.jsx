@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
 import Node from "../Node/Node";
-import Controls, { DEFAULT_SPEED } from "../Controls/Controls";
+import Controls, { DEFAULT_SPEED } from "../Playback/Playback";
 
 import "./Visualizer.css";
 
@@ -332,17 +332,15 @@ export default class Visualizer extends Component {
   unlockControls = () => {
     this.context.updateState("isRunning", false);
     this.context.updateState("isFinished", true);
-    /* this.context.updateState("userRun", false); */
   };
 
   handlePlay = () => {
     const {
       simulationType,
       availableSteps,
-      activeMappingAlgorithm,
-      activeCleaningAlgorithm,
+      activeAlgorithm,
       startNode,
-      userRun,
+      userAlgorithmResult,
       grid,
     } = this.context.state;
     const {
@@ -352,10 +350,9 @@ export default class Visualizer extends Component {
     } = this.context;
 
     const activeAlgorithmCallback =
-      simulationType === "map" && !userRun
-        ? activeMappingAlgorithm.func
-        : simulationType === "sweep" && !userRun
-        ? activeCleaningAlgorithm.func
+      (simulationType === "map" || simulationType === "sweep") &&
+      !userAlgorithmResult
+        ? activeAlgorithm.func
         : undefined;
 
     if (convertAvailableStepsToBatteryCapacity() === 0) return;
@@ -363,8 +360,8 @@ export default class Visualizer extends Component {
 
     robot.syncMapLayoutWithGrid(grid);
 
-    const robotPath = userRun
-      ? userRun.path
+    const robotPath = userAlgorithmResult
+      ? userAlgorithmResult.path
       : activeAlgorithmCallback(
           grid,
           robot.map,
@@ -414,12 +411,12 @@ export default class Visualizer extends Component {
     if (this.props.isClearDustRequested.requested) {
       this.handleClearDust();
     }
-    if (this.context.state.layoutLoaded) {
+    if (this.context.state.configLoaded) {
       this.resetNodeStyles({
         setWalls: true,
         setDust: true,
       });
-      this.context.updateState("layoutLoaded", false);
+      this.context.updateState("configLoaded", false);
     }
     if (this.props.isHighlightMapRequested) {
       const { map } = this.context.robot;
@@ -452,8 +449,8 @@ export default class Visualizer extends Component {
     return (
       <>
         <Controls
-          onResetButtonClicked={this.handleReset}
-          onPlayButtonClicked={this.handlePlay}
+          onReset={this.handleReset}
+          onPlay={this.handlePlay}
           onSpeedChange={this.handleSpeedChanged}
           onGridSizeChange={this.handleGridSizeChange}
         />

@@ -4,7 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Slider from "../Sliders/Base";
 
-import GridContext from "../../Context/grid-context";
+import GridContext from "../../../Context/grid-context";
 
 const MIN = 15;
 const MAX = 35;
@@ -56,13 +56,13 @@ export default function RestrictedSlider(props) {
   const { disabled } = props;
 
   useEffect(() => {
-    if (context.state.layoutLoaded) {
+    if (context.state.configLoaded) {
       console.log("layout loaded in restrictedSlider");
       if (context.state.grid.length !== value) {
         setValue(context.state.grid.length);
       }
     }
-  }, [context.state.layoutLoaded, context.state.grid.length, value]);
+  }, [context.state.configLoaded, context.state.grid.length, value]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);

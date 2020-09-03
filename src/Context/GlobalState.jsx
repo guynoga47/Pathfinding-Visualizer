@@ -26,14 +26,13 @@ class GlobalState extends Component {
       grid: [],
       availableSteps: this.gridHeight * this.gridWidth,
       simulationType: undefined,
-      activeMappingAlgorithm: undefined,
-      activeCleaningAlgorithm: undefined,
-      userScript: DEFAULT_EDITOR_MARKUP,
-      userRun: false,
+      activeAlgorithm: undefined,
+      editorScript: DEFAULT_EDITOR_MARKUP,
+      userAlgorithmResult: false,
       isFinished: false,
       isRunning: false,
       startNode: defaultDockingStation,
-      layoutLoaded: false,
+      configLoaded: false,
     };
   }
 
@@ -58,8 +57,7 @@ class GlobalState extends Component {
         availableSteps: this.gridHeight * this.gridWidth,
         startNode: defaultDockingStation,
         simulationType: undefined,
-        activeMappingAlgorithm: undefined,
-        activeCleaningAlgorithm: undefined,
+        activeAlgorithm: undefined,
         isFinished: false,
         isRunning: false,
       },
@@ -99,7 +97,7 @@ class GlobalState extends Component {
         availableSteps: config.availableSteps,
         startNode: config.startNode,
         simulationType: config.simulationType,
-        layoutLoaded: true,
+        configLoaded: true,
       },
       () => {
         resetGridSearchProperties(this.state.grid);

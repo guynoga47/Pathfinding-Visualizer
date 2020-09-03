@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 
 import Visualizer from "./Components/Visualizer/Visualizer";
-import NavBar from "./Components/Navbar/NavBar.jsx";
-import * as mappingAlgorithms from "./Algorithms/mappingAlgorithms";
-import * as cleaningAlgorithms from "./Algorithms/cleaningAlgorithms";
+import Controller from "./Components/Controller/Controller.jsx";
 
 import { ThemeProvider } from "@material-ui/core/styles";
 import theme from "./Theme.js";
@@ -28,9 +26,7 @@ const App = () => {
     <div className="App">
       <ThemeProvider theme={theme}>
         <GlobalState>
-          <NavBar
-            mappingAlgorithms={mappingAlgorithms.data}
-            cleaningAlgorithms={cleaningAlgorithms.data}
+          <Controller
             setClearWallsRequest={setClearWallsRequest}
             setClearDustRequest={setClearDustRequest}
             setHighlightMapRequest={setHighlightMapRequest}
@@ -68,7 +64,7 @@ TODO
 6. Add functionality to add weights, to support weighted search algorithms.
 
 
-8. Remove ClearWallsRequest from Navbar to Visualizer.
+8. Remove ClearWallsRequest from Contrller to Visualizer.
 9. Why visualizer reevaluates after visualizeShortestPath?
 10. useCallback equivalent in globalstate class?
 11. try to define what should sit in the global state and what should sit in app.js/visualizer.js
