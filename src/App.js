@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 import Visualizer from "./Components/Visualizer/Visualizer";
 import Controller from "./Components/Controller/Controller.jsx";
@@ -10,41 +10,12 @@ import "./App.css";
 import GlobalState from "./Context/GlobalState.jsx";
 
 const App = () => {
-  const [clearWallsRequest, setClearWallsRequest] = useState({
-    requested: false,
-    cleared: true,
-  });
-  const [clearDustRequest, setClearDustRequest] = useState({
-    requested: false,
-    cleared: true,
-  });
-  const [drawingMode, setDrawingMode] = useState("free");
-  const [drawingElement, setDrawingElement] = useState("dust");
-  const [highlightMapRequest, setHighlightMapRequest] = useState(false);
-
   return (
     <div className="App">
       <ThemeProvider theme={theme}>
         <GlobalState>
-          <Controller
-            setClearWallsRequest={setClearWallsRequest}
-            setClearDustRequest={setClearDustRequest}
-            setHighlightMapRequest={setHighlightMapRequest}
-            setDrawingMode={setDrawingMode}
-            drawingMode={drawingMode}
-            drawingElement={drawingElement}
-            setDrawingElement={setDrawingElement}
-          />
-          <Visualizer
-            isClearWallsRequested={clearWallsRequest}
-            setClearWallsRequest={setClearWallsRequest}
-            isClearDustRequested={clearDustRequest}
-            setClearDustRequest={setClearDustRequest}
-            isHighlightMapRequested={highlightMapRequest}
-            setHighlightMapRequest={setHighlightMapRequest}
-            drawingMode={drawingMode}
-            drawingElement={drawingElement}
-          />
+          <Controller />
+          <Visualizer />
         </GlobalState>
       </ThemeProvider>
     </div>

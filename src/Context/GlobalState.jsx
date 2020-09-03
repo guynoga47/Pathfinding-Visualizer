@@ -5,6 +5,7 @@ import {
   DEFAULT_GRID_HEIGHT,
   DEFAULT_GRID_WIDTH,
   calculateDefaultDockingStation,
+  createNode,
 } from "./GlobalStateUtils";
 import { DEFAULT_EDITOR_MARKUP } from "../Components/Editor/editorUtils";
 import Robot from "../Classes/Robot";
@@ -33,6 +34,9 @@ class GlobalState extends Component {
       isRunning: false,
       startNode: defaultDockingStation,
       configLoaded: false,
+      drawMethod: "free",
+      drawItem: "dust",
+      request: "",
     };
   }
 
@@ -111,9 +115,7 @@ class GlobalState extends Component {
     for (let row = 0; row < this.gridHeight; row++) {
       const currentRow = [];
       for (let col = 0; col < this.gridWidth; col++) {
-        currentRow.push(
-          this.createNode(row, col, this.state.grid[row][col].isWall)
-        );
+        currentRow.push(createNode(row, col, this.state.grid[row][col].isWall));
       }
       grid.push(currentRow);
     }
@@ -127,24 +129,11 @@ class GlobalState extends Component {
     for (let row = 0; row < this.gridHeight; row++) {
       const currentRow = [];
       for (let col = 0; col < this.gridWidth; col++) {
-        currentRow.push(this.createNode(row, col));
+        currentRow.push(createNode(row, col));
       }
       grid.push(currentRow);
     }
     return grid;
-  };
-
-  createNode = (row, col, isWall = false) => {
-    return {
-      row,
-      col,
-      isStart: this.isStartNode(row, col),
-      distance: Infinity,
-      dust: 0,
-      heuristicDistance: Infinity,
-      isWall: isWall,
-      previousNode: null,
-    };
   };
 
   updateState = (key, value, callback, param) => {

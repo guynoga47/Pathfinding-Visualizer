@@ -25,23 +25,14 @@ const useStyles = ToolsStyles;
 const Tools = (props) => {
   const context = useContext(GridContext);
 
-  const { isRunning, isFinished } = context.state;
-  const {
-    setHighlightMapRequest,
-    setDrawingMode,
-    drawingMode,
-    setDrawingElement,
-    drawingElement,
-  } = props;
+  const { isRunning, isFinished, drawItem, drawMethod } = context.state;
 
-  const [
-    anchorElDrawingElementDust,
-    setAnchorElDrawingElementDust,
-  ] = React.useState(null);
-  const [
-    anchorElDrawingElementWall,
-    setAnchorElDrawingElementWall,
-  ] = React.useState(null);
+  const [anchorElDrawingItemDust, setAnchorElDrawingItemDust] = React.useState(
+    null
+  );
+  const [anchorElDrawingItemWall, setAnchorElDrawingItemWall] = React.useState(
+    null
+  );
   const [anchorElDrawFree, setAnchorElDrawFree] = React.useState(null);
   const [anchorElDrawRectangle, setAnchorElDrawRectangle] = React.useState(
     null
@@ -97,10 +88,10 @@ const Tools = (props) => {
         setAnchorElBatteryCapacityHover(event.currentTarget);
         break;
       case "btn-dust":
-        setAnchorElDrawingElementDust(event.currentTarget);
+        setAnchorElDrawingItemDust(event.currentTarget);
         break;
       case "btn-wall":
-        setAnchorElDrawingElementWall(event.currentTarget);
+        setAnchorElDrawingItemWall(event.currentTarget);
         break;
       default:
         console.log("Default case entered in Tools.jsx: handlePopoverOpen");
@@ -131,27 +122,28 @@ const Tools = (props) => {
         setAnchorElBatteryCapacityHover(null);
         break;
       case "btn-dust":
-        setAnchorElDrawingElementDust(null);
+        setAnchorElDrawingItemDust(null);
         break;
       case "btn-wall":
-        setAnchorElDrawingElementWall(null);
+        setAnchorElDrawingItemWall(null);
         break;
       default:
         console.log("Default case entered in Tools.jsx: handlePopoverClose");
     }
   };
 
-  const handleDustButtonClicked = (event) => {
-    setDrawingElement("wall");
-    setAnchorElDrawingElementDust(null);
-  };
-  const handleWallButtonClicked = (event) => {
-    setDrawingElement("dust");
-    setAnchorElDrawingElementWall(null);
+  const handleDrawingItemButtonClicked = (event) => {
+    context.updateState(
+      "drawItem",
+      event.currentTarget.id === "btn-wall" ? "dust" : "wall"
+    );
+    event.currentTarget.id === "btn-wall" && setAnchorElDrawingItemWall(null);
+    event.currentTarget.id === "btn-dust" && setAnchorElDrawingItemDust(null);
   };
 
-  const handleDrawingModeButtonClicked = (event) => {
-    setDrawingMode(
+  const handleDrawingMethodButtonClicked = (event) => {
+    context.updateState(
+      "drawMethod",
       event.currentTarget.id === "btn-free"
         ? "free"
         : event.currentTarget.id === "btn-rectangle"
@@ -174,23 +166,22 @@ const Tools = (props) => {
   };
 
   const handleMapButtonMouseDown = (event) => {
-    setHighlightMapRequest(true);
-    console.log(drawingMode);
+    context.updateState("request", "highlightMap");
   };
 
   /* change to mouse leave to avoid bugs? */
   const handleMapButtonMouseUp = (event) => {
-    setHighlightMapRequest(false);
+    context.updateState("request", "removeHighlightMap");
   };
 
   const classes = useStyles();
   return (
     <div className={classes.tools}>
-      {drawingElement === "dust" ? (
+      {drawItem === "dust" ? (
         <IconButton
           id={"btn-dust"}
           className={classes.iconActive}
-          onClick={handleDustButtonClicked}
+          onClick={handleDrawingItemButtonClicked}
           disabled={isRunning}
           onMouseOver={handlePopoverOpen}
           onMouseLeave={handlePopoverClose}
@@ -201,7 +192,7 @@ const Tools = (props) => {
         <IconButton
           id={"btn-wall"}
           className={classes.iconActive}
-          onClick={handleWallButtonClicked}
+          onClick={handleDrawingItemButtonClicked}
           disabled={isRunning}
           onMouseOver={handlePopoverOpen}
           onMouseLeave={handlePopoverClose}
@@ -211,8 +202,8 @@ const Tools = (props) => {
       )}
       <IconButton
         id={"btn-free"}
-        className={drawingMode === "free" ? classes.iconActive : classes.icon}
-        onClick={handleDrawingModeButtonClicked}
+        className={drawMethod === "free" ? classes.iconActive : classes.icon}
+        onClick={handleDrawingMethodButtonClicked}
         onMouseOver={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
         disabled={isRunning || isFinished}
@@ -222,9 +213,9 @@ const Tools = (props) => {
       <IconButton
         id={"btn-rectangle"}
         className={
-          drawingMode === "rectangle" ? classes.iconActive : classes.icon
+          drawMethod === "rectangle" ? classes.iconActive : classes.icon
         }
-        onClick={handleDrawingModeButtonClicked}
+        onClick={handleDrawingMethodButtonClicked}
         onMouseOver={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
         hidden={true}
@@ -235,11 +226,11 @@ const Tools = (props) => {
       <IconButton
         id={"btn-obstacle"}
         className={
-          drawingMode === "filled rectangle" && !isRunning
+          drawMethod === "filled rectangle" && !isRunning
             ? classes.iconActive
             : classes.icon
         }
-        onClick={handleDrawingModeButtonClicked}
+        onClick={handleDrawingMethodButtonClicked}
         onMouseOver={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
         disabled={isRunning || isFinished}
@@ -334,8 +325,8 @@ const Tools = (props) => {
         classes={{
           paper: classes.paper,
         }}
-        open={Boolean(anchorElDrawingElementDust)}
-        anchorEl={anchorElDrawingElementDust}
+        open={Boolean(anchorElDrawingItemDust)}
+        anchorEl={anchorElDrawingItemDust}
         anchorOrigin={{
           vertical: "bottom",
           horizontal: "left",
@@ -355,8 +346,8 @@ const Tools = (props) => {
         classes={{
           paper: classes.paper,
         }}
-        open={Boolean(anchorElDrawingElementWall)}
-        anchorEl={anchorElDrawingElementWall}
+        open={Boolean(anchorElDrawingItemWall)}
+        anchorEl={anchorElDrawingItemWall}
         anchorOrigin={{
           vertical: "bottom",
           horizontal: "left",
