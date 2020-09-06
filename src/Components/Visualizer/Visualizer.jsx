@@ -356,6 +356,7 @@ export default class Visualizer extends Component {
     updateState("isRunning", true);
 
     robot.syncMapLayoutWithGrid(grid);
+    let t0 = performance.now();
 
     const robotPath = userAlgorithmResult
       ? userAlgorithmResult.path
@@ -366,6 +367,8 @@ export default class Visualizer extends Component {
           availableSteps
         );
 
+    let t1 = performance.now();
+    console.log("Call to handlePlay took " + (t1 - t0) + " milliseconds.");
     if (simulationType === "map") {
       robot.updateMap(robotPath);
     }

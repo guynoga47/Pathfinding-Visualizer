@@ -32,20 +32,13 @@ export const baseMap = (grid, map, dockingStation, availableSteps, step) => {
     i++;
   }
 
-  let t0 = performance.now();
-
   const robotPath = adjustRobotPathToBatteryAndInsertReturnPath(
     visitedNodesInOrder,
     map,
     dockingStation,
     availableSteps
   );
-  let t1 = performance.now();
-  console.log(
-    "Call to adjustRobotPathToBatteryAndInsertReturnPath took " +
-      (t1 - t0) +
-      " milliseconds."
-  );
+
   return robotPath;
 };
 
