@@ -243,7 +243,7 @@ export default class Visualizer extends Component {
       }
     }
   };
-  changeNodeDust = (row, col, { remove, add, fixed }) => {
+  changeNodeDust = (row, col, { remove, add }) => {
     const node = this.context.state.grid[row][col];
     if (node.isWall) return;
     const nodeDOM = ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]);

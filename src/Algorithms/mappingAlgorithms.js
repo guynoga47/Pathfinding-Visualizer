@@ -371,29 +371,12 @@ const depthMap = (grid, robotMap, startNode, availableSteps) => {
 
   availableSteps = availableSteps - pathFromDockToStartNode.length;
 
-  let t0 = performance.now();
-
   let dfsResult = dfs(robotMap, currStartNode);
 
-  let t1 = performance.now();
-
-  console.log("Call to dfs took " + (t1 - t0) + " milliseconds.");
-
-  t0 = performance.now();
-  /* let mappingPath = addShortPathBetweenUneighbours(dfsResult, robotMap); */
   const robotPath = [];
   fillPathGapsInNodeList(robotMap, dfsResult, robotPath);
-  t1 = performance.now();
-
-  console.log(
-    "Call to addShortPathBetweenUneighbours took " +
-      (t1 - t0) +
-      " milliseconds."
-  );
 
   visitedNodesInOrder.push(...robotPath);
-
-  t0 = performance.now();
 
   resetGridSearchProperties(robotMap);
   /*
@@ -406,12 +389,6 @@ const depthMap = (grid, robotMap, startNode, availableSteps) => {
     robotMap,
     startNode,
     availableSteps
-  );
-  t1 = performance.now();
-  console.log(
-    "Call to modifyVisitedNodesConsideringBattery took " +
-      (t1 - t0) +
-      " milliseconds."
   );
 
   return visitedConsideringBattery;
@@ -465,10 +442,5 @@ export const data = [
     name: "Depth Traversal",
     shortened: "Depth",
     func: depthMap,
-  },
-  {
-    name: "Adjanceny List",
-    shortened: "Adj",
-    func: adjList,
   },
 ];
