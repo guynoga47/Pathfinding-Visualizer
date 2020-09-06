@@ -8,3 +8,15 @@ export const calculateDefaultDockingStation = (height, width) => {
   };
   return defaultDockingStation;
 };
+
+export const createNode = (row, col, isWall = false) => {
+  return {
+    row,
+    col,
+    distance: Infinity,
+    dust: 0,
+    heuristicDistance: Infinity,
+    isWall: isWall,
+    previousNode: null,
+  };
+};

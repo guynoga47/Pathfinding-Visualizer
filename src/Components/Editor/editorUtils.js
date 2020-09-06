@@ -1,7 +1,15 @@
 /* eslint-disable no-undef */
+import Interpreter from "js-interpreter";
+
 import scopeFunctions from "../../Algorithms/algorithmUtils";
+import * as mappingAlgorithms from "../../Algorithms/mappingAlgorithms";
+import * as cleaningAlgorithms from "../../Algorithms/cleaningAlgorithms";
+
+import configs from "./configs.json";
+
 import validators from "./validators";
 import Exception from "../../Classes/Exception";
+
 export const DEFAULT_EDITOR_MARKUP = `function buildPath(grid, map, dockingStation, availableSteps){
 
   const visitedNodesInOrder = [grid[12][25], grid[12][26], grid[12][27], grid[12][28], grid[12][29], grid[12][28], grid[12][27], grid[12][26], grid[12][25]];
@@ -9,7 +17,47 @@ export const DEFAULT_EDITOR_MARKUP = `function buildPath(grid, map, dockingStati
   return visitedNodesInOrder;
 
 }`;
-export const EXECUTE = `buildPath(grid,map,dockingStation,availableSteps);`;
+
+const EXECUTE = `buildPath(grid,map,dockingStation,availableSteps);`;
+
+export const createSandboxedInterpreter = (code, context) => {
+  const establishEnvironment = (context, interpreter) => {
+    const { grid, availableSteps, startNode } = context.state;
+    const { robot } = context;
+
+    const args = [
+      { name: "grid", value: grid },
+      { name: "map", value: robot.map },
+      {
+        name: "dockingStation",
+        value: robot.map[startNode.row][startNode.col],
+      },
+      { name: "availableSteps", availableSteps },
+    ];
+
+    args.forEach((arg) => {
+      interpreter.setValueToScope(
+        arg.name,
+        interpreter.nativeToPseudo(arg.value)
+      );
+    });
+
+    scopeFunctions.forEach((func) => {
+      interpreter.setValueToScope(func.name, interpreter.nativeToPseudo(func));
+    });
+  };
+  const compileToES5 = (code) => {
+    return Babel.transform(code, {
+      presets: ["es2015"],
+      sourceType: "script",
+    }).code;
+  };
+
+  const interpreter = new Interpreter(compileToES5(code));
+  interpreter.appendCode(EXECUTE);
+  establishEnvironment(context, interpreter);
+  return interpreter;
+};
 
 export const loadScript = (url, callback) => {
   let script = document.createElement("script");
@@ -87,40 +135,57 @@ export const extendAutocomplete = (editor) => {
   editor.completers = [autoComplete];
 };
 
-export const compileToES5 = (code) => {
-  return Babel.transform(code, {
-    presets: ["es2015"],
-    sourceType: "script",
-  }).code;
-};
-
-export const establishEnvironment = (context, interpreter) => {
-  const { grid, availableSteps, startNode } = context.state;
-  const { robot } = context;
-
-  const args = [
-    { name: "grid", value: grid },
-    { name: "map", value: robot.map },
-    { name: "dockingStation", value: robot.map[startNode.row][startNode.col] },
-    { name: "availableSteps", availableSteps },
-  ];
-
-  args.forEach((arg) => {
-    interpreter.setValueToScope(
-      arg.name,
-      interpreter.nativeToPseudo(arg.value)
-    );
-  });
-
-  scopeFunctions.forEach((func) => {
-    interpreter.setValueToScope(func.name, interpreter.nativeToPseudo(func));
-  });
-};
-
 export const validateResult = (result, context) => {
   for (const validate of validators) {
     validate(result, context);
   }
+};
+
+export const getBenchmarkAlgorithms = (simulationType) => {
+  return simulationType === "map"
+    ? mappingAlgorithms.data
+    : cleaningAlgorithms.data;
+};
+export const getBenchmarkConfigs = () => {
+  return configs;
+};
+
+const buildContextFromConfig = (config) => {
+  const { grid, robot, startNode, availableSteps } = config;
+  return { state: { grid, startNode, availableSteps }, robot };
+};
+
+const calculateEfficiency = (path, config, simulationType) => {
+  const { grid } = config;
+  return simulationType === "sweep"
+    ? (path.reduce((a, b) => ({ dust: a.dust + b.dust })) /
+        grid.flat(Infinity).reduce((a, b) => ({ dust: a.dust + b.dust }))) *
+        100
+    : (path.length / (grid.length * grid[0].length)) * 100;
+};
+
+export const measure = (algorithm, config, simulationType) => {
+  let Tstart, Tfinish;
+  let interpreter;
+  if (algorithm.name === "User Script") {
+    interpreter = createSandboxedInterpreter(
+      algorithm.code,
+      buildContextFromConfig(config)
+    );
+    interpreter.run();
+  }
+  const { grid, robot, startNode, availableSteps } = config;
+  const dockingStation = robot.map[startNode.row][startNode.col];
+  Tstart = performance.now();
+  const path =
+    algorithm.name === "User Script"
+      ? interpreter.pseudoToNative(interpreter.value)
+      : algorithm.func(grid, robot.map, dockingStation, availableSteps);
+  Tfinish = performance.now();
+  return {
+    time: Tfinish - Tstart,
+    efficiency: calculateEfficiency(path, config, simulationType),
+  };
 };
 
 export const checkTimeLimitExceeded = (interpreter) => {

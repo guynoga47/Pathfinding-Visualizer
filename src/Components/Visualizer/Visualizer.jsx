@@ -24,20 +24,20 @@ export default class Visualizer extends Component {
 
   handleReset = () => {
     this.context.updateState("isFinished", false);
-    this.context.resetGridKeepWalls(this.resetNodeStyles, {
+    this.context.resetGridKeepWalls(this.applyNodesStyles, {
       setWalls: true,
     });
   };
 
   handleGridSizeChange = (height) => {
     if (height === this.context.gridHeight) return;
-    this.context.resizeGrid(height, this.resetNodeStyles, {
+    this.context.resizeGrid(height, this.applyNodesStyles, {
       resetWalls: true,
       resetDust: true,
     });
   };
 
-  resetNodeStyles = ({ resetWalls, resetDust, setWalls, setDust }) => {
+  applyNodesStyles = ({ resetWalls, resetDust, setWalls, setDust }) => {
     for (let nodeRef in this.refs) {
       const row = parseInt(nodeRef.split("-")[1]);
       const col = parseInt(nodeRef.split("-")[2]);
@@ -72,8 +72,7 @@ export default class Visualizer extends Component {
   };
 
   handleMouseDown = (row, col) => {
-    const { drawingMode, drawingElement } = this.props;
-    const { isFinished, isRunning } = this.context.state;
+    const { drawMethod, drawItem, isFinished, isRunning } = this.context.state;
     if (isFinished || isRunning) return;
     this.mouseDown = true;
     if (this.context.isStartNode(row, col)) {
@@ -85,43 +84,41 @@ export default class Visualizer extends Component {
         `removed startNode in handleMouseDown from node-${row}-${col}`
       );
     } else {
-      if (drawingMode === "rectangle" || drawingMode === "filled rectangle") {
+      if (drawMethod === "rectangle" || drawMethod === "filled rectangle") {
         this.rectLocStart = { row, col };
       }
-      if (drawingElement === "wall") {
+      if (drawItem === "wall") {
         this.changeNodeWall(row, col, { toggle: true });
       }
-      if (drawingElement === "dust") {
+      if (drawItem === "dust") {
         this.changeNodeDust(row, col, { add: true });
       }
     }
   };
 
   handleMouseEnter = (row, col) => {
-    const { drawingMode, drawingElement } = this.props;
-    const { isFinished, isRunning } = this.context.state;
+    const { drawMethod, drawItem, isFinished, isRunning } = this.context.state;
     if (isFinished || !this.mouseDown || isRunning) return;
     if (this.startNodeMouseDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
         `node-start`
       );
-    } else if (drawingMode === "filled rectangle") {
+    } else if (drawMethod === "filled rectangle") {
       this.createAndRenderRectangle(row, col, { fill: true, add: true });
-    } else if (drawingMode === "rectangle") {
+    } else if (drawMethod === "rectangle") {
       this.createAndRenderRectangle(row, col, { fill: false, add: true });
-    } else if (drawingMode === "free") {
-      if (drawingElement === "wall") {
+    } else if (drawMethod === "free") {
+      if (drawItem === "wall") {
         this.changeNodeWall(row, col, { toggle: true });
       }
-      if (drawingElement === "dust") {
+      if (drawItem === "dust") {
         this.changeNodeDust(row, col, { add: true });
       }
     }
   };
 
   handleMouseLeave = (row, col) => {
-    const { drawingMode } = this.props;
-    const { isFinished, isRunning } = this.context.state;
+    const { drawMethod, isFinished, isRunning } = this.context.state;
     if (isFinished || isRunning) return;
     if (this.startNodeMouseDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
@@ -131,40 +128,40 @@ export default class Visualizer extends Component {
         "removed node-start in handleMouseLeave from node" + row + "-" + col
       );
     } else if (this.mouseDown) {
-      if (drawingMode === "rectangle") {
+      if (drawMethod === "rectangle") {
         this.createAndRenderRectangle(row, col, {
           fill: false,
           toggle: true,
         });
-      } else if (drawingMode === "filled rectangle") {
+      } else if (drawMethod === "filled rectangle") {
         this.createAndRenderRectangle(row, col, { fill: true, toggle: true });
       }
     }
   };
 
   createAndRenderRectangle = (row, col, { fill, add, toggle }) => {
-    const { drawingElement } = this.props;
+    const { drawItem } = this.context.state;
     const rectangleNodes = this.calculateRectangleNodes(row, col, {
       fill,
     });
     if (add) {
-      if (drawingElement === "wall") {
+      if (drawItem === "wall") {
         rectangleNodes.forEach((node) =>
           this.changeNodeWall(node.row, node.col, { add: true })
         );
       }
-      if (drawingElement === "dust") {
+      if (drawItem === "dust") {
         rectangleNodes.forEach((node) =>
           this.changeNodeDust(node.row, node.col, { add: true })
         );
       }
     } else {
-      if (drawingElement === "wall") {
+      if (drawItem === "wall") {
         rectangleNodes.forEach((node) =>
           this.changeNodeWall(node.row, node.col, { toggle: true })
         );
       }
-      if (drawingElement === "dust") {
+      if (drawItem === "dust") {
         rectangleNodes.forEach((node) =>
           this.changeNodeDust(node.row, node.col, { remove: true })
         );
@@ -246,7 +243,7 @@ export default class Visualizer extends Component {
       }
     }
   };
-  changeNodeDust = (row, col, { remove, add, fixed }) => {
+  changeNodeDust = (row, col, { remove, add }) => {
     const node = this.context.state.grid[row][col];
     if (node.isWall) return;
     const nodeDOM = ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]);
@@ -378,7 +375,6 @@ export default class Visualizer extends Component {
   };
 
   handleClearWalls = () => {
-    const { setClearWallsRequest } = this.props;
     for (let row = 0; row < this.context.gridHeight; row++) {
       for (let col = 0; col < this.context.gridWidth; col++) {
         if (!this.context.isStartNode(row, col)) {
@@ -388,10 +384,10 @@ export default class Visualizer extends Component {
         }
       }
     }
-    setClearWallsRequest({ requested: false, cleared: true });
+    this.context.updateState("request", false);
   };
+
   handleClearDust = () => {
-    const { setClearDustRequest } = this.props;
     for (let row = 0; row < this.context.gridHeight; row++) {
       for (let col = 0; col < this.context.gridWidth; col++) {
         if (!this.context.isStartNode(row, col)) {
@@ -401,24 +397,28 @@ export default class Visualizer extends Component {
         }
       }
     }
-    setClearDustRequest({ requested: false, cleared: true });
+    this.context.updateState("request", false);
   };
 
   componentDidUpdate() {
-    if (this.props.isClearWallsRequested.requested) {
+    if (this.context.state.request === "clearWalls") {
       this.handleClearWalls();
     }
-    if (this.props.isClearDustRequested.requested) {
+    if (this.context.state.request === "clearDust") {
       this.handleClearDust();
     }
     if (this.context.state.configLoaded) {
-      this.resetNodeStyles({
+      this.applyNodesStyles({
+        resetWalls: true,
+        resetDust: true,
+      });
+      this.applyNodesStyles({
         setWalls: true,
         setDust: true,
       });
       this.context.updateState("configLoaded", false);
     }
-    if (this.props.isHighlightMapRequested) {
+    if (this.context.state.request === "highlightMap") {
       const { map } = this.context.robot;
       for (let row = 0; row < map.length; row++) {
         for (let col = 0; col < map[0].length; col++) {
@@ -430,7 +430,7 @@ export default class Visualizer extends Component {
         }
       }
     }
-    if (!this.props.isHighlightMapRequested) {
+    if (this.context.state.request === "removeHighlightMap") {
       const { map } = this.context.robot;
       for (let row = 0; row < map.length; row++) {
         for (let col = 0; col < map[0].length; col++) {
@@ -458,14 +458,14 @@ export default class Visualizer extends Component {
           {grid.map((row, rowIndex) => (
             <div key={rowIndex} className="row">
               {row.map((node) => {
-                const { row, col, isStart } = node;
+                const { row, col } = node;
                 return (
                   <Node
                     key={`node-${row}-${col}`}
                     ref={`node-${row}-${col}`}
                     row={row}
                     col={col}
-                    isStart={isStart}
+                    isStart={this.context.isStartNode(row, col)}
                     onMouseDown={this.handleMouseDown}
                     onMouseEnter={this.handleMouseEnter}
                     onMouseLeave={this.handleMouseLeave}

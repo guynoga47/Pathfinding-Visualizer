@@ -16,18 +16,18 @@ import Message from "./Message/Message";
 import { infoMessage } from "./Message/messages";
 
 import AceEditor from "react-ace";
-import Interpreter from "js-interpreter";
 
 import {
   DEFAULT_EDITOR_MARKUP,
-  EXECUTE,
-  compileToES5,
+  createSandboxedInterpreter,
   loadScript,
   checkTimeLimitExceeded,
   restrictEditingSegment,
   extendAutocomplete,
-  establishEnvironment,
   validateResult,
+  getBenchmarkAlgorithms,
+  getBenchmarkConfigs,
+  measure,
 } from "./editorUtils.js";
 
 import GridContext from "../../Context/grid-context";
@@ -49,7 +49,10 @@ const useStyles = editorStyles;
 
 const Editor = (props) => {
   const classes = useStyles();
+  const { open, setCodeEditorOpen } = props;
+
   const context = useContext(GridContext);
+
   const [firstMount, setFirstMount] = useState(true);
   const [showError, setShowError] = useState("");
   const [showClearWarning, setShowClearWarning] = useState("");
@@ -60,35 +63,55 @@ const Editor = (props) => {
   let ace = useRef(null);
   const { editorScript } = context.state;
   let code = editorScript;
+
   /*
   no need to deep copy, because strings management is probably managed with ref count, so code is detached from editorScript as soon as onChange
   happens, and we avoid changing the state directly
   */
 
-  const { open, setCodeEditorOpen } = props;
-
   const onChange = (currentCode) => {
     code = currentCode;
+  };
+
+  const handleBenchmark = () => {
+    const { simulationType, userAlgorithmResult } = context.state;
+    if (!userAlgorithmResult) return;
+    const benchmarkAlgorithms = getBenchmarkAlgorithms(simulationType).concat([
+      { name: "User Script", code: code },
+    ]);
+    const benchmarkConfigs = getBenchmarkConfigs();
+    const scores = [];
+    for (const [i, algorithm] of benchmarkAlgorithms.entries()) {
+      scores.push([]);
+      for (const [cfgName, cfg] of Object.entries(benchmarkConfigs)) {
+        scores[parseInt(i)].push({
+          algName: algorithm.name,
+          cfgName: `${cfgName}`,
+          result: measure(algorithm, cfg, simulationType),
+        });
+      }
+    }
   };
 
   const handleLoad = () => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
     context.updateState("editorScript", code);
-    let myInterpreter = new Interpreter(compileToES5(code));
-    myInterpreter.appendCode(EXECUTE);
-    establishEnvironment(context, myInterpreter);
+    const interpreter = createSandboxedInterpreter(code, context);
 
     try {
-      checkTimeLimitExceeded(myInterpreter);
+      checkTimeLimitExceeded(interpreter);
 
-      myInterpreter.run();
-      const result = myInterpreter.pseudoToNative(myInterpreter.value);
+      interpreter.run();
+
+      const result = interpreter.pseudoToNative(interpreter.value);
 
       validateResult(result, context);
 
       setShowSuccess(`Well done!
       You may exit the editor and click the Play button.`);
-      context.updateState("userAlgorithmResult", { path: result });
+      context.updateState("userAlgorithmResult", {
+        path: result,
+      });
     } catch (err) {
       setShowError(err.message);
       context.updateState("userAlgorithmResult", false);
@@ -152,6 +175,14 @@ const Editor = (props) => {
               onClick={() => setShowAPI(true)}
             >
               API
+            </Button>
+            <Button
+              autoFocus
+              className={classes.editorBtn}
+              color="inherit"
+              onClick={handleBenchmark}
+            >
+              BENCHMARK
             </Button>
             <Button
               autoFocus

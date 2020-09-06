@@ -33,15 +33,7 @@ const Controller = (props) => {
   const [codeEditorOpen, setCodeEditorOpen] = React.useState(false);
   const context = useContext(GridContext);
   const classes = useStyles();
-  const {
-    setClearWallsRequest,
-    setClearDustRequest,
-    setHighlightMapRequest,
-    drawingMode,
-    setDrawingMode,
-    setDrawingElement,
-    drawingElement,
-  } = props;
+  const { drawItem } = context.state;
 
   const handleAlgorithmSelected = (event) => {
     if (context.state.simulationType === "map") {
@@ -65,10 +57,10 @@ const Controller = (props) => {
   };
 
   const handleClearWallsRequested = () => {
-    setClearWallsRequest({ cleared: false, requested: true });
+    context.updateState("request", "clearWalls");
   };
   const handleClearDustRequested = () => {
-    setClearDustRequest({ cleared: false, requested: true });
+    context.updateState("request", "clearDust");
   };
 
   return (
@@ -123,7 +115,7 @@ const Controller = (props) => {
                   : "SELECT"}
               </Button>
             )}
-            {drawingElement === "wall" && (
+            {drawItem === "wall" && (
               <Button
                 className={classes.navButton}
                 aria-haspopup="true"
@@ -134,7 +126,7 @@ const Controller = (props) => {
                 Clear Walls
               </Button>
             )}
-            {drawingElement === "dust" && (
+            {drawItem === "dust" && (
               <Button
                 className={classes.navButton}
                 aria-haspopup="true"
@@ -256,15 +248,7 @@ const Controller = (props) => {
             />
           </Grid>
           <Grid item>
-            <Tools
-              isRunning={context.state.isRunning}
-              isFinished={context.state.isFinished}
-              drawingMode={drawingMode}
-              setDrawingMode={setDrawingMode}
-              setHighlightMapRequest={setHighlightMapRequest}
-              drawingElement={drawingElement}
-              setDrawingElement={setDrawingElement}
-            />
+            <Tools />
           </Grid>
         </Grid>
       </Toolbar>
