@@ -6,12 +6,16 @@ export default makeStyles((theme) => ({
   topAppBar: {
     position: "relative",
   },
+  input: {
+    display: "none",
+  },
   title: {
     marginLeft: theme.spacing(2),
     flex: 1,
   },
   editorBtn: {
     color: "white",
+    marginRight: "1em",
     "&:hover": {
       color: "#66FCF1 !important",
       background: "#1f2833",
@@ -31,6 +35,12 @@ export default makeStyles((theme) => ({
   warnMsgBtn: {
     marginBottom: 0,
     fontWeight: 500,
+  },
+  popover: {
+    pointerEvents: "none",
+  },
+  popoverText: {
+    padding: "5px",
   },
 }));
 

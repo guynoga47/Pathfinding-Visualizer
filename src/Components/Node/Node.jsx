@@ -12,7 +12,7 @@ export default class Node extends PureComponent {
       onMouseLeave,
       onMouseUp,
     } = this.props;
-    const extraClassName = isStart && "node-start";
+    const extraClassName = isStart ? "node-start" : "";
 
     /* this pattern of sending the handlers for div from the parent could be costly performance wise, because
     the functions recreates on each re-render. luckily we barely do any rerenders of the divs. */

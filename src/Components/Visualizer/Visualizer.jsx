@@ -80,9 +80,6 @@ export default class Visualizer extends Component {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-start`
       );
-      console.log(
-        `removed startNode in handleMouseDown from node-${row}-${col}`
-      );
     } else {
       if (drawMethod === "rectangle" || drawMethod === "filled rectangle") {
         this.rectLocStart = { row, col };
