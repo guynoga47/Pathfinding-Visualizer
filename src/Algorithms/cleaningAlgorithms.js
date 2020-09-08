@@ -16,7 +16,24 @@ import {
 } from "./algorithmUtils";
 
 
+const canStartCleaning = (map, startingPoint) => {
+  const startingPointNeighbours = getNeighbors(startingPoint, map);
+  if (startingPointNeighbours.length === 0) {
+    return false;
+  }
+
+  for (let i = 0; i < startingPointNeighbours.length; i++) {
+    if (startingPointNeighbours[i].isMapped) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const greedyCleaning = (grid, map, dockingStation, availableSteps) => {
+  if (!canStartCleaning(map, dockingStation)) {
+    return [];
+  }
   let mapCopy = getGridDeepCopy(map)
   let currNode = mapCopy[dockingStation.row][dockingStation.col];
   let bestCandidate;
