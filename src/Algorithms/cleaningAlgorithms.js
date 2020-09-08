@@ -1,12 +1,32 @@
-import { astar } from "./pathfindingAlgorithms";
+import {
+  astar
+} from "./pathfindingAlgorithms";
 import {
   getGridDeepCopy,
   getNeighbors,
   getShortestPathNodesInOrder,
 } from "./algorithmUtils";
 
+
+const canStartCleaning = (map, startingPoint) => {
+  const startingPointNeighbours = getNeighbors(startingPoint, map);
+  if (startingPointNeighbours.length === 0) {
+    return false;
+  }
+
+  for (let i = 0; i < startingPointNeighbours.length; i++) {
+    if (startingPointNeighbours[i].isMapped) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const greedyCleaning = (grid, map, dockingStation, availableSteps) => {
-  let mapCopy = getGridDeepCopy(map);
+  if (!canStartCleaning(map, dockingStation)) {
+    return [];
+  }
+  let mapCopy = getGridDeepCopy(map)
   let currNode = mapCopy[dockingStation.row][dockingStation.col];
   let bestCandidate;
   let canContinue = true;
@@ -72,10 +92,8 @@ const findbestCandidate = (currNode, visitedNodesInOrder, mapCopy) => {
   return findleastVisitedNode(currNeighbours);
 };
 
-export const data = [
-  {
-    name: "Greedy Cleaning",
-    shortened: "Greedy",
-    func: greedyCleaning,
-  },
-];
+export const data = [{
+  name: "Greedy Cleaning",
+  shortened: "Greedy",
+  func: greedyCleaning,
+}, ];
