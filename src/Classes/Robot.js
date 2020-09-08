@@ -18,9 +18,8 @@ export default class Robot {
   };
 
   syncMapLayoutWithGrid = (grid) => {
-    let row, col;
-    for (row = 0; row < grid.length; row++) {
-      for (col = 0; col < grid[0].length; col++) {
+    for (let row = 0; row < grid.length; row++) {
+      for (let col = 0; col < grid[0].length; col++) {
         const mapNode = this.map[row][col];
         const gridNode = grid[row][col];
         mapNode.isWall = gridNode.isWall;

@@ -12,10 +12,11 @@ export default class Node extends PureComponent {
       onMouseLeave,
       onMouseUp,
     } = this.props;
-    const extraClassName = isStart && "node-start";
+    const extraClassName = isStart ? "node-start" : "";
 
-    /* this pattern of sending the handlers for div from the parent could be costly performance wise, because
-    the functions recreates on each re-render. luckily we barely do any rerenders of the divs. */
+    /* The pattern of sending the handlers for the node from the parent could be costly performance wise, because
+    the functions recreates on every re-render. we avoid it because we use direct DOM access to change styles, and barely rerendering the 
+    Node components with react. */
     const nodeJSX = (
       <div
         id={`node-${row}-${col}`}

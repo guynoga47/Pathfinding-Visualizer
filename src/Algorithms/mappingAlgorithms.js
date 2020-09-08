@@ -16,7 +16,7 @@ export const baseMap = (grid, map, dockingStation, availableSteps, step) => {
   let i = 0;
   const visitedNodesInOrder = [];
 
-  let [currNode, pathToStartingNode] = pushPathToNewStartingNode(
+  let [currNode, pathToBorderNode] = extendToMapCurrentBorder(
     grid,
     map,
     dockingStation,
@@ -24,7 +24,7 @@ export const baseMap = (grid, map, dockingStation, availableSteps, step) => {
     availableSteps
   );
 
-  while (i < availableSteps - pathToStartingNode.length) {
+  while (i < availableSteps - pathToBorderNode.length) {
     visitedNodesInOrder.push(currNode);
 
     currNode = step(currNode, map, grid);
@@ -32,27 +32,20 @@ export const baseMap = (grid, map, dockingStation, availableSteps, step) => {
     i++;
   }
 
-  let t0 = performance.now();
-
   const robotPath = adjustRobotPathToBatteryAndInsertReturnPath(
     visitedNodesInOrder,
     map,
     dockingStation,
     availableSteps
   );
-  let t1 = performance.now();
-  console.log(
-    "Call to adjustRobotPathToBatteryAndInsertReturnPath took " +
-      (t1 - t0) +
-      " milliseconds."
-  );
+
   return robotPath;
 };
 
 const spiralMap = (grid, map, dockingStation, availableSteps) => {
   const visitedNodesInOrder = [];
 
-  let [startNode, pathToStartingNode] = pushPathToNewStartingNode(
+  let [startNode, pathToBorderNode] = extendToMapCurrentBorder(
     grid,
     map,
     dockingStation,
@@ -62,7 +55,7 @@ const spiralMap = (grid, map, dockingStation, availableSteps) => {
 
   const offsets = calculateSpiralTraversalOffsets(
     grid,
-    availableSteps - pathToStartingNode.length
+    availableSteps - pathToBorderNode.length
   );
 
   const spiralOrderFromStartNode = [];
@@ -185,45 +178,41 @@ const bestFirst = (currNode, map, grid) => {
   return neighborsAscending[0];
 };
 
-const pushPathToNewStartingNode = (
+const extendToMapCurrentBorder = (
   grid,
   map,
   dockingStation,
   visitedNodesInOrder,
   availableSteps
 ) => {
-  const pathToStartingNode = resolvePathToStartingNode(
-    grid,
-    map,
-    dockingStation
-  );
+  const pathToBorderNode = plotPathToBorderNode(grid, map, dockingStation);
   if (
-    isNewStartNodeRequiredAndAccessible(
-      pathToStartingNode,
+    isBorderNodeRequiredAndAccesible(
+      pathToBorderNode,
       availableSteps,
       dockingStation
     )
   ) {
-    visitedNodesInOrder.push(...pathToStartingNode);
-    const newStartingNode = pathToStartingNode[pathToStartingNode.length - 1];
-    return [newStartingNode, pathToStartingNode];
+    visitedNodesInOrder.push(...pathToBorderNode);
+    const newStartingNode = pathToBorderNode[pathToBorderNode.length - 1];
+    return [newStartingNode, pathToBorderNode];
   }
   return [dockingStation, []];
 };
 
-const isNewStartNodeRequiredAndAccessible = (
-  pathToStartingNode,
+const isBorderNodeRequiredAndAccesible = (
+  pathToBorderNode,
   availableSteps,
   dockingStation
 ) => {
   return (
-    pathToStartingNode.length &&
-    availableSteps >= pathToStartingNode.length * 2 &&
+    pathToBorderNode.length &&
+    availableSteps >= pathToBorderNode.length * 2 &&
     dockingStation.isMapped
   );
 };
 
-const resolvePathToStartingNode = (grid, map, dockingStation) => {
+const plotPathToBorderNode = (grid, map, dockingStation) => {
   let pathToBufferNode = [];
   const unmappedAreaBufferNode = getRandomBufferNode(map, grid);
   if (unmappedAreaBufferNode) {
@@ -368,7 +357,7 @@ const getRandomBufferNode = (map, grid) => {
 const depthMap = (grid, robotMap, startNode, availableSteps) => {
   const visitedNodesInOrder = [];
 
-  let [currStartNode, pathFromDockToStartNode] = pushPathToNewStartingNode(
+  let [currStartNode, pathFromDockToStartNode] = extendToMapCurrentBorder(
     robotMap,
     robotMap,
     startNode,

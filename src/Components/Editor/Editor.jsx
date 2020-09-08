@@ -6,12 +6,15 @@ import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
+import Popover from "@material-ui/core/Popover";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
-import CloseIcon from "@material-ui/icons/Close";
-import APIDescriptor from "./APIDescriptor/APIDescriptor";
+import IconClose from "@material-ui/icons/Close";
+import IconSave from "@material-ui/icons/GetApp";
+import IconLoad from "@material-ui/icons/Publish";
 
 import editorStyles, { Transition } from "./Editor.Styles";
+import APIDescriptor from "./APIDescriptor/APIDescriptor";
 import Message from "./Message/Message";
 import { infoMessage } from "./Message/messages";
 
@@ -38,13 +41,6 @@ import "ace-builds/src-noconflict/ext-language_tools";
 
 import "ace-builds/webpack-resolver";
 
-/*
-TODO: 
-
-1. Save script (as js file, optional)
-
-*/
-
 const useStyles = editorStyles;
 
 const Editor = (props) => {
@@ -60,6 +56,11 @@ const Editor = (props) => {
   const [showInfo, setShowInfo] = useState(infoMessage);
   const [showAPI, setShowAPI] = useState(false);
 
+  const [anchorElSaveScript, setAnchorSaveScript] = React.useState(null);
+  const [anchorElLoadScript, setAnchorElLoadScript] = React.useState(null);
+
+  const [validatedResult, setValidatedResult] = React.useState(false);
+
   let ace = useRef(null);
   const { editorScript } = context.state;
   let code = editorScript;
@@ -70,6 +71,7 @@ const Editor = (props) => {
   */
 
   const onChange = (currentCode) => {
+    /* we dont want to set state on each change because it causes stuttering when typing*/
     code = currentCode;
   };
 
@@ -109,13 +111,24 @@ const Editor = (props) => {
 
       setShowSuccess(`Well done!
       You may exit the editor and click the Play button.`);
-      context.updateState("userAlgorithmResult", {
-        path: result,
-      });
+      setValidatedResult(result);
     } catch (err) {
       setShowError(err.message);
       context.updateState("userAlgorithmResult", false);
     }
+  };
+
+  const handleLoadUserScript = (event) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const { editorScript } = JSON.parse(reader.result);
+      context.loadUserScript(editorScript);
+    };
+    reader.readAsText(event.target.files[0]);
+  };
+
+  const handleSaveUserCode = () => {
+    context.updateState("editorScript", code, context.saveUserScript);
   };
 
   const handleCancelClearRequest = () => {
@@ -140,6 +153,42 @@ const Editor = (props) => {
     loadBabel("https://unpkg.com/@babel/standalone/babel.min.js");
   }, []);
 
+  const handlePopoverOpen = (event) => {
+    switch (event.currentTarget.id) {
+      case "btn-saveScript":
+        setAnchorSaveScript(event.currentTarget);
+        break;
+      case "btn-loadScript":
+        setAnchorElLoadScript(event.currentTarget);
+        break;
+      default:
+        console.log("Default case entered in Editor.jsx: handlePopoverOpen");
+    }
+  };
+
+  const handlePopoverClose = (event) => {
+    switch (event.currentTarget.id) {
+      case "btn-saveScript":
+        setAnchorSaveScript(null);
+        break;
+      case "btn-loadScript":
+        setAnchorElLoadScript(null);
+        break;
+      default:
+        console.log("Default case entered in Editor.jsx: handlePopoverClose");
+    }
+  };
+
+  const handleTransitionToMainView = () => {
+    handleClose();
+    setTimeout(() => {
+      context.updateState("userAlgorithmResult", {
+        path: validatedResult,
+      });
+      setValidatedResult(false);
+    }, 500);
+  };
+
   return (
     <div>
       <Dialog
@@ -157,7 +206,42 @@ const Editor = (props) => {
               onClick={handleClose}
               aria-label="close"
             >
-              <CloseIcon />
+              <IconClose />
+            </IconButton>
+            <input
+              accept=".json"
+              className={classes.input}
+              id="icon-button-load-script"
+              onChange={handleLoadUserScript}
+              onClick={(event) => {
+                //to allow consecutive selection of same files, we need to clear input value after each click.
+                event.target.value = "";
+              }}
+              type="file"
+            />
+            <label htmlFor="icon-button-load-script">
+              <IconButton
+                id={"btn-loadScript"}
+                className={classes.editorBtn}
+                onMouseOver={handlePopoverOpen}
+                onMouseLeave={handlePopoverClose}
+                component={"span"}
+                htmlFor="icon-button-load-config"
+              >
+                <IconLoad />
+              </IconButton>
+            </label>
+            <IconButton
+              id={"btn-saveScript"}
+              className={classes.editorBtn}
+              edge="start"
+              color="inherit"
+              onMouseOver={handlePopoverOpen}
+              onMouseLeave={handlePopoverClose}
+              onClick={handleSaveUserCode}
+              aria-label="close"
+            >
+              <IconSave />
             </IconButton>
             <Typography variant="h6" className={classes.title}></Typography>
             <Button
@@ -238,14 +322,14 @@ const Editor = (props) => {
           variant="filled"
           severity="error"
         />
-        <Message
+        {/*         <Message
           message={showSuccess}
           setMessage={setShowSuccess}
           animationDelay={500}
           topTitle={`Loading Completed!\n`}
           variant="filled"
           severity="success"
-        />
+        /> */}
         <Message
           message={showInfo}
           setMessage={setShowInfo}
@@ -267,7 +351,7 @@ const Editor = (props) => {
           <Grid container direction="row" justify="flex-end">
             <Grid item>
               <Button
-                className={classes.warnMsgBtn}
+                className={classes.msgBtn}
                 variant="outlined"
                 color="secondary"
                 onClick={handleCancelClearRequest}
@@ -287,8 +371,60 @@ const Editor = (props) => {
             </Grid>
           </Grid>
         </Message>
+        <Message
+          message={showSuccess}
+          setMessage={setShowSuccess}
+          onClose={handleTransitionToMainView}
+          animationDelay={500}
+          topTitle={`Loaded Successfully!\n`}
+          variant="filled"
+          severity="success"
+        ></Message>
         <APIDescriptor showAPI={showAPI} setShowAPI={setShowAPI} />
       </Dialog>
+
+      <Popover
+        id="mouse-over-popover"
+        className={classes.popover}
+        classes={{
+          paper: classes.paper,
+        }}
+        open={Boolean(anchorElSaveScript)}
+        anchorEl={anchorElSaveScript}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        onClose={handlePopoverClose}
+        disableRestoreFocus
+      >
+        <Typography className={classes.popoverText}>Save Script</Typography>
+      </Popover>
+      <Popover
+        id="mouse-over-popover"
+        className={classes.popover}
+        classes={{
+          paper: classes.paper,
+        }}
+        open={Boolean(anchorElLoadScript)}
+        anchorEl={anchorElLoadScript}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        onClose={handlePopoverClose}
+        disableRestoreFocus
+      >
+        <Typography className={classes.popoverText}>Load Script</Typography>
+      </Popover>
     </div>
   );
 };

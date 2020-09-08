@@ -27,6 +27,8 @@ export default createContext({
   resizeGrid: (height, callback) => {},
   resetGridKeepWalls: (callback, param) => {},
   getInitialGrid: () => {},
+  saveUserScript: () => {},
+  loadUserScript: () => {},
   isStartNode: (row, col) => {},
   convertBatteryCapacityToAvailableSteps: () => {},
   convertAvailableStepsToBatteryCapacity: () => {},

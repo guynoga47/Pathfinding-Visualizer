@@ -70,13 +70,15 @@ class GlobalState extends Component {
   };
 
   saveConfiguration = () => {
+    const { grid, availableSteps, startNode, simulationType } = this.state;
+    const { robot } = this.robot;
     const blob = new Blob([
       JSON.stringify({
-        grid: this.state.grid,
-        robot: this.robot,
-        availableSteps: this.state.availableSteps,
-        startNode: this.state.startNode,
-        simulationType: this.state.simulationType,
+        grid,
+        robot,
+        availableSteps,
+        startNode,
+        simulationType,
       }),
     ]);
     const [rows, cols] = [this.gridHeight, this.gridWidth];
@@ -110,12 +112,35 @@ class GlobalState extends Component {
     );
   };
 
+  saveUserScript = () => {
+    const { editorScript } = this.state;
+    const blob = new Blob([
+      JSON.stringify({
+        editorScript,
+      }),
+    ]);
+    saveAs(
+      blob,
+      `User Script Snapshot ${new Date()
+        .toLocaleDateString()
+        .replace(/\./g, "-")} at ${new Date()
+        .toLocaleTimeString()
+        .replace(/:/g, ".")}.json`
+    );
+  };
+
+  loadUserScript = (code) => {
+    this.setState({
+      editorScript: code,
+    });
+  };
+
   resetGridKeepWalls = (callback, param) => {
     const grid = [];
     for (let row = 0; row < this.gridHeight; row++) {
       const currentRow = [];
       for (let col = 0; col < this.gridWidth; col++) {
-        currentRow.push(createNode(row, col, this.state.grid[row][col].isWall));
+        currentRow.push({ ...this.state.grid[row][col] });
       }
       grid.push(currentRow);
     }
@@ -174,8 +199,10 @@ class GlobalState extends Component {
           updateState: this.updateState,
           getInitialGrid: this.getInitialGrid,
           resizeGrid: this.resizeGrid,
-          loadConfiguration: this.loadConfiguration,
           saveConfiguration: this.saveConfiguration,
+          loadConfiguration: this.loadConfiguration,
+          saveUserScript: this.saveUserScript,
+          loadUserScript: this.loadUserScript,
           resetGridKeepWalls: this.resetGridKeepWalls,
           gridHeight: this.gridHeight,
           gridWidth: this.gridWidth,
