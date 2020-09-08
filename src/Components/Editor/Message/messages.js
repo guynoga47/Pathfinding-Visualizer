@@ -1,4 +1,4 @@
-export const infoMessage = `This platform allows you to implement your own method to traverse the grid.
+export const INFO_MSG = `This platform allows you to implement your own method to traverse the grid.
 You are required to create and return an 'Array' object which represents the path that the robot will take.
 The path must meet the following requirements:
 
@@ -7,3 +7,10 @@ The path must meet the following requirements:
 3. The number of elements in the array must be of value 'availableSteps' at most.
 
 `;
+
+export const SUCCESS_MSG = `Well done!
+Exiting the editor will now trigger a Playback of the result.
+You can also compare your code to our pre-defined algorithms 
+by clicking on the "Benchmark" button.`;
+
+export const NO_BENCHMARK_MSG = `The code must pass evaluation before attempting a Benchmark!`;

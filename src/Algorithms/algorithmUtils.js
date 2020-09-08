@@ -1,5 +1,7 @@
 import { astar } from "./pathfindingAlgorithms";
 
+export const MAX_DISTANCE = 9999;
+
 export const getShortestPathNodesInOrder = (finishNode) => {
   const shortestPathInOrder = [];
   let currentNode = finishNode;
@@ -49,8 +51,8 @@ export const resetGridSearchProperties = (grid) => {
     for (let col = 0; col < grid[0].length; col++) {
       grid[row][col].previousNode = null;
       grid[row][col].isVisited = false;
-      grid[row][col].distance = Infinity;
-      grid[row][col].heuristicDistance = Infinity;
+      grid[row][col].distance = MAX_DISTANCE;
+      grid[row][col].heuristicDistance = MAX_DISTANCE;
     }
   }
 };

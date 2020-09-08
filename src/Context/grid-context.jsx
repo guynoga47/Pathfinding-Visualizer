@@ -25,7 +25,7 @@ export default createContext({
   loadConfiguration: (nextConfiguration) => {},
   saveConfiguration: () => {},
   resizeGrid: (height, callback) => {},
-  resetGridKeepWalls: (callback, param) => {},
+  resetGridWithCurrentConfiguration: (callback, param) => {},
   getInitialGrid: () => {},
   saveUserScript: () => {},
   loadUserScript: () => {},

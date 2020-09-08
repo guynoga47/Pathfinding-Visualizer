@@ -135,9 +135,9 @@ export const extendAutocomplete = (editor) => {
   editor.completers = [autoComplete];
 };
 
-export const validateResult = (result, context) => {
-  for (const validate of validators) {
-    validate(result, context);
+export const validate = (result, context) => {
+  for (const validator of validators) {
+    validator(result, context);
   }
 };
 
@@ -151,7 +151,13 @@ export const getBenchmarkConfigs = () => {
 };
 
 const buildContextFromConfig = (config) => {
-  const { grid, robot, startNode, availableSteps } = config;
+  const { grid, map, startNode, availableSteps } = config;
+  /*
+  we are creating a dummy Robot object for when building interpreter environment for the Benchmark because 
+  we only need it to have a map property so we can send the same parameters and reuse a function which is being used in the regular
+  user code validation process.
+  */
+  const robot = { map };
   return { state: { grid, startNode, availableSteps }, robot };
 };
 
@@ -174,13 +180,13 @@ export const measure = (algorithm, config, simulationType) => {
     );
     interpreter.run();
   }
-  const { grid, robot, startNode, availableSteps } = config;
-  const dockingStation = robot.map[startNode.row][startNode.col];
+  const { grid, map, startNode, availableSteps } = config;
+  const dockingStation = map[startNode.row][startNode.col];
   Tstart = performance.now();
   const path =
     algorithm.name === "User Script"
       ? interpreter.pseudoToNative(interpreter.value)
-      : algorithm.func(grid, robot.map, dockingStation, availableSteps);
+      : algorithm.func(grid, map, dockingStation, availableSteps);
   Tfinish = performance.now();
   return {
     time: Tfinish - Tstart,

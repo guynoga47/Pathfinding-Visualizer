@@ -3,8 +3,12 @@ import Slide from "@material-ui/core/Slide";
 import { makeStyles } from "@material-ui/core/styles";
 
 export default makeStyles((theme) => ({
-  topAppBar: {
+  appBar: {
     position: "relative",
+  },
+  toolBar: {
+    position: "relative",
+    paddingRight: "0",
   },
   input: {
     display: "none",
@@ -18,6 +22,12 @@ export default makeStyles((theme) => ({
     marginRight: "1em",
     "&:hover": {
       color: "#66FCF1 !important",
+      background: "#1f2833",
+      borderColor: "black !important",
+      transition: "all 0.4s ease 0s",
+    },
+    "&:disabled": {
+      color: "#424242 !important",
       background: "#1f2833",
       borderColor: "black !important",
       transition: "all 0.4s ease 0s",

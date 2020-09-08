@@ -24,7 +24,7 @@ export default class Visualizer extends Component {
 
   handleReset = () => {
     this.context.updateState("isFinished", false);
-    this.context.resetGridKeepWalls(this.applyNodesStyles, {
+    this.context.resetGridWithCurrentConfiguration(this.applyNodesStyles, {
       setWalls: true,
       setDust: true,
     });

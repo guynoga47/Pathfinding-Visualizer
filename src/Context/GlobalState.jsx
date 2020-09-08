@@ -71,11 +71,11 @@ class GlobalState extends Component {
 
   saveConfiguration = () => {
     const { grid, availableSteps, startNode, simulationType } = this.state;
-    const { robot } = this.robot;
+    const { map } = this.robot;
     const blob = new Blob([
       JSON.stringify({
         grid,
-        robot,
+        map,
         availableSteps,
         startNode,
         simulationType,
@@ -93,16 +93,17 @@ class GlobalState extends Component {
   };
 
   loadConfiguration = (config) => {
-    this.robot = new Robot(config.grid);
-    this.robot.map = config.robot.map;
-    this.gridHeight = config.grid.length;
-    this.gridWidth = config.grid[0].length;
+    const { grid, map, startNode, availableSteps, simulationType } = config;
+    this.robot = new Robot(grid);
+    this.robot.map = map;
+    this.gridHeight = grid.length;
+    this.gridWidth = grid[0].length;
     this.setState(
       {
-        grid: config.grid,
-        availableSteps: config.availableSteps,
-        startNode: config.startNode,
-        simulationType: config.simulationType,
+        grid,
+        availableSteps,
+        startNode,
+        simulationType,
         configLoaded: true,
       },
       () => {
@@ -129,13 +130,13 @@ class GlobalState extends Component {
     );
   };
 
-  loadUserScript = (code) => {
+  loadUserScript = (script) => {
     this.setState({
-      editorScript: code,
+      editorScript: script,
     });
   };
 
-  resetGridKeepWalls = (callback, param) => {
+  resetGridWithCurrentConfiguration = (callback, param) => {
     const grid = [];
     for (let row = 0; row < this.gridHeight; row++) {
       const currentRow = [];
@@ -203,7 +204,8 @@ class GlobalState extends Component {
           loadConfiguration: this.loadConfiguration,
           saveUserScript: this.saveUserScript,
           loadUserScript: this.loadUserScript,
-          resetGridKeepWalls: this.resetGridKeepWalls,
+          resetGridWithCurrentConfiguration: this
+            .resetGridWithCurrentConfiguration,
           gridHeight: this.gridHeight,
           gridWidth: this.gridWidth,
         }}
