@@ -59,6 +59,8 @@ const Editor = (props) => {
   const [anchorElSaveScript, setAnchorSaveScript] = React.useState(null);
   const [anchorElLoadScript, setAnchorElLoadScript] = React.useState(null);
 
+  const [validatedResult, setValidatedResult] = React.useState(false);
+
   let ace = useRef(null);
   const { editorScript } = context.state;
   let code = editorScript;
@@ -109,9 +111,7 @@ const Editor = (props) => {
 
       setShowSuccess(`Well done!
       You may exit the editor and click the Play button.`);
-      context.updateState("userAlgorithmResult", {
-        path: result,
-      });
+      setValidatedResult(result);
     } catch (err) {
       setShowError(err.message);
       context.updateState("userAlgorithmResult", false);
@@ -177,6 +177,16 @@ const Editor = (props) => {
       default:
         console.log("Default case entered in Editor.jsx: handlePopoverClose");
     }
+  };
+
+  const handleTransitionToMainView = () => {
+    handleClose();
+    setTimeout(() => {
+      context.updateState("userAlgorithmResult", {
+        path: validatedResult,
+      });
+      setValidatedResult(false);
+    }, 500);
   };
 
   return (
@@ -312,14 +322,14 @@ const Editor = (props) => {
           variant="filled"
           severity="error"
         />
-        <Message
+        {/*         <Message
           message={showSuccess}
           setMessage={setShowSuccess}
           animationDelay={500}
           topTitle={`Loading Completed!\n`}
           variant="filled"
           severity="success"
-        />
+        /> */}
         <Message
           message={showInfo}
           setMessage={setShowInfo}
@@ -341,7 +351,7 @@ const Editor = (props) => {
           <Grid container direction="row" justify="flex-end">
             <Grid item>
               <Button
-                className={classes.warnMsgBtn}
+                className={classes.msgBtn}
                 variant="outlined"
                 color="secondary"
                 onClick={handleCancelClearRequest}
@@ -361,6 +371,15 @@ const Editor = (props) => {
             </Grid>
           </Grid>
         </Message>
+        <Message
+          message={showSuccess}
+          setMessage={setShowSuccess}
+          onClose={handleTransitionToMainView}
+          animationDelay={500}
+          topTitle={`Loaded Successfully!\n`}
+          variant="filled"
+          severity="success"
+        ></Message>
         <APIDescriptor showAPI={showAPI} setShowAPI={setShowAPI} />
       </Dialog>
 

@@ -23,14 +23,7 @@ const Controls = (props) => {
   const { onReset, onPlay, onSpeedChange, onGridSizeChange } = props;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        marginBottom: "2em",
-        marginRight: "7.5em",
-      }}
-    >
+    <div className={classes.container}>
       <GridSizeSlider
         onGridSizeChange={onGridSizeChange}
         disabled={context.state.isRunning}
@@ -41,7 +34,7 @@ const Controls = (props) => {
         </IconButton>
       ) : context.state.isFinished ? (
         <IconButton className={classes.button} onClick={onReset}>
-          <ResetIcon style={{ fontSize: "2em" }} />
+          <ResetIcon className={classes.icon} />
         </IconButton>
       ) : (
         <IconButton
@@ -51,7 +44,7 @@ const Controls = (props) => {
             !context.state.activeAlgorithm && !context.state.userAlgorithmResult
           }
         >
-          <PlayIcon style={{ fontSize: "2em" }} />
+          <PlayIcon className={classes.icon} />
         </IconButton>
       )}
       <SpeedSlider
@@ -65,8 +58,3 @@ const Controls = (props) => {
 };
 
 export default Controls;
-
-/*
-TODO
-1. Centralize styles
-*/

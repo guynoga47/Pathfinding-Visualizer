@@ -26,6 +26,7 @@ export default class Visualizer extends Component {
     this.context.updateState("isFinished", false);
     this.context.resetGridKeepWalls(this.applyNodesStyles, {
       setWalls: true,
+      setDust: true,
     });
   };
 
@@ -270,10 +271,6 @@ export default class Visualizer extends Component {
       return;
     }
     const { simulationType } = this.context.state;
-    /* 
-    this inflation motive is to express a delay to the robot when cleaning dusty nodes, and we only want to do it
-    on the first occurences, because on later occurences the dust is already cleaned 
-    */
 
     const visualizationArray =
       simulationType === "sweep"
@@ -308,12 +305,17 @@ export default class Visualizer extends Component {
   };
 
   inflateFirstNodeOccurencesAccordingToDust = (visitedNodesInOrder) => {
+    /* 
+    This function task is to allow the visualization to express a delay when the robot traverses over a node with dust.
+    The delay is only visual and unrelated to the amount of steps which we calculated the visualization list by.
+    */
     const set = new Set();
     const visualizationArray = [];
     visitedNodesInOrder.forEach((node) => {
-      if (!set.has(node)) {
+      const setComparableNode = JSON.stringify(node);
+      if (!set.has(setComparableNode)) {
+        set.add(setComparableNode);
         for (let i = 0; i < node.dust + 1; i++) {
-          set.add(node);
           visualizationArray.push(node);
         }
       } else {
@@ -345,11 +347,11 @@ export default class Visualizer extends Component {
 
     const activeAlgorithmCallback =
       (simulationType === "map" || simulationType === "sweep") &&
-      !userAlgorithmResult
-        ? activeAlgorithm.func
-        : undefined;
+      !userAlgorithmResult &&
+      activeAlgorithm.func;
 
     if (convertAvailableStepsToBatteryCapacity() === 0) return;
+
     updateState("isRunning", true);
 
     robot.syncMapLayoutWithGrid(grid);
@@ -365,6 +367,9 @@ export default class Visualizer extends Component {
 
     if (simulationType === "map") {
       robot.updateMap(robotPath);
+    }
+    if (userAlgorithmResult) {
+      this.context.updateState("userAlgorithmResult", false);
     }
     this.visualize(robotPath);
     /* this.context.updateState("isRunning", false);
@@ -398,6 +403,9 @@ export default class Visualizer extends Component {
   };
 
   componentDidUpdate() {
+    if (this.context.state.userAlgorithmResult.path) {
+      this.handlePlay();
+    }
     if (this.context.state.request === "clearWalls") {
       this.handleClearWalls();
     }

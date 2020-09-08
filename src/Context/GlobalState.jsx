@@ -140,7 +140,7 @@ class GlobalState extends Component {
     for (let row = 0; row < this.gridHeight; row++) {
       const currentRow = [];
       for (let col = 0; col < this.gridWidth; col++) {
-        currentRow.push(createNode(row, col, this.state.grid[row][col].isWall));
+        currentRow.push({ ...this.state.grid[row][col] });
       }
       grid.push(currentRow);
     }

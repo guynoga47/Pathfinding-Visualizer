@@ -32,10 +32,11 @@ export default makeStyles((theme) => ({
     /*border: "2px solid #000", */
     boxShadow: theme.shadows[5],
   },
-  warnMsgBtn: {
+  msgBtn: {
     marginBottom: 0,
     fontWeight: 500,
   },
+
   popover: {
     pointerEvents: "none",
   },
