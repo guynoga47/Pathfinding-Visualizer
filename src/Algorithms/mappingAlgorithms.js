@@ -1,4 +1,8 @@
-import { dfs, bfs, astar } from "./pathfindingAlgorithms";
+import {
+  dfs,
+  bfs,
+  astar
+} from "./pathfindingAlgorithms";
 import {
   getAllNodes,
   getGridDeepCopy,
@@ -74,7 +78,10 @@ const spiralMap = (grid, map, dockingStation, availableSteps) => {
 
   const accessibleNodesCoords = gridDimensionsLimitedCoords.filter(
     (nodeCoord) => {
-      const { row, col } = nodeCoord;
+      const {
+        row,
+        col
+      } = nodeCoord;
       return accessibleNodes.includes(map[row][col]);
     }
   );
@@ -220,8 +227,7 @@ const plotPathToBorderNode = (grid, map, dockingStation) => {
       map,
       dockingStation,
       unmappedAreaBufferNode,
-      [
-        {
+      [{
           attribute: "isVisited",
           evaluation: false,
         },
@@ -246,7 +252,7 @@ const plotPathToBorderNode = (grid, map, dockingStation) => {
   return pathToBufferNode;
 };
 
-const adjustRobotPathToBatteryAndInsertReturnPath = (
+export const adjustRobotPathToBatteryAndInsertReturnPath = (
   visitedNodesInOrder,
   map,
   dockingStation,
@@ -286,16 +292,13 @@ const adjustRobotPathToBatteryAndInsertReturnPath = (
     let i = Math.min(
       availableSteps - 1,
       visitedNodesConsideringBattery.length - 1
-    );
-    i >= 1;
-    i--
+    ); i >= 1; i--
   ) {
     const node =
       runningMap[visitedNodesConsideringBattery[i].row][
         visitedNodesConsideringBattery[i].col
       ];
-    const searchResult = astar(runningMap, node, startNodeRef, [
-      {
+    const searchResult = astar(runningMap, node, startNodeRef, [{
         attribute: "isVisited",
         evaluation: false,
       },
@@ -340,16 +343,19 @@ const getRandomBufferNode = (map, grid) => {
   const mappedNodes = allNodes.filter((node) => node.isMapped);
   const unmappedMapAdjacentNodes = mappedNodes.filter((node) => {
     const unmappedNeighbors = getNeighbors(node, grid).filter((neighbor) => {
-      const { row, col } = neighbor;
+      const {
+        row,
+        col
+      } = neighbor;
       return !map[row][col].isMapped && !grid[row][col].isWall;
     });
     return unmappedNeighbors.length > 0;
   });
-  return unmappedMapAdjacentNodes.length > 0
-    ? unmappedMapAdjacentNodes[
-        Math.floor(Math.random() * unmappedMapAdjacentNodes.length)
-      ]
-    : false;
+  return unmappedMapAdjacentNodes.length > 0 ?
+    unmappedMapAdjacentNodes[
+      Math.floor(Math.random() * unmappedMapAdjacentNodes.length)
+    ] :
+    false;
 };
 
 /************************************************************** */
@@ -390,34 +396,10 @@ const depthMap = (grid, robotMap, startNode, availableSteps) => {
   return visitedConsideringBattery;
 };
 
-const adjList = (grid, map, dockingStation, availableSteps) => {
-  const adjList = {};
-  for (let i = 0; i < grid.length; i++) {
-    for (let j = 0; j < grid[0].length; j++) {
-      const node = grid[i][j];
-      const edges = [];
-      const neighbors = getNeighbors(node, grid).filter(
-        (neighbor) => !neighbor.isWall
-      );
-      neighbors.forEach((neighbor) => {
-        edges.push({
-          u: node,
-          v: neighbor,
-          w: getWeight(node, neighbor),
-        });
-      });
-      adjList[`${i}-${j}`] = edges;
-    }
-  }
-  return adjList;
-};
 
-const getWeight = (n1, n2) => {
-  return n1.isWall || n2.isWall || n1 === n2 ? null : n2.dust;
-};
 
-export const data = [
-  {
+
+export const data = [{
     name: "Random Traversal",
     shortened: "Random",
     func: (grid, map, dockingStation, availableSteps) =>
