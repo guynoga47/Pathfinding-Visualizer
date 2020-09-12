@@ -1,6 +1,7 @@
 import {
   getAllNodes,
   getNeighbors,
+  MAX_DISTANCE,
   resetGridSearchProperties,
 } from "./algorithmUtils";
 
@@ -15,7 +16,7 @@ export const bfs = (grid, startNode, finishNode) => {
     const closestNode = unvisitedNodes.shift();
     if (closestNode.isWall) continue;
     //need to find more elegant way to work on a copy of the array, maybe move grid to 1d array instead of 2d.
-    if (closestNode.distance === Infinity) {
+    if (closestNode.distance === MAX_DISTANCE) {
       visitedNodesInOrder.forEach((node) => (node.isVisited = false));
       return visitedNodesInOrder;
     }

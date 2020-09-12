@@ -70,13 +70,15 @@ class GlobalState extends Component {
   };
 
   saveConfiguration = () => {
+    const { grid, availableSteps, startNode, simulationType } = this.state;
+    const { map } = this.robot;
     const blob = new Blob([
       JSON.stringify({
-        grid: this.state.grid,
-        robot: this.robot,
-        availableSteps: this.state.availableSteps,
-        startNode: this.state.startNode,
-        simulationType: this.state.simulationType,
+        grid,
+        map,
+        availableSteps,
+        startNode,
+        simulationType,
       }),
     ]);
     const [rows, cols] = [this.gridHeight, this.gridWidth];
@@ -91,16 +93,17 @@ class GlobalState extends Component {
   };
 
   loadConfiguration = (config) => {
-    this.robot = new Robot(config.grid);
-    this.robot.map = config.robot.map;
-    this.gridHeight = config.grid.length;
-    this.gridWidth = config.grid[0].length;
+    const { grid, map, startNode, availableSteps, simulationType } = config;
+    this.robot = new Robot(grid);
+    this.robot.map = map;
+    this.gridHeight = grid.length;
+    this.gridWidth = grid[0].length;
     this.setState(
       {
-        grid: config.grid,
-        availableSteps: config.availableSteps,
-        startNode: config.startNode,
-        simulationType: config.simulationType,
+        grid,
+        availableSteps,
+        startNode,
+        simulationType,
         configLoaded: true,
       },
       () => {
@@ -110,12 +113,35 @@ class GlobalState extends Component {
     );
   };
 
-  resetGridKeepWalls = (callback, param) => {
+  saveUserScript = () => {
+    const { editorScript } = this.state;
+    const blob = new Blob([
+      JSON.stringify({
+        editorScript,
+      }),
+    ]);
+    saveAs(
+      blob,
+      `User Script Snapshot ${new Date()
+        .toLocaleDateString()
+        .replace(/\./g, "-")} at ${new Date()
+        .toLocaleTimeString()
+        .replace(/:/g, ".")}.json`
+    );
+  };
+
+  loadUserScript = (script) => {
+    this.setState({
+      editorScript: script,
+    });
+  };
+
+  resetGridWithCurrentConfiguration = (callback, param) => {
     const grid = [];
     for (let row = 0; row < this.gridHeight; row++) {
       const currentRow = [];
       for (let col = 0; col < this.gridWidth; col++) {
-        currentRow.push(createNode(row, col, this.state.grid[row][col].isWall));
+        currentRow.push({ ...this.state.grid[row][col] });
       }
       grid.push(currentRow);
     }
@@ -150,10 +176,15 @@ class GlobalState extends Component {
     return row === this.state.startNode.row && col === this.state.startNode.col;
   };
 
-  convertAvailableStepsToBatteryCapacity = () => {
-    return Math.floor(
-      (this.state.availableSteps / (this.gridHeight * this.gridWidth)) * 100
-    );
+  convertAvailableStepsToBatteryCapacity = (grid, availableSteps) => {
+    /* We are using this function in relation to the current loaded configuration and also in the DataRow of Benchmark component,
+    so we need to take care of both cases. */
+    const currSteps = !availableSteps
+      ? this.state.availableSteps
+      : availableSteps;
+    const gridHeight = !grid ? this.gridHeight : grid.length;
+    const gridWidth = !grid ? this.gridWidth : grid[0].length;
+    return Math.floor((currSteps / (gridHeight * gridWidth)) * 100);
   };
 
   convertBatteryCapacityToAvailableSteps = (battery) => {
@@ -174,9 +205,12 @@ class GlobalState extends Component {
           updateState: this.updateState,
           getInitialGrid: this.getInitialGrid,
           resizeGrid: this.resizeGrid,
-          loadConfiguration: this.loadConfiguration,
           saveConfiguration: this.saveConfiguration,
-          resetGridKeepWalls: this.resetGridKeepWalls,
+          loadConfiguration: this.loadConfiguration,
+          saveUserScript: this.saveUserScript,
+          loadUserScript: this.loadUserScript,
+          resetGridWithCurrentConfiguration: this
+            .resetGridWithCurrentConfiguration,
           gridHeight: this.gridHeight,
           gridWidth: this.gridWidth,
         }}

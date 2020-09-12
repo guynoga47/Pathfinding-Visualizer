@@ -10,6 +10,8 @@ import configs from "./configs.json";
 import validators from "./validators";
 import Exception from "../../Classes/Exception";
 
+import Robot from "../../Classes/Robot";
+
 export const DEFAULT_EDITOR_MARKUP = `function buildPath(grid, map, dockingStation, availableSteps){
 
   const visitedNodesInOrder = [grid[12][25], grid[12][26], grid[12][27], grid[12][28], grid[12][29], grid[12][28], grid[12][27], grid[12][26], grid[12][25]];
@@ -24,7 +26,7 @@ export const createSandboxedInterpreter = (code, context) => {
   const establishEnvironment = (context, interpreter) => {
     const { grid, availableSteps, startNode } = context.state;
     const { robot } = context;
-
+    robot.syncMapLayoutWithGrid(grid);
     const args = [
       { name: "grid", value: grid },
       { name: "map", value: robot.map },
@@ -93,6 +95,7 @@ export const restrictEditingSegment = (editor) => {
     }
   });
 };
+
 export const extendAutocomplete = (editor) => {
   const funcProtoString = (func) => {
     const parsedFunc = func.toString();
@@ -135,9 +138,9 @@ export const extendAutocomplete = (editor) => {
   editor.completers = [autoComplete];
 };
 
-export const validateResult = (result, context) => {
-  for (const validate of validators) {
-    validate(result, context);
+export const validate = (result, context) => {
+  for (const validator of validators) {
+    validator(result, context);
   }
 };
 
@@ -146,46 +149,120 @@ export const getBenchmarkAlgorithms = (simulationType) => {
     ? mappingAlgorithms.data
     : cleaningAlgorithms.data;
 };
+
 export const getBenchmarkConfigs = () => {
   return configs;
 };
 
-const buildContextFromConfig = (config) => {
-  const { grid, robot, startNode, availableSteps } = config;
-  return { state: { grid, startNode, availableSteps }, robot };
-};
-
-const calculateEfficiency = (path, config, simulationType) => {
-  const { grid } = config;
-  return simulationType === "sweep"
-    ? (path.reduce((a, b) => ({ dust: a.dust + b.dust })) /
-        grid.flat(Infinity).reduce((a, b) => ({ dust: a.dust + b.dust }))) *
-        100
-    : (path.length / (grid.length * grid[0].length)) * 100;
-};
-
 export const measure = (algorithm, config, simulationType) => {
-  let Tstart, Tfinish;
-  let interpreter;
-  if (algorithm.name === "User Script") {
-    interpreter = createSandboxedInterpreter(
+  const runInterpreterCalculateRuntime = (algorithm, config) => {
+    const buildContextFromConfig = (config) => {
+      const { grid, map, startNode, availableSteps } = config;
+      /*
+      we are creating a dummy Robot object for when building interpreter environment for the Benchmark because 
+      we only need it to have a map property so we can send the same parameters and reuse a function which is being used in the regular
+      user code validation process.
+      */
+      const robot = new Robot(grid);
+      robot.map = map;
+      return { state: { grid, startNode, availableSteps }, robot };
+    };
+    const interpreter = createSandboxedInterpreter(
       algorithm.code,
       buildContextFromConfig(config)
     );
+    const t0 = performance.now();
     interpreter.run();
-  }
-  const { grid, robot, startNode, availableSteps } = config;
-  const dockingStation = robot.map[startNode.row][startNode.col];
-  Tstart = performance.now();
-  const path =
+    const t1 = performance.now();
+    const path = interpreter.pseudoToNative(interpreter.value);
+    return [path, t1 - t0];
+  };
+  const runNativeAlgorithmCalculateRuntime = (algorithm) => {
+    /*
+    Buggy! Returned paths ignore walls and dust. need to enter a function and see what properties they are getting.
+    */
+    const t0 = performance.now();
+    const path = algorithm.func(grid, map, dockingStation, availableSteps);
+    const t1 = performance.now();
+    return [path, t1 - t0];
+  };
+  const calculateEfficiency = (path, config, simulationType) => {
+    const calcMappingEfficiency = (path, map) => {
+      /* 
+      Calculates how much we have extended the previous map, meaning, how much new nodes has been added to the map, 
+      in relation to the total unmapped nodes on the grid, when launching the algorithm. 
+      */
+      const unmappedNodesCount = map.flat().filter((node) => !node.isMapped)
+        .length;
+
+      const uniqueNodesFromPath = path.filter(
+        (a, b, c) =>
+          c.findIndex((t) => t.row === a.row && t.col === a.col) === b
+      );
+
+      let mapExtendingNodes = uniqueNodesFromPath.filter(
+        (node) => !node.isMapped
+      );
+
+      return (mapExtendingNodes.length / unmappedNodesCount) * 100;
+    };
+    const calcSweepingEfficiency = (path, grid) => {
+      /* 
+      Calculates how much dust did we clean in relation to the total amount of dust on the grid. 
+      */
+      return (
+        (path.reduce((a, b) => ({ dust: a.dust + b.dust })) /
+          grid.flat().reduce((a, b) => ({ dust: a.dust + b.dust }))) *
+        100
+      );
+    };
+    const { grid, map } = config;
+    return simulationType === "sweep"
+      ? calcSweepingEfficiency(path, grid)
+      : calcMappingEfficiency(path, map);
+  };
+
+  const { grid, map, startNode, availableSteps } = config;
+  const dockingStation = map[startNode.row][startNode.col];
+  const [path, runtime] =
     algorithm.name === "User Script"
-      ? interpreter.pseudoToNative(interpreter.value)
-      : algorithm.func(grid, robot.map, dockingStation, availableSteps);
-  Tfinish = performance.now();
+      ? runInterpreterCalculateRuntime(algorithm, config)
+      : runNativeAlgorithmCalculateRuntime(algorithm);
   return {
-    time: Tfinish - Tstart,
+    path,
+    runtime,
     efficiency: calculateEfficiency(path, config, simulationType),
   };
+};
+
+export const transformScoresToBenchmarkData = (scores) => {
+  const calculateAverage = (alg, property) => {
+    const flattend = alg.map((row) => row.result[property]);
+    return flattend.reduce((a, b) => a + b) / alg.length;
+  };
+
+  return scores.map((algGroup) => {
+    return {
+      name: algGroup[0].algName,
+      avgRuntime: parseFloat(calculateAverage(algGroup, "runtime").toFixed(2)),
+      avgEfficiency: parseFloat(
+        calculateAverage(algGroup, "efficiency").toFixed(2)
+      ),
+      configs: algGroup.map((alg) => {
+        const { result, cfgName, cfg } = alg;
+        const { grid, availableSteps } = cfg;
+        return {
+          cfgName: cfgName,
+          dimensions: `${grid.length}X${grid[0].length}`,
+          battery: availableSteps,
+          runtime: parseFloat(result.runtime.toFixed(2)),
+          efficiency: parseFloat(result.efficiency.toFixed(2)),
+          path: result.path,
+          cfg,
+        };
+      }),
+    };
+  });
 };
 
 export const checkTimeLimitExceeded = (interpreter) => {

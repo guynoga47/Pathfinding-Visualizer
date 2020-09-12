@@ -1,3 +1,5 @@
+import { MAX_DISTANCE } from "../Algorithms/algorithmUtils";
+
 export const DEFAULT_GRID_HEIGHT = 25;
 export const DEFAULT_GRID_WIDTH = 50;
 
@@ -13,9 +15,9 @@ export const createNode = (row, col, isWall = false) => {
   return {
     row,
     col,
-    distance: Infinity,
+    distance: MAX_DISTANCE,
     dust: 0,
-    heuristicDistance: Infinity,
+    heuristicDistance: MAX_DISTANCE,
     isWall: isWall,
     previousNode: null,
   };

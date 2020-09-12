@@ -49,11 +49,10 @@ function valueLabelFormat(value) {
   return marks.findIndex((mark) => mark.value === value) + 1;
 }
 
-export default function RestrictedSlider(props) {
+export default function GridSizeSlider({ disabled, onGridSizeChange }) {
   const context = useContext(GridContext);
   const classes = useStyles();
   const [value, setValue] = useState(DEFAULT_VALUE);
-  const { disabled } = props;
 
   useEffect(() => {
     if (context.state.configLoaded) {
@@ -66,7 +65,7 @@ export default function RestrictedSlider(props) {
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
-    props.onGridSizeChange(newValue);
+    onGridSizeChange(newValue);
   };
 
   return (

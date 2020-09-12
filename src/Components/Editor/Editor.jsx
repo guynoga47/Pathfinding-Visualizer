@@ -6,14 +6,22 @@ import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
+import Popover from "@material-ui/core/Popover";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
-import CloseIcon from "@material-ui/icons/Close";
-import APIDescriptor from "./APIDescriptor/APIDescriptor";
+import IconClose from "@material-ui/icons/Close";
+import IconSave from "@material-ui/icons/GetApp";
+import IconLoad from "@material-ui/icons/Publish";
+import IconSettings from "@material-ui/icons/Settings";
 
 import editorStyles, { Transition } from "./Editor.Styles";
+import APIDescriptor from "./APIDescriptor/APIDescriptor";
 import Message from "./Message/Message";
-import { infoMessage } from "./Message/messages";
+import Benchmark from "./Benchmark/Benchmark";
+
+import { handleCreateConfigurationsFile } from "./configsHelper";
+
+import { INFO_MSG, SUCCESS_MSG, NO_BENCHMARK_MSG } from "./Message/messages";
 
 import AceEditor from "react-ace";
 
@@ -24,9 +32,10 @@ import {
   checkTimeLimitExceeded,
   restrictEditingSegment,
   extendAutocomplete,
-  validateResult,
+  validate,
   getBenchmarkAlgorithms,
   getBenchmarkConfigs,
+  transformScoresToBenchmarkData,
   measure,
 } from "./editorUtils.js";
 
@@ -38,18 +47,10 @@ import "ace-builds/src-noconflict/ext-language_tools";
 
 import "ace-builds/webpack-resolver";
 
-/*
-TODO: 
-
-1. Save script (as js file, optional)
-
-*/
-
 const useStyles = editorStyles;
 
-const Editor = (props) => {
+const Editor = ({ open, setCodeEditorOpen }) => {
   const classes = useStyles();
-  const { open, setCodeEditorOpen } = props;
 
   const context = useContext(GridContext);
 
@@ -57,12 +58,19 @@ const Editor = (props) => {
   const [showError, setShowError] = useState("");
   const [showClearWarning, setShowClearWarning] = useState("");
   const [showSuccess, setShowSuccess] = useState("");
-  const [showInfo, setShowInfo] = useState(infoMessage);
+  const [showInfo, setShowInfo] = useState(INFO_MSG);
   const [showAPI, setShowAPI] = useState(false);
+  const [showBenchmark, setShowBenchmark] = useState(false);
+
+  const [anchorElSaveScript, setAnchorSaveScript] = React.useState(null);
+  const [anchorElLoadScript, setAnchorElLoadScript] = React.useState(null);
+
+  const [validatedResult, setValidatedResult] = React.useState(false);
 
   let ace = useRef(null);
   const { editorScript } = context.state;
   let code = editorScript;
+  const configs = useRef([]);
 
   /*
   no need to deep copy, because strings management is probably managed with ref count, so code is detached from editorScript as soon as onChange
@@ -70,30 +78,38 @@ const Editor = (props) => {
   */
 
   const onChange = (currentCode) => {
+    /* we dont want to set state on each change because it causes stuttering when typing*/
     code = currentCode;
   };
 
   const handleBenchmark = () => {
-    const { simulationType, userAlgorithmResult } = context.state;
-    if (!userAlgorithmResult) return;
+    const { simulationType } = context.state;
+    if (!validatedResult) {
+      setShowError(NO_BENCHMARK_MSG);
+      return;
+    }
     const benchmarkAlgorithms = getBenchmarkAlgorithms(simulationType).concat([
       { name: "User Script", code: code },
     ]);
     const benchmarkConfigs = getBenchmarkConfigs();
     const scores = [];
-    for (const [i, algorithm] of benchmarkAlgorithms.entries()) {
+    for (const [key, algorithm] of benchmarkAlgorithms.entries()) {
       scores.push([]);
+      const i = parseInt(key);
       for (const [cfgName, cfg] of Object.entries(benchmarkConfigs)) {
-        scores[parseInt(i)].push({
+        scores[i].push({
           algName: algorithm.name,
           cfgName: `${cfgName}`,
+          cfg,
           result: measure(algorithm, cfg, simulationType),
         });
       }
     }
+    const data = transformScoresToBenchmarkData(scores);
+    setShowBenchmark(data);
   };
 
-  const handleLoad = () => {
+  const handleValidateScript = () => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
     context.updateState("editorScript", code);
     const interpreter = createSandboxedInterpreter(code, context);
@@ -105,17 +121,28 @@ const Editor = (props) => {
 
       const result = interpreter.pseudoToNative(interpreter.value);
 
-      validateResult(result, context);
+      validate(result, context);
 
-      setShowSuccess(`Well done!
-      You may exit the editor and click the Play button.`);
-      context.updateState("userAlgorithmResult", {
-        path: result,
-      });
+      setShowSuccess(SUCCESS_MSG);
+
+      setValidatedResult(result);
     } catch (err) {
       setShowError(err.message);
       context.updateState("userAlgorithmResult", false);
     }
+  };
+
+  const handleLoadUserScript = (event) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const { editorScript } = JSON.parse(reader.result);
+      context.loadUserScript(editorScript);
+    };
+    reader.readAsText(event.target.files[0]);
+  };
+
+  const handleSaveUserScript = () => {
+    context.updateState("editorScript", code, context.saveUserScript);
   };
 
   const handleCancelClearRequest = () => {
@@ -132,6 +159,14 @@ const Editor = (props) => {
     setShowError("");
     setShowSuccess("");
     context.updateState("editorScript", code);
+    if (validatedResult && !context.state.userAlgorithmResult) {
+      setTimeout(() => {
+        context.updateState("userAlgorithmResult", {
+          path: validatedResult,
+        });
+      }, 500);
+    }
+    setValidatedResult(false);
     setCodeEditorOpen(false);
   };
 
@@ -139,6 +174,32 @@ const Editor = (props) => {
     const loadBabel = loadScript;
     loadBabel("https://unpkg.com/@babel/standalone/babel.min.js");
   }, []);
+
+  const handlePopoverOpen = (event) => {
+    switch (event.currentTarget.id) {
+      case "btn-saveScript":
+        setAnchorSaveScript(event.currentTarget);
+        break;
+      case "btn-loadScript":
+        setAnchorElLoadScript(event.currentTarget);
+        break;
+      default:
+        console.log("Default case entered in Editor.jsx: handlePopoverOpen");
+    }
+  };
+
+  const handlePopoverClose = (event) => {
+    switch (event.currentTarget.id) {
+      case "btn-saveScript":
+        setAnchorSaveScript(null);
+        break;
+      case "btn-loadScript":
+        setAnchorElLoadScript(null);
+        break;
+      default:
+        console.log("Default case entered in Editor.jsx: handlePopoverClose");
+    }
+  };
 
   return (
     <div>
@@ -148,8 +209,8 @@ const Editor = (props) => {
         onClose={handleClose}
         TransitionComponent={Transition}
       >
-        <AppBar className={classes.topAppBar}>
-          <Toolbar>
+        <AppBar className={classes.appBar}>
+          <Toolbar className={classes.toolBar}>
             <IconButton
               className={classes.editorBtn}
               edge="start"
@@ -157,13 +218,78 @@ const Editor = (props) => {
               onClick={handleClose}
               aria-label="close"
             >
-              <CloseIcon />
+              <IconClose />
             </IconButton>
+            <input
+              accept=".json"
+              className={classes.input}
+              id="icon-button-load-script"
+              onChange={handleLoadUserScript}
+              onClick={(event) => {
+                //to allow consecutive selection of same files, we need to clear input value after each click.
+                event.target.value = "";
+              }}
+              type="file"
+            />
+            <label htmlFor="icon-button-load-script">
+              <IconButton
+                id={"btn-loadScript"}
+                className={classes.editorBtn}
+                onMouseOver={handlePopoverOpen}
+                onMouseLeave={handlePopoverClose}
+                component={"span"}
+                htmlFor="icon-button-load-script"
+              >
+                <IconLoad />
+              </IconButton>
+            </label>
+
+            <IconButton
+              id={"btn-saveScript"}
+              className={classes.editorBtn}
+              edge="start"
+              color="inherit"
+              onMouseOver={handlePopoverOpen}
+              onMouseLeave={handlePopoverClose}
+              onClick={handleSaveUserScript}
+              aria-label="close"
+            >
+              <IconSave />
+            </IconButton>
+
+            <input
+              accept=".json"
+              multiple="multiple"
+              className={classes.input}
+              id="icon-button-load-configurations"
+              onChange={(event) =>
+                handleCreateConfigurationsFile(event, configs)
+              }
+              onClick={(event) => {
+                //to allow consecutive selection of same files, we need to clear input value after each click.
+                event.target.value = "";
+              }}
+              type="file"
+            />
+            <label htmlFor="icon-button-load-configurations">
+              <IconButton
+                id={"btn-createConfigurationFile"}
+                className={classes.editorBtn}
+                onMouseOver={handlePopoverOpen}
+                onMouseLeave={handlePopoverClose}
+                component={"span"}
+                htmlFor="icon-button-load-configurations"
+              >
+                <IconSettings />
+              </IconButton>
+            </label>
+
             <Typography variant="h6" className={classes.title}></Typography>
             <Button
               autoFocus
+              /* style={{ marginLeft: "1200px" }} */
               className={classes.editorBtn}
-              onClick={() => setShowInfo(infoMessage)}
+              onClick={() => setShowInfo(INFO_MSG)}
               color="inherit"
             >
               INFO
@@ -201,9 +327,9 @@ const Editor = (props) => {
               autoFocus
               className={classes.editorBtn}
               color="inherit"
-              onClick={handleLoad}
+              onClick={handleValidateScript}
             >
-              LOAD
+              VALIDATE
             </Button>
           </Toolbar>
         </AppBar>
@@ -238,14 +364,7 @@ const Editor = (props) => {
           variant="filled"
           severity="error"
         />
-        <Message
-          message={showSuccess}
-          setMessage={setShowSuccess}
-          animationDelay={500}
-          topTitle={`Loading Completed!\n`}
-          variant="filled"
-          severity="success"
-        />
+
         <Message
           message={showInfo}
           setMessage={setShowInfo}
@@ -267,7 +386,7 @@ const Editor = (props) => {
           <Grid container direction="row" justify="flex-end">
             <Grid item>
               <Button
-                className={classes.warnMsgBtn}
+                className={classes.msgBtn}
                 variant="outlined"
                 color="secondary"
                 onClick={handleCancelClearRequest}
@@ -287,8 +406,65 @@ const Editor = (props) => {
             </Grid>
           </Grid>
         </Message>
+        <Message
+          message={showSuccess}
+          setMessage={setShowSuccess}
+          animationDelay={500}
+          topTitle={`Validated Successfully!\n`}
+          variant="filled"
+          severity="success"
+        ></Message>
         <APIDescriptor showAPI={showAPI} setShowAPI={setShowAPI} />
+        {showBenchmark && (
+          <Benchmark
+            showBenchmark={showBenchmark}
+            setShowBenchmark={setShowBenchmark}
+          />
+        )}
       </Dialog>
+
+      <Popover
+        id="mouse-over-popover"
+        className={classes.popover}
+        classes={{
+          paper: classes.paper,
+        }}
+        open={Boolean(anchorElSaveScript)}
+        anchorEl={anchorElSaveScript}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        onClose={handlePopoverClose}
+        disableRestoreFocus
+      >
+        <Typography className={classes.popoverText}>Save Script</Typography>
+      </Popover>
+      <Popover
+        id="mouse-over-popover"
+        className={classes.popover}
+        classes={{
+          paper: classes.paper,
+        }}
+        open={Boolean(anchorElLoadScript)}
+        anchorEl={anchorElLoadScript}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        onClose={handlePopoverClose}
+        disableRestoreFocus
+      >
+        <Typography className={classes.popoverText}>Load Script</Typography>
+      </Popover>
     </div>
   );
 };

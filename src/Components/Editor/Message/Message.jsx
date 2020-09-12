@@ -10,18 +10,18 @@ import { Typography } from "@material-ui/core";
 
 const useStyles = messageStyles;
 
-const Message = (props) => {
+const Message = ({
+  message,
+  setMessage,
+  onClose,
+  topTitle,
+  bottomTitle,
+  variant,
+  severity,
+  animationDelay,
+  children,
+}) => {
   const classes = useStyles();
-  const {
-    message,
-    setMessage,
-    onClose,
-    topTitle,
-    bottomTitle,
-    variant,
-    severity,
-    animationDelay,
-  } = props;
   return (
     <Modal
       className={classes.modal}
@@ -49,7 +49,7 @@ const Message = (props) => {
               <Typography variant="h5">{topTitle}</Typography>
             </AlertTitle>
             {message}
-            {props.children}
+            {children}
             <Typography variant="h6">{bottomTitle}</Typography>
           </Alert>
         </div>

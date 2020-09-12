@@ -22,7 +22,7 @@ import ToolsStyles from "./Tools.Styles";
 
 const useStyles = ToolsStyles;
 
-const Tools = (props) => {
+const Tools = () => {
   const context = useContext(GridContext);
 
   const { isRunning, isFinished, drawItem, drawMethod } = context.state;
@@ -75,10 +75,10 @@ const Tools = (props) => {
       case "btn-obstacle":
         setAnchorElDrawObstacle(event.currentTarget);
         break;
-      case "btn-save":
+      case "btn-saveConfig":
         setAnchorElSaveConfiguration(event.currentTarget);
         break;
-      case "btn-load":
+      case "btn-loadConfig":
         setAnchorElLoadConfiguration(event.currentTarget);
         break;
       case "btn-map":
@@ -109,10 +109,10 @@ const Tools = (props) => {
       case "btn-obstacle":
         setAnchorElDrawObstacle(null);
         break;
-      case "btn-save":
+      case "btn-saveConfig":
         setAnchorElSaveConfiguration(null);
         break;
-      case "btn-load":
+      case "btn-loadConfig":
         setAnchorElLoadConfiguration(null);
         break;
       case "btn-map":
@@ -241,7 +241,7 @@ const Tools = (props) => {
       <input
         accept=".json"
         className={classes.input}
-        id="icon-button-load-file"
+        id="icon-button-load-config"
         onChange={handleLoadConfiguration}
         onClick={(event) => {
           //to allow consecutive selection of same files, we need to clear input value after each click.
@@ -249,22 +249,22 @@ const Tools = (props) => {
         }}
         type="file"
       />
-      <label htmlFor="icon-button-load-file">
+      <label htmlFor="icon-button-load-config">
         <IconButton
-          id={"btn-load"}
+          id={"btn-loadConfig"}
           className={classes.icon}
           onMouseOver={handlePopoverOpen}
           onMouseLeave={handlePopoverClose}
           disabled={isRunning}
           component={"span"}
-          htmlFor="icon-button-load-file"
+          htmlFor="icon-button-load-config"
         >
           <IconLoad />
         </IconButton>
       </label>
 
       <IconButton
-        id={"btn-save"}
+        id={"btn-saveConfig"}
         className={classes.icon}
         onMouseOver={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
