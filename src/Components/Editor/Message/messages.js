@@ -13,4 +13,4 @@ Exiting the editor will now trigger a Playback of the result.
 You can also compare your code to our pre-defined algorithms 
 by clicking on the "Benchmark" button.`;
 
-export const NO_BENCHMARK_MSG = `The code must pass evaluation before attempting a Benchmark!`;
+export const NO_BENCHMARK_MSG = `The code must pass validation first!`;

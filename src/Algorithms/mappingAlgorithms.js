@@ -390,32 +390,6 @@ const depthMap = (grid, robotMap, startNode, availableSteps) => {
   return visitedConsideringBattery;
 };
 
-const adjList = (grid, map, dockingStation, availableSteps) => {
-  const adjList = {};
-  for (let i = 0; i < grid.length; i++) {
-    for (let j = 0; j < grid[0].length; j++) {
-      const node = grid[i][j];
-      const edges = [];
-      const neighbors = getNeighbors(node, grid).filter(
-        (neighbor) => !neighbor.isWall
-      );
-      neighbors.forEach((neighbor) => {
-        edges.push({
-          u: node,
-          v: neighbor,
-          w: getWeight(node, neighbor),
-        });
-      });
-      adjList[`${i}-${j}`] = edges;
-    }
-  }
-  return adjList;
-};
-
-const getWeight = (n1, n2) => {
-  return n1.isWall || n2.isWall || n1 === n2 ? null : n2.dust;
-};
-
 export const data = [
   {
     name: "Random Traversal",

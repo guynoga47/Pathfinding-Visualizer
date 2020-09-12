@@ -6,12 +6,11 @@ import SyntaxHighlighter from "react-syntax-highlighter";
 import { hybrid } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { Typography } from "@material-ui/core";
 
-const Descriptor = (props) => {
-  const { name, snippet, description } = props;
+const Descriptor = ({ name, snippet, description, descriptionElementRef }) => {
   return (
     <DialogContentText
       id="scroll-dialog-description"
-      ref={props.descriptionElementRef}
+      ref={descriptionElementRef}
       tabIndex={-1}
       style={{ width: "55em", outline: "none" }}
     >

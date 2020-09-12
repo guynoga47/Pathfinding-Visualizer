@@ -25,9 +25,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function ValueLabelComponent(props) {
-  const { children, open, value } = props;
-
+function ValueLabelComponent({ children, open, value }) {
   return (
     <Tooltip open={open} enterTouchDelay={0} placement="top" title={value}>
       {children}
@@ -71,7 +69,7 @@ const PrettoSlider = withStyles({
   },
 })(Slider);
 
-export default function CustomizedSlider(props) {
+export default function CustomizedSlider() {
   const classes = useStyles();
   const context = useContext(GridContext);
 

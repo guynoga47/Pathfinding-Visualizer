@@ -23,7 +23,7 @@ import * as cleaningAlgorithms from "../../Algorithms/cleaningAlgorithms";
 
 const useStyles = controllerStyles;
 
-const Controller = (props) => {
+const Controller = () => {
   const [anchorElMapAlgMenu, setAnchorElMapAlgMenu] = React.useState(null);
   const [anchorElCleanAlgMenu, setAnchorElCleanAlgMenu] = React.useState(null);
   const [

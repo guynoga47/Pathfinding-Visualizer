@@ -17,10 +17,9 @@ const MAX_SPEED = 270;
 
 const useStyles = ControlStyles;
 
-const Controls = (props) => {
+const Controls = ({ onReset, onPlay, onSpeedChange, onGridSizeChange }) => {
   const context = useContext(GridContext);
   const classes = useStyles();
-  const { onReset, onPlay, onSpeedChange, onGridSizeChange } = props;
 
   return (
     <div className={classes.container}>

@@ -74,6 +74,7 @@ export default class Visualizer extends Component {
 
   handleMouseDown = (row, col) => {
     const { drawMethod, drawItem, isFinished, isRunning } = this.context.state;
+
     if (isFinished || isRunning) return;
     this.mouseDown = true;
     if (this.context.isStartNode(row, col)) {
@@ -96,6 +97,7 @@ export default class Visualizer extends Component {
 
   handleMouseEnter = (row, col) => {
     const { drawMethod, drawItem, isFinished, isRunning } = this.context.state;
+
     if (isFinished || !this.mouseDown || isRunning) return;
     if (this.startNodeMouseDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
@@ -117,6 +119,7 @@ export default class Visualizer extends Component {
 
   handleMouseLeave = (row, col) => {
     const { drawMethod, isFinished, isRunning } = this.context.state;
+
     if (isFinished || isRunning) return;
     if (this.startNodeMouseDown) {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
@@ -142,6 +145,7 @@ export default class Visualizer extends Component {
     const rectangleNodes = this.calculateRectangleNodes(row, col, {
       fill,
     });
+
     if (add) {
       if (drawItem === "wall") {
         rectangleNodes.forEach((node) =>
@@ -172,6 +176,7 @@ export default class Visualizer extends Component {
     const { updateState } = this.context;
     const node = grid[row][col];
     const nodeDOM = ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]);
+
     console.log(this.context.state.grid[row][col]);
     console.log(
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList
@@ -201,6 +206,7 @@ export default class Visualizer extends Component {
     const leftPoint = startPoint.col < endPoint.col ? startPoint : endPoint;
     const rowDiff = Math.abs(startPoint.row - endPoint.row);
     const colDiff = Math.abs(startPoint.col - endPoint.col);
+
     for (let i = upperPoint.row; i <= rowDiff + upperPoint.row; i++) {
       for (let j = leftPoint.col; j <= colDiff + leftPoint.col; j++) {
         if (!fill) {
@@ -245,6 +251,7 @@ export default class Visualizer extends Component {
     const node = this.context.state.grid[row][col];
     if (node.isWall) return;
     const nodeDOM = ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]);
+
     if (!this.context.isStartNode(row, col)) {
       const dust = node.dust;
       if (add) {
@@ -377,10 +384,13 @@ export default class Visualizer extends Component {
   };
 
   handleClearWalls = () => {
-    for (let row = 0; row < this.context.gridHeight; row++) {
-      for (let col = 0; col < this.context.gridWidth; col++) {
-        if (!this.context.isStartNode(row, col)) {
-          if (this.context.state.grid[row][col].isWall) {
+    const { gridHeight, gridWidth, isStartNode } = this.context;
+    const { grid } = this.context.state;
+
+    for (let row = 0; row < gridHeight; row++) {
+      for (let col = 0; col < gridWidth; col++) {
+        if (!isStartNode(row, col)) {
+          if (grid[row][col].isWall) {
             this.changeNodeWall(row, col, { remove: true });
           }
         }
@@ -390,10 +400,13 @@ export default class Visualizer extends Component {
   };
 
   handleClearDust = () => {
-    for (let row = 0; row < this.context.gridHeight; row++) {
-      for (let col = 0; col < this.context.gridWidth; col++) {
-        if (!this.context.isStartNode(row, col)) {
-          if (this.context.state.grid[row][col].dust) {
+    const { gridHeight, gridWidth, isStartNode } = this.context;
+    const { grid } = this.context.state;
+
+    for (let row = 0; row < gridHeight; row++) {
+      for (let col = 0; col < gridWidth; col++) {
+        if (!isStartNode(row, col)) {
+          if (grid[row][col].dust) {
             this.changeNodeDust(row, col, { remove: true });
           }
         }
@@ -403,16 +416,18 @@ export default class Visualizer extends Component {
   };
 
   componentDidUpdate() {
-    if (this.context.state.userAlgorithmResult.path) {
+    const { request, userAlgorithmResult, configLoaded } = this.context.state;
+
+    if (userAlgorithmResult.path) {
       this.handlePlay();
     }
-    if (this.context.state.request === "clearWalls") {
+    if (request === "clearWalls") {
       this.handleClearWalls();
     }
-    if (this.context.state.request === "clearDust") {
+    if (request === "clearDust") {
       this.handleClearDust();
     }
-    if (this.context.state.configLoaded) {
+    if (configLoaded) {
       this.applyNodesStyles({
         resetWalls: true,
         resetDust: true,
@@ -423,7 +438,7 @@ export default class Visualizer extends Component {
       });
       this.context.updateState("configLoaded", false);
     }
-    if (this.context.state.request === "highlightMap") {
+    if (request === "highlightMap") {
       const { map } = this.context.robot;
       for (let row = 0; row < map.length; row++) {
         for (let col = 0; col < map[0].length; col++) {
@@ -435,7 +450,7 @@ export default class Visualizer extends Component {
         }
       }
     }
-    if (this.context.state.request === "removeHighlightMap") {
+    if (request === "removeHighlightMap") {
       const { map } = this.context.robot;
       for (let row = 0; row < map.length; row++) {
         for (let col = 0; col < map[0].length; col++) {

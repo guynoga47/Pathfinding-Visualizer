@@ -12,14 +12,13 @@ const useStyles = makeStyles({
   },
 });
 
-export default function ContinuousSlider(props) {
+export default function SpeedSlider({ disabled, min, max, onSpeedChange }) {
   const classes = useStyles();
-  const { disabled, min, max } = props;
   const [value, setValue] = React.useState((max + min) / 2);
   const handleChange = (event, sliderValue) => {
     let calculatedSpeed = Math.abs(sliderValue - (max + min));
     setValue(sliderValue);
-    props.onSpeedChange(calculatedSpeed);
+    onSpeedChange(calculatedSpeed);
   };
 
   return (

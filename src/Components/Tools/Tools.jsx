@@ -22,7 +22,7 @@ import ToolsStyles from "./Tools.Styles";
 
 const useStyles = ToolsStyles;
 
-const Tools = (props) => {
+const Tools = () => {
   const context = useContext(GridContext);
 
   const { isRunning, isFinished, drawItem, drawMethod } = context.state;

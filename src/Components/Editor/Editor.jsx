@@ -18,6 +18,9 @@ import editorStyles, { Transition } from "./Editor.Styles";
 import APIDescriptor from "./APIDescriptor/APIDescriptor";
 import Message from "./Message/Message";
 import Benchmark from "./Benchmark/Benchmark";
+
+import { handleCreateConfigurationsFile } from "./configsHelper";
+
 import { INFO_MSG, SUCCESS_MSG, NO_BENCHMARK_MSG } from "./Message/messages";
 
 import AceEditor from "react-ace";
@@ -32,6 +35,7 @@ import {
   validate,
   getBenchmarkAlgorithms,
   getBenchmarkConfigs,
+  transformScoresToBenchmarkData,
   measure,
 } from "./editorUtils.js";
 
@@ -45,9 +49,8 @@ import "ace-builds/webpack-resolver";
 
 const useStyles = editorStyles;
 
-const Editor = (props) => {
+const Editor = ({ open, setCodeEditorOpen }) => {
   const classes = useStyles();
-  const { open, setCodeEditorOpen } = props;
 
   const context = useContext(GridContext);
 
@@ -67,6 +70,7 @@ const Editor = (props) => {
   let ace = useRef(null);
   const { editorScript } = context.state;
   let code = editorScript;
+  const configs = useRef([]);
 
   /*
   no need to deep copy, because strings management is probably managed with ref count, so code is detached from editorScript as soon as onChange
@@ -89,16 +93,20 @@ const Editor = (props) => {
     ]);
     const benchmarkConfigs = getBenchmarkConfigs();
     const scores = [];
-    for (const [i, algorithm] of benchmarkAlgorithms.entries()) {
+    for (const [key, algorithm] of benchmarkAlgorithms.entries()) {
       scores.push([]);
+      const i = parseInt(key);
       for (const [cfgName, cfg] of Object.entries(benchmarkConfigs)) {
-        scores[parseInt(i)].push({
+        scores[i].push({
           algName: algorithm.name,
           cfgName: `${cfgName}`,
+          cfg,
           result: measure(algorithm, cfg, simulationType),
         });
       }
     }
+    const data = transformScoresToBenchmarkData(scores);
+    setShowBenchmark(data);
   };
 
   const handleValidateScript = () => {
@@ -151,14 +159,14 @@ const Editor = (props) => {
     setShowError("");
     setShowSuccess("");
     context.updateState("editorScript", code);
-    if (validatedResult) {
+    if (validatedResult && !context.state.userAlgorithmResult) {
       setTimeout(() => {
         context.updateState("userAlgorithmResult", {
           path: validatedResult,
         });
-        setValidatedResult(false);
       }, 500);
     }
+    setValidatedResult(false);
     setCodeEditorOpen(false);
   };
 
@@ -192,61 +200,6 @@ const Editor = (props) => {
         console.log("Default case entered in Editor.jsx: handlePopoverClose");
     }
   };
-
-  const configs = useRef([]);
-  /* const [configs, setConfigs] = useState([]); */
-
-  const handleCreateConfigurationsFile = (event) => {
-    const files = event.currentTarget.files;
-    for (const file of files) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        configs.current = configs.current.concat([event.currentTarget.result]);
-      };
-      reader.readAsText(file);
-    }
-    /* for (const file of files) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setConfigs(configs.concat([event.currentTarget.result]));
-      };
-      reader.readAsText(file);
-    } */
-
-    setTimeout(() => {
-      const jsonFile = {};
-
-      configs.current.forEach((config, i) => {
-        const { grid, map, startNode, availableSteps } = JSON.parse(config);
-        jsonFile[`cfg${i}`] = {
-          grid,
-          map,
-          startNode,
-          availableSteps,
-        };
-      });
-      const blob = new Blob([JSON.stringify(jsonFile)]);
-      saveAs(blob, `configs.json`);
-    }, 2000);
-  };
-
-  /* useEffect(() => {
-    if (configs.length === 3) {
-      const jsonFile = {};
-
-      configs.forEach((config, i) => {
-        const { grid, map, startNode, availableSteps } = JSON.parse(config);
-        jsonFile[`cfg${i}`] = {
-          grid,
-          map,
-          startNode,
-          availableSteps,
-        };
-      });
-      const blob = new Blob([JSON.stringify(jsonFile)]);
-      saveAs(blob, `configs.json`);
-    }
-  }, [configs]); */
 
   return (
     <div>
@@ -309,7 +262,9 @@ const Editor = (props) => {
               multiple="multiple"
               className={classes.input}
               id="icon-button-load-configurations"
-              onChange={handleCreateConfigurationsFile}
+              onChange={(event) =>
+                handleCreateConfigurationsFile(event, configs)
+              }
               onClick={(event) => {
                 //to allow consecutive selection of same files, we need to clear input value after each click.
                 event.target.value = "";
@@ -460,11 +415,12 @@ const Editor = (props) => {
           severity="success"
         ></Message>
         <APIDescriptor showAPI={showAPI} setShowAPI={setShowAPI} />
-        {/*         <Benchmark
-          showBenchmark={showBenchmark}
-          setShowBenchmark={setShowBenchmark}
-          disabled={!context.state.userAlgorithmResult}
-        /> */}
+        {showBenchmark && (
+          <Benchmark
+            showBenchmark={showBenchmark}
+            setShowBenchmark={setShowBenchmark}
+          />
+        )}
       </Dialog>
 
       <Popover
