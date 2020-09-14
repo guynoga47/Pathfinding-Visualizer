@@ -73,15 +73,15 @@ const DataRow = ({ row }) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.configs.map(({cfgName, dimensions, runtime, efficiency,path, battery, cfg}) => (
-                    <TableRow key={cfgName}>
-                      <TableCell align="left">{cfgName}</TableCell>
+                  {row.configs.map(({configName, dimensions, runtime, efficiency,path, battery, config}) => (
+                    <TableRow key={configName}>
+                      <TableCell align="left">{configName}</TableCell>
                       <TableCell align="left">{dimensions}</TableCell>
-                      <TableCell align="right">{convertAvailableStepsToBatteryCapacity(cfg.grid,battery)}%</TableCell>
+                      <TableCell align="right">{convertAvailableStepsToBatteryCapacity(config.grid,battery)}%</TableCell>
                       <TableCell align="right">{runtime}</TableCell>
                       <TableCell align="right">{efficiency}%</TableCell>
                       <TableCell align="right">
-                        <IconButton onClick={()=>{handleLoad(path, cfg)}}>
+                        <IconButton onClick={()=>{handleLoad(path, config)}}>
                           <IconLoad/>
                         </IconButton>
                       </TableCell>
