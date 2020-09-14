@@ -29,23 +29,11 @@ const useStyles = makeStyles({
 });
 
 //prettier-ignore
-const DataRow = ({ row, setShowReplay }) => {
+const DataRow = ({ row, onBenchmarkReplay }) => {
   const [open, setOpen] = useState(false);
   const classes = useStyles();
   const context = useContext(GridContext);
-  const {convertAvailableStepsToBatteryCapacity, loadConfiguration} = context;
-
-  const handleReplay = (path, config) => {
-    const adjustBenchmarkConfigToLoaderRequirements = (config) => {
-      const { map } = config.robot;
-      const {simulationType} = context;
-      return {...config, map, simulationType }
-    }
-    loadConfiguration(adjustBenchmarkConfigToLoaderRequirements(config));
-    context.updateState("benchmarkReplayResult", path);
-    /* setShowReplay(path); */
-    /* setShowMessage() */
-  }
+  const {convertAvailableStepsToBatteryCapacity} = context;
 
   return (
     <React.Fragment>
@@ -90,7 +78,7 @@ const DataRow = ({ row, setShowReplay }) => {
                       <TableCell align="right">{runtime}</TableCell>
                       <TableCell align="right">{efficiency}%</TableCell>
                       <TableCell align="right">
-                        <IconButton onClick={()=>{handleReplay(path, config)}}>
+                        <IconButton onClick={()=>{onBenchmarkReplay(path, config)}}>
                           <PlayCircleOutlineIcon/>
                         </IconButton>
                       </TableCell>

@@ -343,7 +343,7 @@ export default class Visualizer extends Component {
       availableSteps,
       activeAlgorithm,
       startNode,
-      userAlgorithmResult,
+      editorSimulation,
       grid,
     } = this.context.state;
     const {
@@ -354,7 +354,7 @@ export default class Visualizer extends Component {
 
     const activeAlgorithmCallback =
       (simulationType === "map" || simulationType === "sweep") &&
-      !userAlgorithmResult &&
+      !editorSimulation &&
       activeAlgorithm.func;
 
     if (convertAvailableStepsToBatteryCapacity() === 0) return;
@@ -362,10 +362,9 @@ export default class Visualizer extends Component {
     updateState("isRunning", true);
 
     robot.syncMapLayoutWithGrid(grid);
-    let t0 = performance.now();
 
-    const robotPath = userAlgorithmResult
-      ? userAlgorithmResult
+    const robotPath = editorSimulation
+      ? editorSimulation
       : activeAlgorithmCallback(
           grid,
           robot.map,
@@ -373,13 +372,11 @@ export default class Visualizer extends Component {
           availableSteps
         );
 
-    let t1 = performance.now();
-    console.log("Call to handlePlay took " + (t1 - t0) + " milliseconds.");
     if (simulationType === "map") {
       robot.updateMap(robotPath);
     }
-    if (userAlgorithmResult) {
-      this.context.updateState("userAlgorithmResult", false);
+    if (editorSimulation) {
+      this.context.updateState("editorSimulation", false);
     }
     this.visualize(robotPath);
     /* this.context.updateState("isRunning", false);
@@ -419,9 +416,9 @@ export default class Visualizer extends Component {
   };
 
   componentDidUpdate() {
-    const { request, userAlgorithmResult, configLoaded } = this.context.state;
+    const { request, editorSimulation, configLoaded } = this.context.state;
 
-    if (userAlgorithmResult) {
+    if (editorSimulation) {
       this.handlePlay();
     }
     if (request === "clearWalls") {

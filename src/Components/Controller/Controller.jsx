@@ -80,6 +80,7 @@ const Controller = () => {
               aria-controls="customized-menu"
               aria-haspopup="true"
               variant="contained"
+              disabled={context.state.isRunning}
               onClick={handleSimulationTypeSelectionClicked}
             >
               {context.state.simulationType
@@ -110,7 +111,7 @@ const Controller = () => {
               >
                 {context.state.activeAlgorithm
                   ? context.state.activeAlgorithm.shortened
-                  : context.state.userAlgorithmResult
+                  : context.state.editorSimulation
                   ? "USER SCRIPT"
                   : "SELECT"}
               </Button>
@@ -180,7 +181,7 @@ const Controller = () => {
                 className={classes.menuItem}
                 onClick={() => {
                   context.updateState("activeAlgorithm", algorithm);
-                  context.updateState("userAlgorithmResult", false);
+                  context.updateState("editorSimulation", false);
                   handleMapMenuClose();
                 }}
               >
@@ -218,7 +219,7 @@ const Controller = () => {
                 className={classes.menuItem}
                 onClick={() => {
                   context.updateState("activeAlgorithm", algorithm);
-                  context.updateState("userAlgorithmResult", false);
+                  context.updateState("editorSimulation", false);
                   handleCleanAlgMenuClose();
                 }}
               >

@@ -9,9 +9,9 @@ import TableRow from "@material-ui/core/TableRow";
 
 import DialogContainer from "../DialogContainer/DialogContainer";
 
-import Row from "./DataRow";
+import DataRow from "./DataRow";
 
-const Benchmark = ({ showBenchmark, setShowBenchmark }) => {
+const Benchmark = ({ showBenchmark, setShowBenchmark, onBenchmarkReplay }) => {
   /* renaming for readibility, this variable behaves as a conditional for displaying the benchmark, 
   and contains the data itself when Benchmark is requested. */
   const data = showBenchmark;
@@ -33,7 +33,11 @@ const Benchmark = ({ showBenchmark, setShowBenchmark }) => {
           </TableHead>
           <TableBody>
             {data.map((algData) => (
-              <Row key={`${algData.name}`} row={algData} />
+              <DataRow
+                key={`${algData.name}`}
+                row={algData}
+                onBenchmarkReplay={onBenchmarkReplay}
+              />
             ))}
           </TableBody>
         </Table>

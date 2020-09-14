@@ -40,7 +40,7 @@ const Controls = ({ onReset, onPlay, onSpeedChange, onGridSizeChange }) => {
           className={classes.button}
           onClick={onPlay}
           disabled={
-            !context.state.activeAlgorithm && !context.state.userAlgorithmResult
+            !context.state.activeAlgorithm && !context.state.editorSimulation
           }
         >
           <PlayIcon className={classes.icon} />

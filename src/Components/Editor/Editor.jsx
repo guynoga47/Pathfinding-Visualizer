@@ -60,9 +60,9 @@ const Editor = ({ open, setCodeEditorOpen }) => {
   const context = useContext(GridContext);
 
   const [firstMount, setFirstMount] = useState(true);
-  const [showError, setShowError] = useState("");
-  const [showClearWarning, setShowClearWarning] = useState("");
-  const [showSuccess, setShowSuccess] = useState("");
+  const [showError, setShowError] = useState(false);
+  const [showClearWarning, setShowClearWarning] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [showInfo, setShowInfo] = useState(INFO_MSG);
   const [showAPI, setShowAPI] = useState(false);
   const [showBenchmark, setShowBenchmark] = useState(false);
@@ -129,10 +129,10 @@ const Editor = ({ open, setCodeEditorOpen }) => {
       setShowSuccess(SUCCESS_MSG);
 
       setValidatedResult(result);
-      context.updateState("benchmarkReplayResult", false);
+      /*       context.updateState("benchmarkReplayResult", false); */
     } catch (err) {
       setShowError(err.message);
-      context.updateState("userAlgorithmResult", false);
+      context.updateState("editorSimulation", false);
     }
   };
 
@@ -150,31 +150,46 @@ const Editor = ({ open, setCodeEditorOpen }) => {
   };
 
   const handleCancelClearRequest = () => {
-    setShowClearWarning("");
+    setShowClearWarning(false);
   };
 
   const handleConfirmClearRequest = () => {
-    setShowClearWarning("");
+    setShowClearWarning(false);
     code = DEFAULT_EDITOR_MARKUP;
     context.updateState("editorScript", code);
   };
 
   const handleRun = () => {
+    setTimeout(() => {
+      context.updateState("editorSimulation", validatedResult);
+    }, 500);
+    setShowSuccess(false);
+    handleClose();
+  };
+
+  const handleDismiss = () => {
+    setValidatedResult(false);
+    context.updateState("editorSimulation", false);
+    setShowSuccess(false);
+  };
+
+  const handleBenchmarkReplay = (replay, config) => {
+    const adjustBenchmarkConfigToLoaderRequirements = (config) => {
+      const { map } = config.robot;
+      const { simulationType } = context.state;
+      return { ...config, map, simulationType };
+    };
+    const { loadConfiguration } = context;
+    loadConfiguration(adjustBenchmarkConfigToLoaderRequirements(config));
+    context.updateState("editorSimulation", replay);
+    setShowBenchmark(false);
+    setShowSuccess(false);
     handleClose();
   };
 
   const handleClose = () => {
-    setShowError("");
-    setShowSuccess("");
     context.updateState("editorScript", code);
-    setTimeout(() => {
-      context.updateState(
-        "userAlgorithmResult",
-        context.state.benchmarkReplayResult || validatedResult
-      );
-    }, 500);
     setValidatedResult(false);
-    context.updateState("benchmarkReplayResult", false);
     setCodeEditorOpen(false);
   };
 
@@ -296,7 +311,6 @@ const Editor = ({ open, setCodeEditorOpen }) => {
             <Typography variant="h6" className={classes.title}></Typography>
             <Button
               autoFocus
-              /* style={{ marginLeft: "1200px" }} */
               className={classes.editorBtn}
               onClick={() => setShowInfo(INFO_MSG)}
               color="inherit"
@@ -406,16 +420,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
             </Grid>
           </Grid>
         </Message>
-        {/*         <Message
-          message={showSuccess}
-          setMessage={setShowSuccess}
-          animationDelay={500}
-          topTitle={`Validated Successfully!\n`}
-          variant="filled"
-          severity="success"
-        >
 
-        </Message> */}
         <Message
           message={showSuccess}
           setMessage={setShowSuccess}
@@ -427,6 +432,15 @@ const Editor = ({ open, setCodeEditorOpen }) => {
         >
           <Grid container direction="row" justify="flex-end">
             <Grid item>
+              <Button
+                className={classes.msgBtn}
+                style={{ marginRight: "10em", marginLeft: 0 }}
+                variant="outlined"
+                color="secondary"
+                onClick={handleDismiss}
+              >
+                DISMISS
+              </Button>
               <Button
                 className={classes.msgBtn}
                 variant="outlined"
@@ -453,6 +467,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
           <Benchmark
             showBenchmark={showBenchmark}
             setShowBenchmark={setShowBenchmark}
+            onBenchmarkReplay={handleBenchmarkReplay}
           />
         )}
       </Dialog>
