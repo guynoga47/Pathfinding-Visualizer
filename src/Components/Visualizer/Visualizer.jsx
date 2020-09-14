@@ -365,7 +365,7 @@ export default class Visualizer extends Component {
     let t0 = performance.now();
 
     const robotPath = userAlgorithmResult
-      ? userAlgorithmResult.path
+      ? userAlgorithmResult
       : activeAlgorithmCallback(
           grid,
           robot.map,
@@ -421,7 +421,7 @@ export default class Visualizer extends Component {
   componentDidUpdate() {
     const { request, userAlgorithmResult, configLoaded } = this.context.state;
 
-    if (userAlgorithmResult.path) {
+    if (userAlgorithmResult) {
       this.handlePlay();
     }
     if (request === "clearWalls") {

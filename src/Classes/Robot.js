@@ -20,11 +20,12 @@ export default class Robot {
   syncMapLayoutWithGrid = (grid) => {
     for (let row = 0; row < grid.length; row++) {
       for (let col = 0; col < grid[0].length; col++) {
-        const mapNode = this.map[row][col];
         const gridNode = grid[row][col];
-        mapNode.isWall = gridNode.isWall;
-        mapNode.isMapped = gridNode.isWall ? false : mapNode.isMapped;
-        mapNode.dust = gridNode.dust;
+        this.map[row][col].isWall = gridNode.isWall;
+        this.map[row][col].isMapped = gridNode.isWall
+          ? false
+          : this.map[row][col].isMapped;
+        this.map[row][col].dust = gridNode.dust;
       }
     }
   };

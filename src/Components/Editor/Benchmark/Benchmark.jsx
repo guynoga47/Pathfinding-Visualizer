@@ -22,7 +22,7 @@ const Benchmark = ({ showBenchmark, setShowBenchmark }) => {
       title={`Benchmark`}
     >
       <TableContainer component="div">
-        <Table size="large" aria-label="collapsible table">
+        <Table size="medium" aria-label="collapsible table">
           <TableHead>
             <TableRow>
               <TableCell />

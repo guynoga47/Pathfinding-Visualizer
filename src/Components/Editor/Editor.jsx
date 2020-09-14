@@ -124,6 +124,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
       setShowSuccess(SUCCESS_MSG);
 
       setValidatedResult(result);
+      context.updateState("benchmarkReplayResult", false);
     } catch (err) {
       setShowError(err.message);
       context.updateState("userAlgorithmResult", false);
@@ -157,14 +158,14 @@ const Editor = ({ open, setCodeEditorOpen }) => {
     setShowError("");
     setShowSuccess("");
     context.updateState("editorScript", code);
-    if (validatedResult && !context.state.userAlgorithmResult) {
-      setTimeout(() => {
-        context.updateState("userAlgorithmResult", {
-          path: validatedResult,
-        });
-      }, 500);
-    }
+    setTimeout(() => {
+      context.updateState(
+        "userAlgorithmResult",
+        context.state.benchmarkReplayResult || validatedResult
+      );
+    }, 500);
     setValidatedResult(false);
+    context.updateState("benchmarkReplayResult", false);
     setCodeEditorOpen(false);
   };
 

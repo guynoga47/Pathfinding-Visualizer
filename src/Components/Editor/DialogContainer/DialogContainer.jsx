@@ -20,7 +20,7 @@ const DialogContainer = ({ title, showDialog, setShowDialog, children }) => {
 
   return (
     <Dialog
-      open={showDialog}
+      open={Boolean(showDialog)}
       PaperComponent={PaperComponent}
       scroll="paper"
       maxWidth="md"

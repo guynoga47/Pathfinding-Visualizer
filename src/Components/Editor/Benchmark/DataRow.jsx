@@ -12,6 +12,8 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Typography from "@material-ui/core/Typography";
 import IconLoad from "@material-ui/icons/Publish";
+import PlayArrowIcon from "@material-ui/icons/PlayArrow";
+import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
 
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
@@ -27,15 +29,22 @@ const useStyles = makeStyles({
 });
 
 //prettier-ignore
-const DataRow = ({ row }) => {
+const DataRow = ({ row, setShowReplay }) => {
   const [open, setOpen] = useState(false);
   const classes = useStyles();
   const context = useContext(GridContext);
   const {convertAvailableStepsToBatteryCapacity, loadConfiguration} = context;
 
-  const handleLoad = (path, config) => {
-    loadConfiguration(config);
-    context.updateState("userAlgorithmResult", {path});
+  const handleReplay = (path, config) => {
+    const adjustBenchmarkConfigToLoaderRequirements = (config) => {
+      const { map } = config.robot;
+      const {simulationType} = context;
+      return {...config, map, simulationType }
+    }
+    loadConfiguration(adjustBenchmarkConfigToLoaderRequirements(config));
+    context.updateState("benchmarkReplayResult", path);
+    /* setShowReplay(path); */
+    /* setShowMessage() */
   }
 
   return (
@@ -69,7 +78,7 @@ const DataRow = ({ row }) => {
                     <TableCell align="right">BATTERY</TableCell>
                     <TableCell align="right">RUNTIME</TableCell>
                     <TableCell align="right">EFFICIENCY</TableCell>
-                    <TableCell align="right">LOAD</TableCell>
+                    <TableCell align="right">REPLAY</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -81,8 +90,8 @@ const DataRow = ({ row }) => {
                       <TableCell align="right">{runtime}</TableCell>
                       <TableCell align="right">{efficiency}%</TableCell>
                       <TableCell align="right">
-                        <IconButton onClick={()=>{handleLoad(path, config)}}>
-                          <IconLoad/>
+                        <IconButton onClick={()=>{handleReplay(path, config)}}>
+                          <PlayCircleOutlineIcon/>
                         </IconButton>
                       </TableCell>
                     </TableRow>

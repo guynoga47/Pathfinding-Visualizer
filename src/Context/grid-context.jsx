@@ -8,6 +8,7 @@ export default createContext({
     activeAlgorithm: undefined,
     editorScript: "",
     userAlgorithmResult: [],
+    benchmarkReplayResult: [],
     isFinished: false,
     isRunning: false,
     startNode: undefined,

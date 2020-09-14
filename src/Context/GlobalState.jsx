@@ -30,6 +30,7 @@ class GlobalState extends Component {
       activeAlgorithm: undefined,
       editorScript: DEFAULT_EDITOR_MARKUP,
       userAlgorithmResult: false,
+      benchmarkReplayResult: false,
       isFinished: false,
       isRunning: false,
       startNode: defaultDockingStation,
