@@ -69,13 +69,11 @@ const Editor = ({ open, setCodeEditorOpen }) => {
 
   let ace = useRef(null);
   const { editorScript } = context.state;
-  let code = editorScript;
-  const configs = useRef([]);
-
   /*
   no need to deep copy, because strings management is probably managed with ref count, so code is detached from editorScript as soon as onChange
   happens, and we avoid changing the state directly
   */
+  let code = editorScript;
 
   const onChange = (currentCode) => {
     /* we dont want to set state on each change because it causes stuttering when typing*/
@@ -92,16 +90,16 @@ const Editor = ({ open, setCodeEditorOpen }) => {
       { name: "User Script", code: code },
     ]);
     const benchmarkConfigs = getBenchmarkConfigs();
+
     const scores = [];
-    for (const [key, algorithm] of benchmarkAlgorithms.entries()) {
+    for (const [i, algorithm] of benchmarkAlgorithms.entries()) {
       scores.push([]);
-      const i = parseInt(key);
-      for (const [cfgName, cfg] of Object.entries(benchmarkConfigs)) {
-        scores[i].push({
+      for (const [configName, config] of Object.entries(benchmarkConfigs)) {
+        scores[parseInt(i)].push({
           algName: algorithm.name,
-          cfgName: `${cfgName}`,
-          cfg,
-          result: measure(algorithm, cfg, simulationType),
+          configName: `${configName}`,
+          config,
+          result: measure(algorithm, config, simulationType),
         });
       }
     }
@@ -172,6 +170,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
 
   useEffect(() => {
     const loadBabel = loadScript;
+    console.log("in use effect");
     loadBabel("https://unpkg.com/@babel/standalone/babel.min.js");
   }, []);
 

@@ -4,6 +4,7 @@ import Interpreter from "js-interpreter";
 import scopeFunctions from "../../Algorithms/algorithmUtils";
 import * as mappingAlgorithms from "../../Algorithms/mappingAlgorithms";
 import * as cleaningAlgorithms from "../../Algorithms/cleaningAlgorithms";
+import { getGridDeepCopy } from "../../Algorithms/algorithmUtils";
 
 import configs from "./configs.json";
 
@@ -151,20 +152,45 @@ export const getBenchmarkAlgorithms = (simulationType) => {
 };
 
 export const getBenchmarkConfigs = () => {
+  const addFullyMappedMapToConfig = (config) => {
+    /* 
+  When first importing the configs.json file, we want to assign a fully mapped map to the robot so we will be able to correctly evaluate and
+  measure the algorithms cleaning potential in relation to each configuration. we will use when the Benchmark is being run under "SWEEP" context.
+  */
+    const fullyMappedMap = getGridDeepCopy(config.robot.map);
+    for (let i = 0; i < fullyMappedMap.length; i++) {
+      for (let j = 0; j < fullyMappedMap[i].length; j++) {
+        fullyMappedMap[i][j].isMapped = true;
+      }
+    }
+    config.robot.fullyMappedMap = fullyMappedMap;
+  };
+
+  const addDummyRobotToConfig = (config) => {
+    /* 
+  When first importing the configs.json file, we want to assign a dummy robot to each config so we can simulate execution of each algorithm
+  and configuration combination. a correct simulation is dependent on having a robot object in the context of the execution. 
+  */
+    const { grid, map } = config;
+    const dummy = new Robot(grid);
+    dummy.map = map;
+    dummy.syncMapLayoutWithGrid(grid);
+    delete config.map;
+    config.robot = dummy;
+  };
+  for (const config of Object.values(configs)) {
+    !config.robot && addDummyRobotToConfig(config);
+    !config.fullyMappedMap && addFullyMappedMapToConfig(config);
+  }
   return configs;
 };
 
+//prettier-ignore
 export const measure = (algorithm, config, simulationType) => {
   const runInterpreterCalculateRuntime = (algorithm, config) => {
     const buildContextFromConfig = (config) => {
-      const { grid, map, startNode, availableSteps } = config;
-      /*
-      we are creating a dummy Robot object for when building interpreter environment for the Benchmark because 
-      we only need it to have a map property so we can send the same parameters and reuse a function which is being used in the regular
-      user code validation process.
-      */
-      const robot = new Robot(grid);
-      robot.map = map;
+      const { grid, robot, startNode, availableSteps } = config;
+      robot.map = simulationType === "sweep" ? robot.fullyMappedMap : robot.map;
       return { state: { grid, startNode, availableSteps }, robot };
     };
     const interpreter = createSandboxedInterpreter(
@@ -177,13 +203,15 @@ export const measure = (algorithm, config, simulationType) => {
     const path = interpreter.pseudoToNative(interpreter.value);
     return [path, t1 - t0];
   };
-  const runNativeAlgorithmCalculateRuntime = (algorithm) => {
-    /*
-    Buggy! Returned paths ignore walls and dust. need to enter a function and see what properties they are getting.
-    */
+  const runNativeAlgorithmCalculateRuntime = (algorithm, config) => {
+    const { grid, robot, startNode, availableSteps } = config;
+    const {row, col} = startNode;
+    const dockingStation = simulationType === "sweep" ? robot.fullyMappedMap[row][col] : robot.map[row][col];
+    const map = simulationType === "sweep" ? robot.fullyMappedMap : robot.map;
     const t0 = performance.now();
-    const path = algorithm.func(grid, map, dockingStation, availableSteps);
+    const path = algorithm.func(grid,map,dockingStation,availableSteps);
     const t1 = performance.now();
+
     return [path, t1 - t0];
   };
   const calculateEfficiency = (path, config, simulationType) => {
@@ -216,18 +244,16 @@ export const measure = (algorithm, config, simulationType) => {
         100
       );
     };
-    const { grid, map } = config;
+    const { grid, robot } = config;
     return simulationType === "sweep"
       ? calcSweepingEfficiency(path, grid)
-      : calcMappingEfficiency(path, map);
+      : calcMappingEfficiency(path, robot.map);
   };
 
-  const { grid, map, startNode, availableSteps } = config;
-  const dockingStation = map[startNode.row][startNode.col];
   const [path, runtime] =
     algorithm.name === "User Script"
       ? runInterpreterCalculateRuntime(algorithm, config)
-      : runNativeAlgorithmCalculateRuntime(algorithm);
+      : runNativeAlgorithmCalculateRuntime(algorithm, config);
   return {
     path,
     runtime,
@@ -249,16 +275,16 @@ export const transformScoresToBenchmarkData = (scores) => {
         calculateAverage(algGroup, "efficiency").toFixed(2)
       ),
       configs: algGroup.map((alg) => {
-        const { result, cfgName, cfg } = alg;
-        const { grid, availableSteps } = cfg;
+        const { result, configName, config } = alg;
+        const { grid, availableSteps } = config;
         return {
-          cfgName: cfgName,
+          config,
+          configName,
           dimensions: `${grid.length}X${grid[0].length}`,
           battery: availableSteps,
           runtime: parseFloat(result.runtime.toFixed(2)),
           efficiency: parseFloat(result.efficiency.toFixed(2)),
           path: result.path,
-          cfg,
         };
       }),
     };
