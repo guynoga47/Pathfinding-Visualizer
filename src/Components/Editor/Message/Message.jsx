@@ -18,6 +18,7 @@ const Message = ({
   bottomTitle,
   variant,
   severity,
+  dismissable,
   animationDelay,
   children,
 }) => {
@@ -32,6 +33,8 @@ const Message = ({
       }}
       disableEnforceFocus
       disableAutoFocus
+      disableBackdropClick={dismissable}
+      disableEscapeKeyDown={dismissable}
       closeAfterTransition
       BackdropComponent={Backdrop}
       BackdropProps={{

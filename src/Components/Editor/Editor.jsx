@@ -21,7 +21,12 @@ import Benchmark from "./Benchmark/Benchmark";
 
 import { handleCreateConfigurationsFile } from "./configsHelper";
 
-import { INFO_MSG, SUCCESS_MSG, NO_BENCHMARK_MSG } from "./Message/messages";
+import {
+  INFO_MSG,
+  SUCCESS_MSG,
+  NO_BENCHMARK_MSG,
+  WARNING_MSG,
+} from "./Message/messages";
 
 import AceEditor from "react-ace";
 
@@ -152,6 +157,10 @@ const Editor = ({ open, setCodeEditorOpen }) => {
     setShowClearWarning("");
     code = DEFAULT_EDITOR_MARKUP;
     context.updateState("editorScript", code);
+  };
+
+  const handleRun = () => {
+    handleClose();
   };
 
   const handleClose = () => {
@@ -306,19 +315,9 @@ const Editor = ({ open, setCodeEditorOpen }) => {
               autoFocus
               className={classes.editorBtn}
               color="inherit"
-              onClick={handleBenchmark}
-            >
-              BENCHMARK
-            </Button>
-            <Button
-              autoFocus
-              className={classes.editorBtn}
-              color="inherit"
               onClick={() => {
                 context.updateState("editorScript", code);
-                setShowClearWarning(
-                  "Are you sure you want to restore code back to default?"
-                );
+                setShowClearWarning(WARNING_MSG);
               }}
             >
               CLEAR
@@ -380,6 +379,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
           setMessage={setShowClearWarning}
           animationDelay={500}
           topTitle={`Warning!\n`}
+          dismissable
           variant="filled"
           severity="warning"
         >
@@ -406,14 +406,48 @@ const Editor = ({ open, setCodeEditorOpen }) => {
             </Grid>
           </Grid>
         </Message>
-        <Message
+        {/*         <Message
           message={showSuccess}
           setMessage={setShowSuccess}
           animationDelay={500}
           topTitle={`Validated Successfully!\n`}
           variant="filled"
           severity="success"
-        ></Message>
+        >
+
+        </Message> */}
+        <Message
+          message={showSuccess}
+          setMessage={setShowSuccess}
+          animationDelay={500}
+          topTitle={`Validated Successfully!\n`}
+          dismissable
+          variant="filled"
+          severity="success"
+        >
+          <Grid container direction="row" justify="flex-end">
+            <Grid item>
+              <Button
+                className={classes.msgBtn}
+                variant="outlined"
+                color="secondary"
+                onClick={handleBenchmark}
+              >
+                BENCHMARK
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                className={classes.msgBtn}
+                variant="outlined"
+                color="secondary"
+                onClick={handleRun}
+              >
+                RUN
+              </Button>
+            </Grid>
+          </Grid>
+        </Message>
         <APIDescriptor showAPI={showAPI} setShowAPI={setShowAPI} />
         {showBenchmark && (
           <Benchmark
