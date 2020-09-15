@@ -24,7 +24,13 @@ export const DEFAULT_EDITOR_MARKUP = `function buildPath(grid, map, dockingStati
 const EXECUTE = `buildPath(grid,map,dockingStation,availableSteps);`;
 
 export const createSandboxedInterpreter = (code, context) => {
+  const loadBabel = () => {
+    if (!window.Babel) {
+      loadScript("https://unpkg.com/@babel/standalone/babel.min.js");
+    }
+  };
   const establishEnvironment = (context, interpreter) => {
+    const isPrimitive = (value) => Object(value) !== value;
     const { grid, availableSteps, startNode } = context.state;
     const { robot } = context;
     robot.syncMapLayoutWithGrid(grid);
@@ -35,13 +41,15 @@ export const createSandboxedInterpreter = (code, context) => {
         name: "dockingStation",
         value: robot.map[startNode.row][startNode.col],
       },
-      { name: "availableSteps", availableSteps },
+      { name: "availableSteps", value: availableSteps },
     ];
 
     args.forEach((arg) => {
       interpreter.setValueToScope(
         arg.name,
-        interpreter.nativeToPseudo(arg.value)
+        isPrimitive(arg.value)
+          ? arg.value
+          : interpreter.nativeToPseudo(arg.value)
       );
     });
 
@@ -50,16 +58,27 @@ export const createSandboxedInterpreter = (code, context) => {
     });
   };
   const compileToES5 = (code) => {
-    return Babel.transform(code, {
-      presets: ["es2015"],
-      sourceType: "script",
-    }).code;
+    try {
+      return Babel.transform(code, {
+        presets: ["es2015"],
+        sourceType: "script",
+      }).code;
+    } catch (err) {
+      throw new Exception(
+        "Code compilation failed, please check your internet connection!"
+      );
+    }
   };
-
-  const interpreter = new Interpreter(compileToES5(code));
-  interpreter.appendCode(EXECUTE);
-  establishEnvironment(context, interpreter);
-  return interpreter;
+  try {
+    loadBabel();
+    const interpreter = new Interpreter(compileToES5(code));
+    interpreter.appendCode(EXECUTE);
+    establishEnvironment(context, interpreter);
+    return interpreter;
+  } catch (err) {
+    console.log(err);
+    throw new Exception(err.message);
+  }
 };
 
 export const loadScript = (url, callback) => {
@@ -161,6 +180,7 @@ export const getBenchmarkConfigs = () => {
     for (let i = 0; i < fullyMappedMap.length; i++) {
       for (let j = 0; j < fullyMappedMap[i].length; j++) {
         fullyMappedMap[i][j].isMapped = true;
+        config.robot.map[i][j].isMapped = false;
       }
     }
     config.robot.fullyMappedMap = fullyMappedMap;
@@ -207,7 +227,8 @@ export const measure = (algorithm, config, simulationType) => {
     const { grid, robot, startNode, availableSteps } = config;
     const {row, col} = startNode;
     const dockingStation = simulationType === "sweep" ? robot.fullyMappedMap[row][col] : robot.map[row][col];
-    const map = simulationType === "sweep" ? robot.fullyMappedMap : robot.map;
+    /* const map = simulationType === "sweep" ? robot.fullyMappedMap : robot.map; */
+    const map = robot.map;
     const t0 = performance.now();
     const path = algorithm.func(grid,map,dockingStation,availableSteps);
     const t1 = performance.now();
@@ -239,8 +260,8 @@ export const measure = (algorithm, config, simulationType) => {
       Calculates how much dust did we clean in relation to the total amount of dust on the grid. 
       */
       return (
-        (path.reduce((a, b) => ({ dust: a.dust + b.dust })) /
-          grid.flat().reduce((a, b) => ({ dust: a.dust + b.dust }))) *
+        path.reduce((a, b) => ({ dust: a.dust + b.dust })).dust /
+          grid.flat().reduce((a, b) => ({ dust: a.dust + b.dust })).dust *
         100
       );
     };

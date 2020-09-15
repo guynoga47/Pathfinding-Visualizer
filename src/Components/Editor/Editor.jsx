@@ -21,19 +21,13 @@ import Benchmark from "./Benchmark/Benchmark";
 
 import { handleCreateConfigurationsFile } from "./configsHelper";
 
-import {
-  INFO_MSG,
-  SUCCESS_MSG,
-  NO_BENCHMARK_MSG,
-  WARNING_MSG,
-} from "./Message/messages";
+import { INFO_MSG, SUCCESS_MSG, WARNING_MSG } from "./Message/messages";
 
 import AceEditor from "react-ace";
 
 import {
   DEFAULT_EDITOR_MARKUP,
   createSandboxedInterpreter,
-  loadScript,
   checkTimeLimitExceeded,
   restrictEditingSegment,
   extendAutocomplete,
@@ -87,10 +81,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
 
   const handleBenchmark = () => {
     const { simulationType } = context.state;
-    if (!validatedResult) {
-      setShowError(NO_BENCHMARK_MSG);
-      return;
-    }
+
     const benchmarkAlgorithms = getBenchmarkAlgorithms(simulationType).concat([
       { name: "User Script", code: code },
     ]);
@@ -114,15 +105,19 @@ const Editor = ({ open, setCodeEditorOpen }) => {
 
   const handleValidateScript = () => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
+
     context.updateState("editorScript", code);
-    const interpreter = createSandboxedInterpreter(code, context);
 
     try {
+      const interpreter = createSandboxedInterpreter(code, context);
+
       checkTimeLimitExceeded(interpreter);
 
       interpreter.run();
 
       const result = interpreter.pseudoToNative(interpreter.value);
+
+      console.log(result);
 
       validate(result, context);
 
@@ -194,9 +189,9 @@ const Editor = ({ open, setCodeEditorOpen }) => {
   };
 
   useEffect(() => {
-    const loadBabel = loadScript;
+    /* const loadBabel = loadScript;
     console.log("in use effect");
-    loadBabel("https://unpkg.com/@babel/standalone/babel.min.js");
+    loadBabel("https://unpkg.com/@babel/standalone/babel.min.js"); */
   }, []);
 
   const handlePopoverOpen = (event) => {

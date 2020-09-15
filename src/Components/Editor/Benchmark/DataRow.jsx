@@ -11,8 +11,6 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Typography from "@material-ui/core/Typography";
-import IconLoad from "@material-ui/icons/Publish";
-import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
 
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";

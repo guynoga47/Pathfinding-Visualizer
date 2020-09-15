@@ -372,9 +372,9 @@ export default class Visualizer extends Component {
           availableSteps
         );
 
-    if (simulationType === "map") {
+    /*     if (simulationType === "map") {
       robot.updateMap(robotPath);
-    }
+    } */
     if (editorSimulation) {
       this.context.updateState("editorSimulation", false);
     }
