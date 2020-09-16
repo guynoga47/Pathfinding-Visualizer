@@ -67,6 +67,8 @@ const Editor = ({ open, setCodeEditorOpen }) => {
   const [validatedResult, setValidatedResult] = React.useState(false);
 
   let ace = useRef(null);
+  let benchmarkCache = useRef(null);
+
   const { editorScript } = context.state;
   /*
   no need to deep copy, because strings management is probably managed with ref count, so code is detached from editorScript as soon as onChange
@@ -80,13 +82,30 @@ const Editor = ({ open, setCodeEditorOpen }) => {
   };
 
   const handleBenchmark = () => {
+    const isCachedBenchmarkAvailable = (simulationType) => {
+      return (
+        benchmarkCache?.current?.data &&
+        simulationType === benchmarkCache?.current?.simulationType
+      );
+    };
+    const cacheBenchmark = (scores) => {
+      benchmarkCache.current = {
+        data: transformScoresToBenchmarkData(scores),
+        simulationType,
+      };
+    };
+
     const { simulationType } = context.state;
+    if (isCachedBenchmarkAvailable(simulationType)) {
+      setShowBenchmark(benchmarkCache.current.data);
+      return;
+    }
 
     const benchmarkAlgorithms = getBenchmarkAlgorithms(simulationType).concat([
       { name: "User Script", code: code },
     ]);
-    const benchmarkConfigs = getBenchmarkConfigs();
-
+    const benchmarkConfigs = getBenchmarkConfigs(simulationType);
+    const t0 = performance.now();
     const scores = [];
     for (const [i, algorithm] of benchmarkAlgorithms.entries()) {
       scores.push([]);
@@ -99,14 +118,19 @@ const Editor = ({ open, setCodeEditorOpen }) => {
         });
       }
     }
-    const data = transformScoresToBenchmarkData(scores);
-    setShowBenchmark(data);
+    const t1 = performance.now();
+    console.log(t1 - t0);
+    cacheBenchmark(scores);
+    setShowBenchmark(benchmarkCache.current.data);
   };
 
   const handleValidateScript = () => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
-
-    context.updateState("editorScript", code);
+    const { editorScript } = context.state;
+    if (code !== editorScript) {
+      context.updateState("editorScript", code);
+      benchmarkCache.current = null;
+    }
 
     try {
       const interpreter = createSandboxedInterpreter(code, context);

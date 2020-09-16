@@ -4,9 +4,8 @@ import Interpreter from "js-interpreter";
 import scopeFunctions from "../../Algorithms/algorithmUtils";
 import * as mappingAlgorithms from "../../Algorithms/mappingAlgorithms";
 import * as cleaningAlgorithms from "../../Algorithms/cleaningAlgorithms";
-import { getGridDeepCopy } from "../../Algorithms/algorithmUtils";
 
-import configs from "./configs.json";
+import staticConfigs from "./configs.json";
 
 import validators from "./validators";
 import Exception from "../../Classes/Exception";
@@ -170,22 +169,12 @@ export const getBenchmarkAlgorithms = (simulationType) => {
     : cleaningAlgorithms.data;
 };
 
-export const getBenchmarkConfigs = () => {
-  const addFullyMappedMapToConfig = (config) => {
-    /* 
-  When first importing the configs.json file, we want to assign a fully mapped map to the robot so we will be able to correctly evaluate and
-  measure the algorithms cleaning potential in relation to each configuration. we will use when the Benchmark is being run under "SWEEP" context.
-  */
-    const fullyMappedMap = getGridDeepCopy(config.robot.map);
-    for (let i = 0; i < fullyMappedMap.length; i++) {
-      for (let j = 0; j < fullyMappedMap[i].length; j++) {
-        fullyMappedMap[i][j].isMapped = true;
-        config.robot.map[i][j].isMapped = false;
-      }
+export const getBenchmarkConfigs = (simulationType) => {
+  const adjustMapToSimulationType = (map) => {
+    for (const node of map.flat()) {
+      node.isMapped = simulationType === "sweep" && !node.isWall ? true : false;
     }
-    config.robot.fullyMappedMap = fullyMappedMap;
   };
-
   const addDummyRobotToConfig = (config) => {
     /* 
   When first importing the configs.json file, we want to assign a dummy robot to each config so we can simulate execution of each algorithm
@@ -194,13 +183,14 @@ export const getBenchmarkConfigs = () => {
     const { grid, map } = config;
     const dummy = new Robot(grid);
     dummy.map = map;
-    dummy.syncMapLayoutWithGrid(grid);
     delete config.map;
     config.robot = dummy;
   };
+  const configs = JSON.parse(JSON.stringify(staticConfigs));
   for (const config of Object.values(configs)) {
     !config.robot && addDummyRobotToConfig(config);
-    !config.fullyMappedMap && addFullyMappedMapToConfig(config);
+    config.robot.syncMapLayoutWithGrid(config.grid);
+    adjustMapToSimulationType(config.robot.map, simulationType);
   }
   return configs;
 };
@@ -210,7 +200,6 @@ export const measure = (algorithm, config, simulationType) => {
   const runInterpreterCalculateRuntime = (algorithm, config) => {
     const buildContextFromConfig = (config) => {
       const { grid, robot, startNode, availableSteps } = config;
-      robot.map = simulationType === "sweep" ? robot.fullyMappedMap : robot.map;
       return { state: { grid, startNode, availableSteps }, robot };
     };
     const interpreter = createSandboxedInterpreter(
@@ -226,8 +215,7 @@ export const measure = (algorithm, config, simulationType) => {
   const runNativeAlgorithmCalculateRuntime = (algorithm, config) => {
     const { grid, robot, startNode, availableSteps } = config;
     const {row, col} = startNode;
-    const dockingStation = simulationType === "sweep" ? robot.fullyMappedMap[row][col] : robot.map[row][col];
-    /* const map = simulationType === "sweep" ? robot.fullyMappedMap : robot.map; */
+    const dockingStation = robot.map[row][col];
     const map = robot.map;
     const t0 = performance.now();
     const path = algorithm.func(grid,map,dockingStation,availableSteps);
@@ -259,8 +247,12 @@ export const measure = (algorithm, config, simulationType) => {
       /* 
       Calculates how much dust did we clean in relation to the total amount of dust on the grid. 
       */
+     const uniqueNodesFromPath = path.filter(
+      (a, b, c) =>
+        c.findIndex((t) => t.row === a.row && t.col === a.col) === b
+    );
       return (
-        path.reduce((a, b) => ({ dust: a.dust + b.dust })).dust /
+        uniqueNodesFromPath.reduce((a, b) => ({ dust: a.dust + b.dust })).dust /
           grid.flat().reduce((a, b) => ({ dust: a.dust + b.dust })).dust *
         100
       );

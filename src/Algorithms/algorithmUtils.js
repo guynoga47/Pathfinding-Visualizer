@@ -79,9 +79,6 @@ export const fillPathGapsInNodeList = (
     const currNode = nodeList[i];
     const prevNode = i > 0 ? nodeList[i - 1] : currNode;
     if (!isNeighbors(currNode, prevNode)) {
-      console.log(
-        `not neighbors found: node-${currNode.row}-${currNode.col}, node-${prevNode.row}-${prevNode.col}`
-      );
       const astarResult = astar(map, prevNode, currNode, filters);
       const path = getShortestPathNodesInOrder(
         astarResult[astarResult.length - 1]

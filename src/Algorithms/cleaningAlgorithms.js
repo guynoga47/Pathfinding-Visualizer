@@ -21,9 +21,8 @@ const canStartCleaning = (map, startingPoint) => {
 
 const greedyCleaning = (grid, map, dockingStation, availableSteps) => {
   if (!canStartCleaning(map, dockingStation)) {
-    return [dockingStation];
+    return [];
   }
-  return [dockingStation];
   let mapCopy = getGridDeepCopy(map);
   let currNode = mapCopy[dockingStation.row][dockingStation.col];
   let bestCandidate;
@@ -31,7 +30,7 @@ const greedyCleaning = (grid, map, dockingStation, availableSteps) => {
   let visitedNodesInOrder = [];
   visitedNodesInOrder.push(dockingStation);
   while (canContinue) {
-    bestCandidate = findbestCandidate(currNode, visitedNodesInOrder, mapCopy);
+    bestCandidate = findBestCandidate(currNode, visitedNodesInOrder, mapCopy);
 
     // get Astar path from best candidate to docking station and check that there are still enough steps if we add the best candidate
 
@@ -69,7 +68,7 @@ const greedyCleaning = (grid, map, dockingStation, availableSteps) => {
   return visitedNodesInOrder;
 };
 
-const findbestCandidate = (currNode, visitedNodesInOrder, mapCopy) => {
+const findBestCandidate = (currNode, visitedNodesInOrder, mapCopy) => {
   let currNeighbours = getNeighbors(currNode, mapCopy).filter(
     (neighbour) => neighbour.isMapped
   );
@@ -81,13 +80,13 @@ const findbestCandidate = (currNode, visitedNodesInOrder, mapCopy) => {
       return sortedNeighboursByWeight[i];
     }
   }
-  const findleastVisitedNode = (currNeighbours) => {
+  const findLeastVisitedNode = (currNeighbours) => {
     let neighboursSortedByVisitCount = currNeighbours.sort(
       (n1, n2) => n1.visitCount - n2.visitCount
     );
     return neighboursSortedByVisitCount[0];
   };
-  return findleastVisitedNode(currNeighbours);
+  return findLeastVisitedNode(currNeighbours);
 };
 
 export const data = [

@@ -233,7 +233,7 @@ const Controller = () => {
               className={classes.menuItem}
               onClick={() => {
                 setCodeEditorOpen(true);
-                handleMapMenuClose();
+                handleCleanAlgMenuClose();
               }}
             >
               <ListItemText

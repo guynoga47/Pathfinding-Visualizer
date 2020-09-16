@@ -252,10 +252,7 @@ const adjustRobotPathToBatteryAndInsertReturnPath = (
   dockingStation,
   availableSteps
 ) => {
-  let t2 = performance.now();
   const runningMap = getGridDeepCopy(map);
-  let t3 = performance.now();
-  console.log("Call to getGridDeepCopy took " + (t3 - t2) + " milliseconds.");
 
   const startNodeRef = runningMap[dockingStation.row][dockingStation.col];
   /*     visitedNodesInOrder.forEach((visitedNode) => {
@@ -280,8 +277,6 @@ const adjustRobotPathToBatteryAndInsertReturnPath = (
     (node) => (runningMap[node.row][node.col].isMapped = true)
   );
 
-  let counter = 0;
-  let t0 = performance.now();
   for (
     let i = Math.min(
       availableSteps - 1,
@@ -308,7 +303,6 @@ const adjustRobotPathToBatteryAndInsertReturnPath = (
         evaluation: true,
       },
     ]);
-    counter++;
 
     if (searchResult) {
       const pathToDockingStation = getShortestPathNodesInOrder(
@@ -318,12 +312,7 @@ const adjustRobotPathToBatteryAndInsertReturnPath = (
         const robotPath = visitedNodesInOrder
           .slice(0, i)
           .concat(pathToDockingStation);
-        console.log("iteration " + counter);
         removeDuplicateNodes(robotPath);
-        let t1 = performance.now();
-        console.log(
-          "loop in modifiyVisitedNodes took " + (t1 - t0) + " milliseconds."
-        );
         return robotPath;
       }
     }
