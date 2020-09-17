@@ -26,7 +26,6 @@ import { INFO_MSG, SUCCESS_MSG, WARNING_MSG } from "./Message/messages";
 import AceEditor from "react-ace";
 
 import {
-  DEFAULT_EDITOR_MARKUP,
   createSandboxedInterpreter,
   checkTimeLimitExceeded,
   restrictEditingSegment,
@@ -37,6 +36,8 @@ import {
   transformScoresToBenchmarkData,
   measure,
 } from "./editorUtils.js";
+
+import { DEFAULT_EDITOR_MARKUP } from "./code";
 
 import GridContext from "../../Context/grid-context";
 
@@ -166,9 +167,10 @@ const Editor = ({ open, setCodeEditorOpen }) => {
       console.log(func(grid, robot.map, dockingStation, availableSteps));
       return; */
       const interpreter = createSandboxedInterpreter(code, context);
-
+      let t0 = performance.now();
       checkTimeLimitExceeded(interpreter);
-
+      let t1 = performance.now();
+      console.log(t1 - t0);
       interpreter.run();
 
       const result = interpreter.pseudoToNative(interpreter.value);

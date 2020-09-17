@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import Interpreter from "js-interpreter";
 
-import scopeFunctions from "../../Algorithms/algorithmUtils";
+import scopeFunctions from "./interpreterScope";
 import * as mappingAlgorithms from "../../Algorithms/mappingAlgorithms";
 import * as cleaningAlgorithms from "../../Algorithms/cleaningAlgorithms";
 
@@ -11,43 +11,7 @@ import validators from "./validators";
 import Exception from "../../Classes/Exception";
 
 import Robot from "../../Classes/Robot";
-
-export const DEFAULT_EDITOR_MARKUP = `function buildPath(grid, map, dockingStation, availableSteps){
-
-  let i = 0;
-  const visitedNodesInOrder = [];
-  let currNode = dockingStation;
-
-  while (i < availableSteps) {
-    visitedNodesInOrder.push(currNode);
-
-    const neighbors = getNeighbors(currNode, map).filter((neighbor) => !grid[neighbor.row][neighbor.col].isWall);
-
-    neighbors = interpreterShuffle(neighbors);
-
-    const neighborsAscending = [...neighbors].sort((n1, n2) => n1.visitCount - n2.visitCount);
-    const neighborsDescending = [...neighbors].sort((n1, n2) => n2.visitCount - n1.visitCount);
-    const neighborsProbabilities = [];
-
-    const multipliers = [70, 20, 5, 5];
-    neighborsDescending.forEach((neighbor, i) => {
-      for (let count = 0; count <= multipliers[i]; count++) {
-        neighborsProbabilities.push(neighborsAscending[i]);
-      }
-    });
-    currNode = neighborsProbabilities[Math.floor(Math.random() * neighborsProbabilities.length)];
-    
-    currNode.visitCount = !currNode.visitCount ? 1 : currNode.visitCount + 1;
-    i++;
-  }
-
-  const robotPath = adjustRobotPathToBatteryAndInsertReturnPath(visitedNodesInOrder, map, dockingStation, availableSteps);
-  
-  return robotPath;
-
-}`;
-
-const EXECUTE = `buildPath(grid,map,dockingStation,availableSteps);`;
+import { EXECUTE } from "./code";
 
 export const createSandboxedInterpreter = (code, context) => {
   const establishEnvironment = (context, interpreter) => {
@@ -336,7 +300,7 @@ export const checkTimeLimitExceeded = (interpreter) => {
   while (interpreter.step()) {
     let now = new Date().getTime() - start;
     let secondsPassed = Math.floor((now / 1000) % 60);
-    if (secondsPassed === 3) {
+    if (secondsPassed === 10) {
       throw new Exception(
         "Time limit exceeded, check for infinite loops or performance bottlenecks!"
       );

@@ -7,7 +7,7 @@ import {
   calculateDefaultDockingStation,
   createNode,
 } from "./GlobalStateUtils";
-import { DEFAULT_EDITOR_MARKUP } from "../Components/Editor/editorUtils";
+import { DEFAULT_EDITOR_MARKUP } from "../Components/Editor/code";
 import Robot from "../Classes/Robot";
 import { resetGridSearchProperties } from "../Algorithms/algorithmUtils";
 

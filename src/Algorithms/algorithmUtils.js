@@ -115,7 +115,8 @@ export const adjustRobotPathToBatteryAndInsertReturnPath = (
   visitedNodesInOrder,
   map,
   dockingStation,
-  availableSteps
+  availableSteps,
+  search
 ) => {
   const runningMap = getGridDeepCopy(map);
 
@@ -154,7 +155,7 @@ export const adjustRobotPathToBatteryAndInsertReturnPath = (
       runningMap[visitedNodesConsideringBattery[i].row][
         visitedNodesConsideringBattery[i].col
       ];
-    const searchResult = astar(runningMap, node, startNodeRef, [
+    const searchResult = search(runningMap, node, startNodeRef, [
       {
         attribute: "isVisited",
         evaluation: false,
@@ -192,17 +193,3 @@ export const adjustRobotPathToBatteryAndInsertReturnPath = (
 export const isEqual = (node1, node2) => {
   return node1.row === node2.row && node1.col === node2.col;
 };
-
-export default [
-  getShortestPathNodesInOrder,
-  getAllNodes,
-  isNeighbors,
-  isValidCoordinates,
-  getNeighbors,
-  resetGridSearchProperties,
-  getGridDeepCopy,
-  fillPathGapsInNodeList,
-  removeDuplicateNodes,
-  shuffle,
-  astar,
-];

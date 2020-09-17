@@ -6,8 +6,6 @@ import {
   resetGridSearchProperties,
 } from "./algorithmUtils";
 
-import { interpreterResetGridSearchProperties } from "../Components/Editor/interpreterScope";
-
 import Stack from "../Classes/Stack.js";
 
 export const bfs = (grid, startNode, finishNode) => {
@@ -26,7 +24,7 @@ export const bfs = (grid, startNode, finishNode) => {
     closestNode.isVisited = true;
     visitedNodesInOrder.push(closestNode);
     //need to find more elegant way to work on a copy of the array, maybe move grid to 1d array instead of 2d.
-    if (isEqual(closestNode, finishNode)) {
+    if (closestNode === finishNode) {
       visitedNodesInOrder.forEach((node) => (node.isVisited = false));
       return visitedNodesInOrder;
     }
@@ -81,7 +79,13 @@ export const dfs = (grid, startNode) => {
   return visitedNodesInOrder;
 };
 
-export const astar = (grid, startNode, finishNode, filters) => {
+export const astar = (
+  grid,
+  startNode,
+  finishNode,
+  filters,
+  invokedFromEditor
+) => {
   if (!filters) {
     filters = [
       { attribute: "isVisited", evaluation: false },
@@ -90,7 +94,10 @@ export const astar = (grid, startNode, finishNode, filters) => {
   }
 
   const visitedNodesInOrder = [];
-  resetGridSearchProperties(grid);
+
+  grid = invokedFromEditor && invokedFromEditor.searchPropsResetter(grid);
+  !invokedFromEditor && resetGridSearchProperties(grid);
+
   startNode.distance = 0;
   startNode.heuristicDistance = 0;
   const priorityQueue = [];
