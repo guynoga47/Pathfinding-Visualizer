@@ -38,11 +38,21 @@ export default class Visualizer extends Component {
     });
   };
 
-  applyNodesStyles = ({ resetWalls, resetDust, setWalls, setDust }) => {
+  applyNodesStyles = ({
+    resetHighlight,
+    resetWalls,
+    resetDust,
+    setWalls,
+    setDust,
+    setHighlight,
+  }) => {
+    const { grid } = this.context.state;
+    const { robot } = this.context;
     for (let nodeRef in this.refs) {
       const row = parseInt(nodeRef.split("-")[1]);
       const col = parseInt(nodeRef.split("-")[2]);
-      const node = this.context.state.grid[row][col];
+      const gridNode = grid[row][col];
+      const mapNode = robot.map[row][col];
       const nodeDOM = ReactDOM.findDOMNode(this.refs[nodeRef]);
       if (resetWalls) {
         nodeDOM.classList.remove("node-wall");
@@ -53,15 +63,32 @@ export default class Visualizer extends Component {
           nodeDOM.classList.remove(`${dust}`);
         }
       }
+      if (resetHighlight) {
+        if (mapNode.isMapped) {
+          nodeDOM.classList.remove("highlight");
+          if (gridNode.dust) {
+            nodeDOM.classList.add(`dust-${gridNode.dust}`);
+          }
+        }
+      }
       if (setWalls) {
         nodeDOM.classList.remove("node-wall");
-        if (node.isWall) {
+        if (gridNode.isWall) {
           nodeDOM.classList.add("node-wall");
         }
       }
       if (setDust) {
-        if (node.dust) {
-          nodeDOM.classList.add(`dust-${node.dust}`);
+        if (gridNode.dust) {
+          nodeDOM.classList.add(`dust-${gridNode.dust}`);
+        }
+      }
+      if (setHighlight) {
+        if (mapNode.isMapped) {
+          nodeDOM.classList.add("highlight");
+          if (gridNode.dust) {
+            const dust = nodeDOM.classList[1];
+            nodeDOM.classList.remove(`${dust}`);
+          }
         }
       }
       if (!this.context.isStartNode(row, col))
@@ -431,36 +458,16 @@ export default class Visualizer extends Component {
       this.applyNodesStyles({
         resetWalls: true,
         resetDust: true,
-      });
-      this.applyNodesStyles({
         setWalls: true,
         setDust: true,
       });
       this.context.updateState("configLoaded", false);
     }
     if (request === "highlightMap") {
-      const { map } = this.context.robot;
-      for (let row = 0; row < map.length; row++) {
-        for (let col = 0; col < map[0].length; col++) {
-          if (map[row][col].isMapped) {
-            ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.add(
-              `highlight`
-            );
-          }
-        }
-      }
+      this.applyNodesStyles({ setHighlight: true });
     }
     if (request === "removeHighlightMap") {
-      const { map } = this.context.robot;
-      for (let row = 0; row < map.length; row++) {
-        for (let col = 0; col < map[0].length; col++) {
-          if (map[row][col]) {
-            ReactDOM.findDOMNode(
-              this.refs[`node-${row}-${col}`]
-            ).classList.remove(`highlight`);
-          }
-        }
-      }
+      this.applyNodesStyles({ resetHighlight: true });
     }
   }
 

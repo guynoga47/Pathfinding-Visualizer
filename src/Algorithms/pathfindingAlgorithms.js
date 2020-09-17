@@ -2,8 +2,11 @@ import {
   getAllNodes,
   getNeighbors,
   MAX_DISTANCE,
+  isEqual,
   resetGridSearchProperties,
 } from "./algorithmUtils";
+
+import { interpreterResetGridSearchProperties } from "../Components/Editor/interpreterScope";
 
 import Stack from "../Classes/Stack.js";
 
@@ -23,7 +26,7 @@ export const bfs = (grid, startNode, finishNode) => {
     closestNode.isVisited = true;
     visitedNodesInOrder.push(closestNode);
     //need to find more elegant way to work on a copy of the array, maybe move grid to 1d array instead of 2d.
-    if (closestNode === finishNode) {
+    if (isEqual(closestNode, finishNode)) {
       visitedNodesInOrder.forEach((node) => (node.isVisited = false));
       return visitedNodesInOrder;
     }
@@ -85,6 +88,7 @@ export const astar = (grid, startNode, finishNode, filters) => {
       { attribute: "isWall", evaluation: false },
     ];
   }
+
   const visitedNodesInOrder = [];
   resetGridSearchProperties(grid);
   startNode.distance = 0;
@@ -97,7 +101,7 @@ export const astar = (grid, startNode, finishNode, filters) => {
     closestNode.isVisited = true;
     visitedNodesInOrder.push(closestNode);
 
-    if (closestNode === finishNode) {
+    if (isEqual(closestNode, finishNode)) {
       return visitedNodesInOrder;
     }
 

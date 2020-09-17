@@ -63,6 +63,10 @@ const Editor = ({ open, setCodeEditorOpen }) => {
 
   const [anchorElSaveScript, setAnchorSaveScript] = React.useState(null);
   const [anchorElLoadScript, setAnchorElLoadScript] = React.useState(null);
+  const [
+    anchorElCreateConfigurationsFile,
+    setAnchorElCreateConfigurationsFile,
+  ] = React.useState(null);
 
   const [validatedResult, setValidatedResult] = React.useState(false);
 
@@ -79,6 +83,21 @@ const Editor = ({ open, setCodeEditorOpen }) => {
   const onChange = (currentCode) => {
     /* we dont want to set state on each change because it causes stuttering when typing*/
     code = currentCode;
+  };
+
+  const handleClearButtonClick = () => {
+    context.updateState("editorScript", code);
+    setShowClearWarning(WARNING_MSG);
+  };
+
+  const handleAPIButtonClick = () => {
+    context.updateState("editorScript", code);
+    setShowAPI(true);
+  };
+
+  const handleInfoButtonClick = () => {
+    context.updateState("editorScript", code);
+    setShowInfo(INFO_MSG);
   };
 
   const handleBenchmark = () => {
@@ -126,13 +145,26 @@ const Editor = ({ open, setCodeEditorOpen }) => {
 
   const handleValidateScript = () => {
     /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
+
     const { editorScript } = context.state;
     if (code !== editorScript) {
       context.updateState("editorScript", code);
       benchmarkCache.current = null;
     }
-
     try {
+      /*       const { grid, availableSteps, startNode } = context.state;
+      const { robot } = context;
+      const dockingStation = robot.map[startNode.row][startNode.col];
+      //"Register" the function
+      //prettier-ignore
+      const args = `grid,robot.map,dockingStation,availableSteps`;
+      var func = new Function(
+        `grid,robot.map,dockingStation,availableSteps`,
+        `${code} return buildPath(grid,map,dockingStation,availableSteps);`
+      );
+      //Call the function
+      console.log(func(grid, robot.map, dockingStation, availableSteps));
+      return; */
       const interpreter = createSandboxedInterpreter(code, context);
 
       checkTimeLimitExceeded(interpreter);
@@ -142,6 +174,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
       const result = interpreter.pseudoToNative(interpreter.value);
 
       console.log(result);
+      /* console.log(JSON.parse(code)); */
 
       validate(result, context);
 
@@ -156,6 +189,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
   };
 
   const handleLoadUserScript = (event) => {
+    context.updateState("editorScript", code);
     const reader = new FileReader();
     reader.onload = () => {
       const { editorScript } = JSON.parse(reader.result);
@@ -226,6 +260,9 @@ const Editor = ({ open, setCodeEditorOpen }) => {
       case "btn-loadScript":
         setAnchorElLoadScript(event.currentTarget);
         break;
+      case "btn-createConfigurationsFile":
+        setAnchorElCreateConfigurationsFile(event.currentTarget);
+        break;
       default:
         console.log("Default case entered in Editor.jsx: handlePopoverOpen");
     }
@@ -238,6 +275,9 @@ const Editor = ({ open, setCodeEditorOpen }) => {
         break;
       case "btn-loadScript":
         setAnchorElLoadScript(null);
+        break;
+      case "btn-createConfigurationsFile":
+        setAnchorElCreateConfigurationsFile(null);
         break;
       default:
         console.log("Default case entered in Editor.jsx: handlePopoverClose");
@@ -304,7 +344,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
               accept=".json"
               multiple="multiple"
               className={classes.input}
-              id="icon-button-load-configurations"
+              id="icon-button-create-configs"
               onChange={(event) =>
                 handleCreateConfigurationsFile(event, configs)
               }
@@ -314,14 +354,14 @@ const Editor = ({ open, setCodeEditorOpen }) => {
               }}
               type="file"
             />
-            <label htmlFor="icon-button-load-configurations">
+            <label htmlFor="icon-button-create-configs">
               <IconButton
-                id={"btn-createConfigurationFile"}
+                id={"btn-createConfigurationsFile"}
                 className={classes.editorBtn}
                 onMouseOver={handlePopoverOpen}
                 onMouseLeave={handlePopoverClose}
                 component={"span"}
-                htmlFor="icon-button-load-configurations"
+                htmlFor="icon-button-create-configs"
               >
                 <IconSettings />
               </IconButton>
@@ -331,7 +371,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
             <Button
               autoFocus
               className={classes.editorBtn}
-              onClick={() => setShowInfo(INFO_MSG)}
+              onClick={handleInfoButtonClick}
               color="inherit"
             >
               INFO
@@ -340,7 +380,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
               autoFocus
               className={classes.editorBtn}
               color="inherit"
-              onClick={() => setShowAPI(true)}
+              onClick={handleAPIButtonClick}
             >
               API
             </Button>
@@ -348,10 +388,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
               autoFocus
               className={classes.editorBtn}
               color="inherit"
-              onClick={() => {
-                context.updateState("editorScript", code);
-                setShowClearWarning(WARNING_MSG);
-              }}
+              onClick={handleClearButtonClick}
             >
               CLEAR
             </Button>
@@ -490,23 +527,14 @@ const Editor = ({ open, setCodeEditorOpen }) => {
           />
         )}
       </Dialog>
-
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
-        classes={{
-          paper: classes.paper,
-        }}
+        classes={{ paper: classes.paper }}
         open={Boolean(anchorElSaveScript)}
         anchorEl={anchorElSaveScript}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
@@ -515,23 +543,30 @@ const Editor = ({ open, setCodeEditorOpen }) => {
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
-        classes={{
-          paper: classes.paper,
-        }}
+        classes={{ paper: classes.paper }}
         open={Boolean(anchorElLoadScript)}
         anchorEl={anchorElLoadScript}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
         <Typography className={classes.popoverText}>Load Script</Typography>
+      </Popover>
+      <Popover
+        id="mouse-over-popover"
+        className={classes.popover}
+        classes={{ paper: classes.paper }}
+        open={Boolean(anchorElCreateConfigurationsFile)}
+        anchorEl={anchorElCreateConfigurationsFile}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+        onClose={handlePopoverClose}
+        disableRestoreFocus
+      >
+        <Typography className={classes.popoverText}>
+          Create Configurations File
+        </Typography>
       </Popover>
     </div>
   );

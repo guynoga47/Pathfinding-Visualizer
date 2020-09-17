@@ -111,6 +111,88 @@ export const shuffle = (array) => {
   }
 };
 
+export const adjustRobotPathToBatteryAndInsertReturnPath = (
+  visitedNodesInOrder,
+  map,
+  dockingStation,
+  availableSteps
+) => {
+  const runningMap = getGridDeepCopy(map);
+
+  const startNodeRef = runningMap[dockingStation.row][dockingStation.col];
+  /*     visitedNodesInOrder.forEach((visitedNode) => {
+    const { row, col } = visitedNode;
+    runningMap[row][col].isMapped = true;
+  }); */
+  /* 
+  visitedNodes is calculated regardless of battery size (using the algorithm callback).
+  we want to minimize the amount of iterations of this loop, so we start searching for a path
+  back to the docking station starting from the node that corresponds to our current battery, backwards,
+  until we find a complete path (mapping/sweeping + return to docking station).
+
+  TODO:
+  1. Consider removing isMapped consideration. we update the robot map in handlePlay function on visualizer.
+  */
+
+  const visitedNodesConsideringBattery = visitedNodesInOrder.slice(
+    0,
+    availableSteps
+  );
+  visitedNodesConsideringBattery.forEach(
+    (node) => (runningMap[node.row][node.col].isMapped = true)
+  );
+
+  for (
+    let i = Math.min(
+      availableSteps - 1,
+      visitedNodesConsideringBattery.length - 1
+    );
+    i >= 1;
+    i--
+  ) {
+    const node =
+      runningMap[visitedNodesConsideringBattery[i].row][
+        visitedNodesConsideringBattery[i].col
+      ];
+    const searchResult = astar(runningMap, node, startNodeRef, [
+      {
+        attribute: "isVisited",
+        evaluation: false,
+      },
+      {
+        attribute: "isWall",
+        evaluation: false,
+      },
+      {
+        attribute: "isMapped",
+        evaluation: true,
+      },
+    ]);
+
+    if (searchResult) {
+      const pathToDockingStation = getShortestPathNodesInOrder(
+        searchResult[searchResult.length - 1]
+      );
+      if (pathToDockingStation.length + i <= availableSteps) {
+        const robotPath = visitedNodesInOrder
+          .slice(0, i)
+          .concat(pathToDockingStation);
+        removeDuplicateNodes(robotPath);
+        return robotPath;
+      }
+    }
+  }
+
+  console.log(
+    "error in adjustRobotPathToBatteryAndInsertReturnPath in GlobalContext"
+  );
+  return false;
+};
+
+export const isEqual = (node1, node2) => {
+  return node1.row === node2.row && node1.col === node2.col;
+};
+
 export default [
   getShortestPathNodesInOrder,
   getAllNodes,

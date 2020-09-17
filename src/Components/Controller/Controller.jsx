@@ -35,12 +35,30 @@ const Controller = () => {
   const classes = useStyles();
   const { drawItem } = context.state;
 
-  const handleAlgorithmSelected = (event) => {
+  const handleSimulationTypeSelected = (selectedSimulationType) => {
+    const { simulationType } = context.state;
+    if (simulationType !== selectedSimulationType) {
+      context.updateState("simulationType", selectedSimulationType);
+      context.updateState("activeAlgorithm", null);
+    }
+    handleSimulationTypeMenuClose();
+  };
+
+  const handleAlgorithmSelected = (selectedAlgorithm, menuCloseCallback) => {
+    context.updateState("activeAlgorithm", selectedAlgorithm);
+    context.updateState("editorSimulation", false);
+    menuCloseCallback();
+  };
+
+  const handleAlgorithmSelectionMenuClicked = (event) => {
     if (context.state.simulationType === "map") {
       setAnchorElMapAlgMenu(event.currentTarget);
     } else {
       setAnchorElCleanAlgMenu(event.currentTarget);
     }
+  };
+  const handleSimulationTypeSelectionClicked = (event) => {
+    setAnchorElSimulationType(event.currentTarget);
   };
   const handleMapMenuClose = () => {
     setAnchorElMapAlgMenu(null);
@@ -48,9 +66,6 @@ const Controller = () => {
 
   const handleCleanAlgMenuClose = () => {
     setAnchorElCleanAlgMenu(null);
-  };
-  const handleSimulationTypeSelectionClicked = (event) => {
-    setAnchorElSimulationType(event.currentTarget);
   };
   const handleSimulationTypeMenuClose = () => {
     setAnchorElSimulationType(null);
@@ -107,7 +122,7 @@ const Controller = () => {
                 aria-haspopup="true"
                 variant="contained"
                 disabled={context.state.isRunning}
-                onClick={handleAlgorithmSelected}
+                onClick={handleAlgorithmSelectionMenuClicked}
               >
                 {context.state.activeAlgorithm
                   ? context.state.activeAlgorithm.shortened
@@ -150,19 +165,13 @@ const Controller = () => {
           >
             <MenuItem
               className={classes.menuItem}
-              onClick={() => {
-                context.updateState("simulationType", "map");
-                handleSimulationTypeMenuClose();
-              }}
+              onClick={() => handleSimulationTypeSelected("map")}
             >
               <ListItemText primary="MAP" className={classes.menuItemText} />
             </MenuItem>
             <MenuItem
               className={classes.menuItem}
-              onClick={() => {
-                context.updateState("simulationType", "sweep");
-                handleSimulationTypeMenuClose();
-              }}
+              onClick={() => handleSimulationTypeSelected("sweep")}
             >
               <ListItemText primary="SWEEP" className={classes.menuItemText} />
             </MenuItem>
@@ -180,9 +189,7 @@ const Controller = () => {
                 key={algorithm.name}
                 className={classes.menuItem}
                 onClick={() => {
-                  context.updateState("activeAlgorithm", algorithm);
-                  context.updateState("editorSimulation", false);
-                  handleMapMenuClose();
+                  handleAlgorithmSelected(algorithm, handleMapMenuClose);
                 }}
               >
                 <ListItemText
@@ -218,9 +225,7 @@ const Controller = () => {
                 key={algorithm.name}
                 className={classes.menuItem}
                 onClick={() => {
-                  context.updateState("activeAlgorithm", algorithm);
-                  context.updateState("editorSimulation", false);
-                  handleCleanAlgMenuClose();
+                  handleAlgorithmSelected(algorithm, handleCleanAlgMenuClose);
                 }}
               >
                 <ListItemText

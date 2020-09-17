@@ -14,20 +14,42 @@ import Robot from "../../Classes/Robot";
 
 export const DEFAULT_EDITOR_MARKUP = `function buildPath(grid, map, dockingStation, availableSteps){
 
-  const visitedNodesInOrder = [grid[12][25], grid[12][26], grid[12][27], grid[12][28], grid[12][29], grid[12][28], grid[12][27], grid[12][26], grid[12][25]];
+  let i = 0;
+  const visitedNodesInOrder = [];
+  let currNode = dockingStation;
 
-  return visitedNodesInOrder;
+  while (i < availableSteps) {
+    visitedNodesInOrder.push(currNode);
+
+    const neighbors = getNeighbors(currNode, map).filter((neighbor) => !grid[neighbor.row][neighbor.col].isWall);
+
+    neighbors = interpreterShuffle(neighbors);
+
+    const neighborsAscending = [...neighbors].sort((n1, n2) => n1.visitCount - n2.visitCount);
+    const neighborsDescending = [...neighbors].sort((n1, n2) => n2.visitCount - n1.visitCount);
+    const neighborsProbabilities = [];
+
+    const multipliers = [70, 20, 5, 5];
+    neighborsDescending.forEach((neighbor, i) => {
+      for (let count = 0; count <= multipliers[i]; count++) {
+        neighborsProbabilities.push(neighborsAscending[i]);
+      }
+    });
+    currNode = neighborsProbabilities[Math.floor(Math.random() * neighborsProbabilities.length)];
+    
+    currNode.visitCount = !currNode.visitCount ? 1 : currNode.visitCount + 1;
+    i++;
+  }
+
+  const robotPath = adjustRobotPathToBatteryAndInsertReturnPath(visitedNodesInOrder, map, dockingStation, availableSteps);
+  
+  return robotPath;
 
 }`;
 
 const EXECUTE = `buildPath(grid,map,dockingStation,availableSteps);`;
 
 export const createSandboxedInterpreter = (code, context) => {
-  const loadBabel = () => {
-    if (!window.Babel) {
-      loadScript("https://unpkg.com/@babel/standalone/babel.min.js");
-    }
-  };
   const establishEnvironment = (context, interpreter) => {
     const isPrimitive = (value) => Object(value) !== value;
     const { grid, availableSteps, startNode } = context.state;
@@ -57,7 +79,13 @@ export const createSandboxedInterpreter = (code, context) => {
     });
   };
   const compileToES5 = (code) => {
+    const loadBabel = () => {
+      if (!window.Babel) {
+        loadScript("https://unpkg.com/@babel/standalone/babel.min.js");
+      }
+    };
     try {
+      loadBabel();
       return Babel.transform(code, {
         presets: ["es2015"],
         sourceType: "script",
@@ -69,7 +97,6 @@ export const createSandboxedInterpreter = (code, context) => {
     }
   };
   try {
-    loadBabel();
     const interpreter = new Interpreter(compileToES5(code));
     interpreter.appendCode(EXECUTE);
     establishEnvironment(context, interpreter);
