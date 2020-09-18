@@ -2,7 +2,7 @@ export const DEFAULT_EDITOR_MARKUP = `function buildPath(grid, map, dockingStati
 
   let i = 0;
   const visitedNodesInOrder = [];
-  let currNode = dockingStation;
+  let currNode = map[dockingStation.row][dockingStation.col];
 
   while (i < availableSteps) {
     visitedNodesInOrder.push(currNode);
@@ -11,7 +11,7 @@ export const DEFAULT_EDITOR_MARKUP = `function buildPath(grid, map, dockingStati
       (neighbor) => !grid[neighbor.row][neighbor.col].isWall
     );
 
-    neighbors = INTERPRETER_shuffle(neighbors);
+    neighbors = shuffle(neighbors);
 
     const neighborsAscending = [...neighbors].sort(
       (n1, n2) => n1.visitCount - n2.visitCount
@@ -31,19 +31,19 @@ export const DEFAULT_EDITOR_MARKUP = `function buildPath(grid, map, dockingStati
       neighborsProbabilities[
         Math.floor(Math.random() * neighborsProbabilities.length)
       ];
-
+    currNode = map[currNode.row][currNode.col];
     currNode.visitCount = !currNode.visitCount
       ? 1
       : currNode.visitCount + 1;
     i++;
   }
 
-  const robotPath = INTERPRETER_adjustRobotPathToBatteryAndInsertReturnPath(
+  const robotPath = adjustRobotPathToBatteryAndInsertReturnPath(
     visitedNodesInOrder,
     map,
     dockingStation,
     availableSteps,
-    INTERPRETER_astar
+    astar
   );
   return robotPath;
   

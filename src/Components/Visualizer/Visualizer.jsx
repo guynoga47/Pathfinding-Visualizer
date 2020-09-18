@@ -35,6 +35,7 @@ export default class Visualizer extends Component {
     this.context.resizeGrid(height, this.applyNodesStyles, {
       resetWalls: true,
       resetDust: true,
+      resetHighlight: true,
     });
   };
 

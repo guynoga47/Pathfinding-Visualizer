@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import React, { useContext, useEffect, useState, useRef } from "react";
+import React, { useContext, useState, useRef } from "react";
 
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
@@ -153,19 +153,6 @@ const Editor = ({ open, setCodeEditorOpen }) => {
       benchmarkCache.current = null;
     }
     try {
-      /*       const { grid, availableSteps, startNode } = context.state;
-      const { robot } = context;
-      const dockingStation = robot.map[startNode.row][startNode.col];
-      //"Register" the function
-      //prettier-ignore
-      const args = `grid,robot.map,dockingStation,availableSteps`;
-      var func = new Function(
-        `grid,robot.map,dockingStation,availableSteps`,
-        `${code} return buildPath(grid,map,dockingStation,availableSteps);`
-      );
-      //Call the function
-      console.log(func(grid, robot.map, dockingStation, availableSteps));
-      return; */
       const interpreter = createSandboxedInterpreter(code, context);
       let t0 = performance.now();
       checkTimeLimitExceeded(interpreter);
@@ -175,15 +162,13 @@ const Editor = ({ open, setCodeEditorOpen }) => {
 
       const result = interpreter.pseudoToNative(interpreter.value);
 
-      console.log(result);
-      /* console.log(JSON.parse(code)); */
+      console.log(result.filter((node) => node.visitCount > 1));
 
       validate(result, context);
 
       setShowSuccess(SUCCESS_MSG);
 
       setValidatedResult(result);
-      /*       context.updateState("benchmarkReplayResult", false); */
     } catch (err) {
       setShowError(err.message);
       context.updateState("editorSimulation", false);
@@ -191,6 +176,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
   };
 
   const handleLoadUserScript = (event) => {
+    benchmarkCache.current = null;
     context.updateState("editorScript", code);
     const reader = new FileReader();
     reader.onload = () => {
@@ -247,12 +233,6 @@ const Editor = ({ open, setCodeEditorOpen }) => {
     setValidatedResult(false);
     setCodeEditorOpen(false);
   };
-
-  useEffect(() => {
-    /* const loadBabel = loadScript;
-    console.log("in use effect");
-    loadBabel("https://unpkg.com/@babel/standalone/babel.min.js"); */
-  }, []);
 
   const handlePopoverOpen = (event) => {
     switch (event.currentTarget.id) {
@@ -320,6 +300,9 @@ const Editor = ({ open, setCodeEditorOpen }) => {
               <IconButton
                 id={"btn-loadScript"}
                 className={classes.editorBtn}
+                onMouseEnter={() => {
+                  context.updateState("editorScript", code);
+                }}
                 onMouseOver={handlePopoverOpen}
                 onMouseLeave={handlePopoverClose}
                 component={"span"}
@@ -334,6 +317,9 @@ const Editor = ({ open, setCodeEditorOpen }) => {
               className={classes.editorBtn}
               edge="start"
               color="inherit"
+              onMouseEnter={() => {
+                context.updateState("editorScript", code);
+              }}
               onMouseOver={handlePopoverOpen}
               onMouseLeave={handlePopoverClose}
               onClick={handleSaveUserScript}
@@ -360,6 +346,9 @@ const Editor = ({ open, setCodeEditorOpen }) => {
               <IconButton
                 id={"btn-createConfigurationsFile"}
                 className={classes.editorBtn}
+                onMouseEnter={() => {
+                  context.updateState("editorScript", code);
+                }}
                 onMouseOver={handlePopoverOpen}
                 onMouseLeave={handlePopoverClose}
                 component={"span"}
@@ -468,7 +457,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
             </Grid>
             <Grid item>
               <Button
-                className={classes.warnMsgBtn}
+                className={classes.msgBtn}
                 variant="outlined"
                 color="secondary"
                 onClick={handleConfirmClearRequest}

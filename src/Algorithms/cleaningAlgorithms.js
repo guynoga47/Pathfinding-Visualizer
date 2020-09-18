@@ -7,11 +7,15 @@ import {
   fillPathGapsInNodeList,
   adjustRobotPathToBatteryAndInsertReturnPath,
   shuffle,
+  adjList,
 } from "./algorithmUtils";
 
 const findEulerCircuit = (grid, map, dockingStation, availableSteps) => {
   // in order to use this euler algorithm we must check that indegree=outdegree which always true hence no need to check that
-  const graphAdjList = adjList(grid, map, dockingStation, availableSteps);
+  const graph = adjList(map, [
+    { attribute: "isWall", evaluation: false },
+    { attribute: "isMapped", evaluation: true },
+  ]);
   const currPath = new Stack();
   let currVertex = dockingStation;
   //initialize starting point to currpath
@@ -19,9 +23,9 @@ const findEulerCircuit = (grid, map, dockingStation, availableSteps) => {
   let circuit = [];
   while (!currPath.isEmpty()) {
     //check if there is remaining edge
-    if (graphAdjList[`${currVertex.row}-${currVertex.col}`].length > 0) {
+    if (graph[`${currVertex.row}-${currVertex.col}`].length > 0) {
       currPath.push(currVertex);
-      currVertex = graphAdjList[`${currVertex.row}-${currVertex.col}`].pop().v;
+      currVertex = graph[`${currVertex.row}-${currVertex.col}`].pop().v;
     }
     //
     else {
@@ -40,7 +44,7 @@ const findEulerCircuit = (grid, map, dockingStation, availableSteps) => {
   //return circuit;
 };
 
-const prepareAdjesencyList = (adjList) => {
+/* const prepareAdjesencyList = (adjList) => {
   for (let key in adjList) {
     if (adjList[key].length % 2 === 1) {
       // if odd number of neighbours
@@ -65,7 +69,7 @@ const prepareAdjesencyList = (adjList) => {
     }
   }
   return adjList;
-};
+}; */
 
 const findEulerCircuitUndirected = (
   grid,
@@ -74,73 +78,43 @@ const findEulerCircuitUndirected = (
   availableSteps
 ) => {
   // in order to use this euler algorithm we must check that indegree=outdegree which always true hence no need to check that
-  const graphAdjList = adjList(grid, map, dockingStation, availableSteps);
-  const undriectedAdjList = prepareAdjesencyList(graphAdjList);
+  const graph = adjList(map, [
+    { attribute: "isWall", evaluation: false },
+    { attribute: "isMapped", evaluation: true },
+  ]);
+  /* const undriectedAdjList = prepareAdjesencyList(graph); */
   const currPath = new Stack();
-  let currVertex = dockingStation;
+  let currNode = dockingStation;
   //initialize starting point to currpath
   currPath.push(dockingStation);
-  let circuit = [];
+  const circuit = [];
   while (!currPath.isEmpty()) {
     //check if there is remaining edge
-    if (graphAdjList[`${currVertex.row}-${currVertex.col}`].length > 0) {
-      currPath.push(currVertex);
-      let topVertexIndex =
-        graphAdjList[`${currVertex.row}-${currVertex.col}`].length - 1;
-      let topVertex =
-        graphAdjList[`${currVertex.row}-${currVertex.col}`][topVertexIndex].v;
-      let topVertexNeighbours =
-        graphAdjList[`${topVertex.row}-${topVertex.col}`];
-      let newTopVertexNeighbours = [];
+    const { row, col } = currNode;
+    if (graph[`${row}-${col}`].length) {
+      currPath.push(currNode);
+      let topVertexIndex = graph[`${row}-${col}`].length - 1;
+      let topVertex = graph[`${row}-${col}`][topVertexIndex].v;
+      let topVertexNeighbours = graph[`${topVertex.row}-${topVertex.col}`];
+      const newTopVertexNeighbors = [];
       for (let i = 0; i < topVertexNeighbours.length; i++) {
-        if (topVertexNeighbours[i].v !== currVertex) {
-          newTopVertexNeighbours.push(topVertexNeighbours[i]);
+        if (topVertexNeighbours[i].v !== currNode) {
+          newTopVertexNeighbors.push(topVertexNeighbours[i]);
         }
-        graphAdjList[
-          `${topVertex.row}-${topVertex.col}`
-        ] = newTopVertexNeighbours;
+        graph[`${topVertex.row}-${topVertex.col}`] = newTopVertexNeighbors;
       }
-      currVertex = graphAdjList[`${currVertex.row}-${currVertex.col}`].pop().v;
+      currNode = graph[`${row}-${col}`].pop().v;
       // find and remove the opposite edge
     }
     //
     else {
-      circuit.push(currVertex);
-      currVertex = currPath.pop();
+      circuit.push(currNode);
+      currNode = currPath.pop();
     }
   }
   const visitedNodesInOrder = [];
   fillPathGapsInNodeList(map, circuit, visitedNodesInOrder);
   return visitedNodesInOrder;
-};
-
-const adjList = (grid, map, dockingStation, availableSteps) => {
-  const adjList = {};
-  for (let i = 0; i < map.length; i++) {
-    for (let j = 0; j < map[0].length; j++) {
-      if (map[i][j].isMapped) {
-        const node = map[i][j];
-        const edges = [];
-        const neighbors = getNeighbors(node, map).filter(
-          (neighbor) => !neighbor.isWall && neighbor.isMapped
-        );
-        neighbors.forEach((neighbor) => {
-          edges.push({
-            u: node,
-            v: neighbor,
-            w: getWeight(node, neighbor),
-          });
-        });
-        shuffle(edges);
-        adjList[`${i}-${j}`] = edges;
-      }
-    }
-  }
-  return adjList;
-};
-
-const getWeight = (n1, n2) => {
-  return n1.isWall || n2.isWall || n1 === n2 ? null : n2.dust;
 };
 
 const canStartCleaning = (map, startingPoint) => {
@@ -168,7 +142,7 @@ const greedyCleaning = (grid, map, dockingStation, availableSteps) => {
   let visitedNodesInOrder = [];
   visitedNodesInOrder.push(dockingStation);
   while (canContinue) {
-    bestCandidate = findbestCandidate(currNode, visitedNodesInOrder, mapCopy);
+    bestCandidate = findBestCandidate(currNode, visitedNodesInOrder, mapCopy);
 
     // get Astar path from best candidate to docking station and check that there are still enough steps if we add the best candidate
 
@@ -207,7 +181,13 @@ const greedyCleaning = (grid, map, dockingStation, availableSteps) => {
   return visitedNodesInOrder;
 };
 
-const findbestCandidate = (currNode, visitedNodesInOrder, mapCopy) => {
+const findBestCandidate = (currNode, visitedNodesInOrder, mapCopy) => {
+  const getLeastVisitedNode = (nodes) => {
+    let nodesByVisitCount = nodes.sort(
+      (n1, n2) => n1.visitCount - n2.visitCount
+    );
+    return nodesByVisitCount[0];
+  };
   let currNeighbours = getNeighbors(currNode, mapCopy).filter(
     (neighbour) => neighbour.isMapped
   );
@@ -220,13 +200,7 @@ const findbestCandidate = (currNode, visitedNodesInOrder, mapCopy) => {
       return sortedNeighboursByWeight[i];
     }
   }
-  const findleastVisitedNode = (currNeighbours) => {
-    let neighboursSortedByVisitCount = currNeighbours.sort(
-      (n1, n2) => n1.visitCount - n2.visitCount
-    );
-    return neighboursSortedByVisitCount[0];
-  };
-  return findleastVisitedNode(currNeighbours);
+  return getLeastVisitedNode(currNeighbours);
 };
 
 export const data = [

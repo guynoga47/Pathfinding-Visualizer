@@ -111,12 +111,53 @@ export const shuffle = (array) => {
   }
 };
 
+export const adjList = (
+  grid,
+  filters = { attribute: "isWall", evaluation: false }
+) => {
+  const isValidNode = (node) => {
+    let res = true;
+    filters.forEach((filter) => {
+      const { attribute, evaluation } = filter;
+      if (node[attribute] !== evaluation) {
+        res = false;
+      }
+    });
+    return res;
+  };
+  const getWeight = (n1, n2) => {
+    return n1.isWall || n2.isWall || n1 === n2 ? null : n2.dust;
+  };
+  const adjList = {};
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[0].length; j++) {
+      const node = grid[i][j];
+      if (isValidNode(node)) {
+        const edges = [];
+        const neighbors = getNeighbors(node, grid).filter((node) =>
+          isValidNode(node)
+        );
+        neighbors.forEach((neighbor) => {
+          edges.push({
+            u: node,
+            v: neighbor,
+            w: getWeight(node, neighbor),
+          });
+        });
+        shuffle(edges);
+        adjList[`${i}-${j}`] = edges;
+      }
+    }
+  }
+  return adjList;
+};
+
 export const adjustRobotPathToBatteryAndInsertReturnPath = (
   visitedNodesInOrder,
   map,
   dockingStation,
   availableSteps,
-  search
+  search = astar
 ) => {
   const runningMap = getGridDeepCopy(map);
 

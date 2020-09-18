@@ -95,7 +95,7 @@ export const astar = (
 
   const visitedNodesInOrder = [];
 
-  grid = invokedFromEditor && invokedFromEditor.searchPropsResetter(grid);
+  grid = invokedFromEditor ? invokedFromEditor.searchPropsResetter(grid) : grid;
   !invokedFromEditor && resetGridSearchProperties(grid);
 
   startNode.distance = 0;

@@ -11,6 +11,11 @@ import {
   shuffle,
 } from "./algorithmUtils";
 
+import {
+  INTERPRETER_astar,
+  INTERPRETER_adjustRobotPathToBatteryAndInsertReturnPath,
+} from "../Components/Editor/interpreterScope";
+
 export const baseMap = (grid, map, dockingStation, availableSteps, step) => {
   let i = 0;
   const visitedNodesInOrder = [];
@@ -134,16 +139,21 @@ const calculateSpiralTraversalOffsets = (grid, availableSteps) => {
   return offsets;
 };
 
-const randomOptimized = (currNode, map, grid) => {
+export const randomOptimized = (currNode, map, grid) => {
   const neighbors = getNeighbors(currNode, map).filter(
     (neighbor) => !grid[neighbor.row][neighbor.col].isWall
   );
+
+  /**CHECK ONLY */
+  const visited = neighbors.filter((node) => node.visitCount > 1);
+  if (visited.length > 0) {
+    console.log("hi");
+  }
 
   /* shuffling neighbors to compensate for prioritizing certain paths 
   when dust is evenly distributed around the dockingStation (mostly went left and down) */
 
   shuffle(neighbors);
-
   const neighborsAscending = [...neighbors].sort(
     (n1, n2) => n1.visitCount - n2.visitCount
   );
@@ -158,9 +168,11 @@ const randomOptimized = (currNode, map, grid) => {
       neighborsProbabilities.push(neighborsAscending[i]);
     }
   });
-  return neighborsProbabilities[
+  console.log(neighborsProbabilities);
+  return neighbors[Math.floor(Math.random() * neighbors.length)];
+  /* return neighborsProbabilities[
     Math.floor(Math.random() * neighborsProbabilities.length)
-  ];
+  ]; */
 };
 
 const bestFirst = (currNode, map, grid) => {
@@ -320,5 +332,32 @@ export const data = [
     name: "Depth Traversal",
     shortened: "Depth",
     func: depthMap,
+  },
+  {
+    name: "try",
+    shortened: "try",
+    func: (grid, map, dockingStation, availableSteps) => {
+      let i = 0;
+      const visitedNodesInOrder = [];
+      let currNode = dockingStation;
+
+      while (i < availableSteps) {
+        visitedNodesInOrder.push(currNode);
+        currNode = randomOptimized(currNode, map, grid);
+        currNode.visitCount = !currNode.visitCount
+          ? 1
+          : currNode.visitCount + 1;
+        i++;
+      }
+
+      const robotPath = INTERPRETER_adjustRobotPathToBatteryAndInsertReturnPath(
+        visitedNodesInOrder,
+        map,
+        dockingStation,
+        availableSteps,
+        INTERPRETER_astar
+      );
+      return robotPath;
+    },
   },
 ];

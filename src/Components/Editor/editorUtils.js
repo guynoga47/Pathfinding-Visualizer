@@ -18,6 +18,11 @@ export const createSandboxedInterpreter = (code, context) => {
     const isPrimitive = (value) => Object(value) !== value;
     const { grid, availableSteps, startNode } = context.state;
     const { robot } = context;
+    if (!availableSteps) {
+      throw new Exception(
+        "Please charge the robot's battery before validating the script!"
+      );
+    }
     robot.syncMapLayoutWithGrid(grid);
     const args = [
       { name: "grid", value: grid },
@@ -38,8 +43,11 @@ export const createSandboxedInterpreter = (code, context) => {
       );
     });
 
-    scopeFunctions.forEach((func) => {
-      interpreter.setValueToScope(func.name, interpreter.nativeToPseudo(func));
+    scopeFunctions.forEach((funcObj) => {
+      interpreter.setValueToScope(
+        funcObj.name,
+        interpreter.nativeToPseudo(funcObj.func)
+      );
     });
   };
   const compileToES5 = (code) => {

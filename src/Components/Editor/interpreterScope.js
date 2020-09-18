@@ -13,6 +13,7 @@ import {
   removeDuplicateNodes,
 } from "../../Algorithms/algorithmUtils";
 import { astar } from "../../Algorithms/pathfindingAlgorithms";
+import { randomOptimized } from "../../Algorithms/mappingAlgorithms";
 
 export const INTERPRETER_resetGridSearchProperties = (grid) => {
   resetGridSearchProperties(grid);
@@ -60,18 +61,20 @@ export const INTERPRETER_adjustRobotPathToBatteryAndInsertReturnPath = (
   );
 };
 
+//prettier-ignore
 export default [
-  getShortestPathNodesInOrder,
-  getAllNodes,
-  isNeighbors,
-  isEqual,
-  isValidCoordinates,
-  getNeighbors,
-  getGridDeepCopy,
-  INTERPRETER_adjustRobotPathToBatteryAndInsertReturnPath,
-  INTERPRETER_astar,
-  INTERPRETER_resetGridSearchProperties,
-  INTERPRETER_shuffle,
-  INTERPRETER_fillPathGapsInNodeList,
-  INTERPRETER_removeDuplicateNodes,
+  {name: getShortestPathNodesInOrder.name, func: getShortestPathNodesInOrder},
+  {name: getAllNodes.name, func: getAllNodes},
+  {name: isNeighbors.name, func: isNeighbors},
+  {name: isEqual.name, func: isEqual },
+  {name: isValidCoordinates.name, func: isValidCoordinates},
+  {name: getNeighbors.name, func: getNeighbors},
+  {name: getGridDeepCopy.name, func: getGridDeepCopy},
+  {name: randomOptimized.name, func: randomOptimized},
+  {name: shuffle.name, func: INTERPRETER_shuffle},
+  {name: adjustRobotPathToBatteryAndInsertReturnPath.name, func: INTERPRETER_adjustRobotPathToBatteryAndInsertReturnPath},
+  {name: astar.name, func: INTERPRETER_astar},
+  {name: resetGridSearchProperties.name, func: INTERPRETER_resetGridSearchProperties},
+  {name: fillPathGapsInNodeList.name, func: INTERPRETER_fillPathGapsInNodeList},
+  {name: removeDuplicateNodes.name, func: INTERPRETER_removeDuplicateNodes},
 ];
