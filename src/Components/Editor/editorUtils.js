@@ -22,9 +22,12 @@ import { EXECUTE } from "./code";
 export const createSandboxedInterpreter = (code, context) => {
   const establishEnvironment = (context, interpreter) => {
     const isPrimitive = (value) => Object(value) !== value;
+    const isBatteryEmpty = () =>
+      Math.floor((availableSteps / (grid.length * grid[0].length)) * 100) === 0;
+
     const { grid, availableSteps, startNode } = context.state;
     const { robot } = context;
-    if (!availableSteps) {
+    if (isBatteryEmpty()) {
       throw new Exception(NO_BATTERY);
     }
     robot.syncMapLayoutWithGrid(grid);
@@ -210,7 +213,7 @@ export const measure = (algorithm, config, simulationType) => {
     interpreter.run();
     const t1 = performance.now();
     const path = interpreter.pseudoToNative(interpreter.value);
-    return [path, t1 - t0];
+    return [path, (t1 - t0)/200];
   };
   const runNativeAlgorithmCalculateRuntime = (algorithm, config) => {
     const { grid, robot, startNode, availableSteps } = config;

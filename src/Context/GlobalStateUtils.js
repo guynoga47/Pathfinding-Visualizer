@@ -22,3 +22,17 @@ export const createNode = (row, col, isWall = false) => {
     previousNode: null,
   };
 };
+
+export const convertAvailableStepsToBatteryCapacity = (
+  grid,
+  availableSteps
+) => {
+  /* We are using this function in relation to the current loaded configuration and also in the DataRow of Benchmark component,
+  so we need to take care of both cases. */
+  const currSteps = !availableSteps
+    ? this.state.availableSteps
+    : availableSteps;
+  const gridHeight = !grid ? this.gridHeight : grid.length;
+  const gridWidth = !grid ? this.gridWidth : grid[0].length;
+  return Math.floor((currSteps / (gridHeight * gridWidth)) * 100);
+};

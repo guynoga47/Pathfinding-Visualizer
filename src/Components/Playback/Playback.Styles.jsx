@@ -11,6 +11,6 @@ export default makeStyles((theme) => ({
     display: "flex",
     justifyContent: "center",
     marginBottom: "2em",
-    marginRight: "7.5em",
+    marginRight: "8em",
   },
 }));

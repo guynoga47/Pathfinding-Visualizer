@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
 import Node from "../Node/Node";
-import Controls, { DEFAULT_SPEED } from "../Playback/Playback";
+import Playback, { DEFAULT_SPEED } from "../Playback/Playback";
 
 import "./Visualizer.css";
 
@@ -467,7 +467,7 @@ export default class Visualizer extends Component {
     const { grid } = this.context.state;
     return (
       <>
-        <Controls
+        <Playback
           onReset={this.handleReset}
           onPlay={this.handlePlay}
           onSpeedChange={this.handleSpeedChanged}

@@ -17,7 +17,7 @@ export const WARNING_MSG = `Are you sure you want to restore code back to defaul
 
 export const TIME_LIMIT_EXCEEDED = `Time limit exceeded, check for infinite loops or performance bottlenecks!`;
 
-export const NO_BATTERY = `Time limit exceeded, check for infinite loops or performance bottlenecks!`;
+export const NO_BATTERY = `Please charge the robot's battery before attempting to validate the code!`;
 
 export const COMPILATION_FAILED = `Code compilation failed, please check your internet connection!`;
 
