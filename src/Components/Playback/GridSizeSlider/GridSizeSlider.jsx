@@ -7,13 +7,14 @@ import Slider from "../Sliders/Base";
 import GridContext from "../../../Context/grid-context";
 
 const MIN = 15;
-const MAX = 35;
-const DEFAULT_VALUE = 25;
+const MAX = 25;
+const DEFAULT_VALUE = 20;
 
 const useStyles = makeStyles({
   root: {
-    width: 300,
+    width: 200,
     marginRight: "2em",
+    marginLeft: "4em",
     textAlign: "center",
   },
 });
@@ -30,14 +31,6 @@ const marks = [
   {
     value: 25,
     label: "25x50",
-  },
-  {
-    value: 30,
-    label: "30x60",
-  },
-  {
-    value: 35,
-    label: "35x70",
   },
 ];
 
@@ -56,7 +49,6 @@ export default function GridSizeSlider({ disabled, onGridSizeChange }) {
 
   useEffect(() => {
     if (context.state.configLoaded) {
-      console.log("layout loaded in restrictedSlider");
       if (context.state.grid.length !== value) {
         setValue(context.state.grid.length);
       }

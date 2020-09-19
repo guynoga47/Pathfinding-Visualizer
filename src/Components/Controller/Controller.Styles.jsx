@@ -40,11 +40,6 @@ export default makeStyles((theme) => ({
     height: "6em",
     padding: "0 10px",
   },
-  logo: {
-    display: "flex",
-    alignItems: "center",
-    height: "6em",
-  },
   logoPlaceholder: {
     fontWeight: 500,
     fontStyle: "italic",

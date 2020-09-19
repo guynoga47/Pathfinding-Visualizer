@@ -72,7 +72,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
   const [validatedResult, setValidatedResult] = React.useState(false);
 
   let ace = useRef(null);
-  let benchmarkCache = useRef(null);
+  let cache = useRef(null);
 
   const { editorScript } = context.state;
   /*
@@ -102,30 +102,25 @@ const Editor = ({ open, setCodeEditorOpen }) => {
   };
 
   const handleBenchmark = () => {
-    const isCachedBenchmarkAvailable = (simulationType) => {
-      return (
-        benchmarkCache?.current?.data &&
-        simulationType === benchmarkCache?.current?.simulationType
-      );
+    const isCachedBenchmarkAvailable = () => {
+      return cache?.current?.benchmark;
     };
     const cacheBenchmark = (scores) => {
-      benchmarkCache.current = {
-        data: transformScoresToBenchmarkData(scores),
-        simulationType,
+      cache.current = {
+        ...cache.current,
+        benchmark: transformScoresToBenchmarkData(scores),
       };
     };
-
-    const { simulationType } = context.state;
-    if (isCachedBenchmarkAvailable(simulationType)) {
-      setShowBenchmark(benchmarkCache.current.data);
+    if (isCachedBenchmarkAvailable()) {
+      setShowBenchmark(cache.current.benchmark);
       return;
     }
+    const { simulationType } = context.state;
 
     const benchmarkAlgorithms = getBenchmarkAlgorithms(simulationType).concat([
       { name: "User Script", code: code },
     ]);
     const benchmarkConfigs = getBenchmarkConfigs(simulationType);
-    const t0 = performance.now();
     const scores = [];
     for (const [i, algorithm] of benchmarkAlgorithms.entries()) {
       scores.push([]);
@@ -138,37 +133,47 @@ const Editor = ({ open, setCodeEditorOpen }) => {
         });
       }
     }
-    const t1 = performance.now();
-    console.log(t1 - t0);
     cacheBenchmark(scores);
-    setShowBenchmark(benchmarkCache.current.data);
+    setShowBenchmark(cache.current.benchmark);
   };
 
   const handleValidateScript = () => {
-    /*set some flag to visualizer to initialize handlePlay function with the evaluation of the user code*/
+    const cacheValidatedResult = (result) => {
+      cache.current = {
+        ...cache.current,
+        validatedResult: result,
+      };
+    };
+
+    const isCachedValidatedResultAvailable = () => {
+      return cache?.current?.validatedResult;
+    };
 
     const { editorScript } = context.state;
     if (code !== editorScript) {
       context.updateState("editorScript", code);
-      benchmarkCache.current = null;
+      cache.current = null;
+    } else if (isCachedValidatedResultAvailable()) {
+      setShowSuccess(SUCCESS_MSG);
+      return;
     }
+
     try {
       const interpreter = createSandboxedInterpreter(code, context);
-      let t0 = performance.now();
+
       checkTimeLimitExceeded(interpreter);
-      let t1 = performance.now();
-      console.log(t1 - t0);
+
       interpreter.run();
 
       const result = interpreter.pseudoToNative(interpreter.value);
-
-      console.log(result.filter((node) => node.visitCount > 1));
 
       validate(result, context);
 
       setShowSuccess(SUCCESS_MSG);
 
       setValidatedResult(result);
+
+      cacheValidatedResult(result);
     } catch (err) {
       setShowError(err.message);
       context.updateState("editorSimulation", false);
@@ -176,7 +181,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
   };
 
   const handleLoadUserScript = (event) => {
-    benchmarkCache.current = null;
+    cache.current = null;
     context.updateState("editorScript", code);
     const reader = new FileReader();
     reader.onload = () => {
@@ -209,7 +214,6 @@ const Editor = ({ open, setCodeEditorOpen }) => {
   };
 
   const handleDismiss = () => {
-    setValidatedResult(false);
     context.updateState("editorSimulation", false);
     setShowSuccess(false);
   };
@@ -230,6 +234,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
 
   const handleClose = () => {
     context.updateState("editorScript", code);
+    cache.current = null;
     setValidatedResult(false);
     setCodeEditorOpen(false);
   };
@@ -481,7 +486,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
             <Grid item>
               <Button
                 className={classes.msgBtn}
-                style={{ marginRight: "10em", marginLeft: 0 }}
+                style={{ marginRight: "12em", marginLeft: 0 }}
                 variant="outlined"
                 color="secondary"
                 onClick={handleDismiss}

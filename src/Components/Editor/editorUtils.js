@@ -10,6 +10,12 @@ import staticConfigs from "./configs.json";
 import validators from "./validators";
 import Exception from "../../Classes/Exception";
 
+import {
+  TIME_LIMIT_EXCEEDED,
+  NO_BATTERY,
+  COMPILATION_FAILED,
+} from "./Message/messages";
+
 import Robot from "../../Classes/Robot";
 import { EXECUTE } from "./code";
 
@@ -19,12 +25,10 @@ export const createSandboxedInterpreter = (code, context) => {
     const { grid, availableSteps, startNode } = context.state;
     const { robot } = context;
     if (!availableSteps) {
-      throw new Exception(
-        "Please charge the robot's battery before validating the script!"
-      );
+      throw new Exception(NO_BATTERY);
     }
     robot.syncMapLayoutWithGrid(grid);
-    const args = [
+    const scopeArgs = [
       { name: "grid", value: grid },
       { name: "map", value: robot.map },
       {
@@ -34,7 +38,7 @@ export const createSandboxedInterpreter = (code, context) => {
       { name: "availableSteps", value: availableSteps },
     ];
 
-    args.forEach((arg) => {
+    scopeArgs.forEach((arg) => {
       interpreter.setValueToScope(
         arg.name,
         isPrimitive(arg.value)
@@ -63,9 +67,7 @@ export const createSandboxedInterpreter = (code, context) => {
         sourceType: "script",
       }).code;
     } catch (err) {
-      throw new Exception(
-        "Code compilation failed, please check your internet connection!"
-      );
+      throw new Exception(COMPILATION_FAILED);
     }
   };
   try {
@@ -74,7 +76,6 @@ export const createSandboxedInterpreter = (code, context) => {
     establishEnvironment(context, interpreter);
     return interpreter;
   } catch (err) {
-    console.log(err);
     throw new Exception(err.message);
   }
 };
@@ -309,9 +310,7 @@ export const checkTimeLimitExceeded = (interpreter) => {
     let now = new Date().getTime() - start;
     let secondsPassed = Math.floor((now / 1000) % 60);
     if (secondsPassed === 10) {
-      throw new Exception(
-        "Time limit exceeded, check for infinite loops or performance bottlenecks!"
-      );
+      throw new Exception(TIME_LIMIT_EXCEEDED);
     }
   }
 };

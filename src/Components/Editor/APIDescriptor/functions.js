@@ -1,11 +1,22 @@
 export default [
   {
+    name: "boolean isEqual(node1, node2)",
+    snippet: `console.log(isEqual(grid[0][0], grid[0][0])) /*true*/
+console.log(isEqual(grid[0][0], grid[0][2])) /*false*/
+console.log(isEqual(grid[0][0], map[0][0])) /*true*/`,
+    description: `
+          Performs a check if 2 nodes are identical with respect to their 'row' and 'col' values.
+          Comparing with === might be problematic because the variables are copied by value with every 
+          function call.
+    `,
+  },
+  {
     name: "boolean isNeighbors(node1, node2)",
     snippet: `console.log(isNeighbors(grid[0][0], grid[0][1])) /*true*/
 console.log(isNeighbors(grid[0][0], grid[0][2])) /*false*/
 console.log(isNeighbors(grid[1][5], grid[1][5])) /*true*/`,
     description: `
-          The isNeighbors functions is used check if two nodes are neighbors.
+          The 'isNeighbors' functions is used check if two nodes are neighbors.
           It can be used, for example, to validate the path before returning it to check if
           there are illegal non-adjacent nodes in it.
     `,
@@ -16,7 +27,7 @@ console.log(isNeighbors(grid[1][5], grid[1][5])) /*true*/`,
 neighbors = neighbors.filter(neighbor => !neighbor.isWall && neighbours.isMapped);
 /*get all sweep traversable neighbors of node[i][j] in the map.*/`,
     description: `
-          This function retrieves the adjacent nodes to any given node, with respect to grid dimensions.
+          This function retrieves, by value ,the adjacent nodes to any given node, with respect to the grid's dimensions.
           Definition of adjacent nodes, for node[i][j]:
 
           [node[i+1][j], node[i-1][j], node[i][j+1], node[i][j-1]].
@@ -29,7 +40,8 @@ nodes.forEach(node=>{
   /*do something...*/
 });`,
     description: `
-         Spreads all the nodes to a 1-dimensional array representation.
+         Spreads all the nodes to a 1-dimensional array representation. 
+         The returned array contains copys of the original grid nodes.
     `,
   },
   {
@@ -61,7 +73,7 @@ if(astarResult){
          Performs an astar search from 'startNode' to 'finishNode'.
          'filters' indicates the properties which we filter out each node neighbors by. if its not defined, the default is to look only at nodes which
          are not visited yet and are not walls.
-         The returned value is an array of the searched nodes, in the order of the search.
+         The returned value is an array of the searched nodes (a copy of them), in the order of the search.
          To extract the path, you need to use 'getShortestPathNodesInOrder' on the last searched node, which should be 'finishNode', if a path was found.
          in case no path was found, the algorithm returns false.
     `,
@@ -79,13 +91,13 @@ if(astarResult){
       `,
   },
   {
-    name: "resetGridSearchProperties(grid)",
+    name: "[...[...grid[0], grid] resetGridSearchProperties(grid)",
     snippet: `const astarResult = astar(grid, grid[i][j], grid[k][p]);
 if(astarResult){
   const path = getShortestPathNodesInOrder(astarResult[astarResult.length-1])
   /*...*/
 }
-resetGridSearchProperties(grid);`,
+grid = resetGridSearchProperties(grid);`,
     description: `
            This function can be used to facilitate repeated searches that uses the properties {isVisited, distance, heuristicDistance, previousNode} 
            of the nodes. astar uses it internally to return a "clean" grid, so it's not required in conjunction with it, but can be used 
@@ -94,34 +106,35 @@ resetGridSearchProperties(grid);`,
   },
   {
     name:
-      "fillPathGapsInNodeList(map, nodeList, visitedNodesInOrder, ?filters)",
+      "[...nodes] fillPathGapsInNodeList(map, nodeList, visitedNodesInOrder, ?filters)",
     snippet: `const visitedNodesInOrder = [];
 const bfsResult = breadthTraversal(map, startNode, availableSteps);
-fillPathGapsInNodeList(map, bfsResult, visitedNodesInOrder, 
+visitedNodesInOrder = fillPathGapsInNodeList(map, bfsResult, visitedNodesInOrder, 
       [{attribute: "isVisited", evaluation: false}, 
       {attribute: "isWall", evaluation: false},
       {attribute: "isMapped", evaluation: true}]);
 return visitedNodesInOrder;`,
     description: `
            This function calls astar internally in order to fill gaps in a node list, by inserting paths between any 'nodeList' adjacent nodes, which
-           are not neighbors in the grid.
+           are not neighbors in the grid. returns a continious list of by-value copied nodes.
       `,
   },
   {
-    name: "removeDuplicateNodes(path)",
+    name: "[...nodes] removeDuplicateNodes(path)",
     snippet: `const path = pathWithDuplicateAdjacentNodes;
-removeDuplicateNodes(path)`,
+path = removeDuplicateNodes(path)`,
     description: `
-    This function searches for 'path' adjacent nodes which are identical and removes all the consequetive occurences of that node.
+    This function searches for 'path' adjacent nodes which are identical and removes all the consequetive occurences of that node. 
+    returns a list of by-value copied nodes.
       `,
   },
   {
-    name: "shuffle(array)",
+    name: "[...array] shuffle(array)",
     snippet: `const neighbors = getNeighbors(currNode).filter(node => !node.isWall);
-shuffle(neighbors);
+neighbors = shuffle(neighbors);
 /*...*/`,
     description: `
-    Shuffles an array inplace.
+    Shuffles an array and returns a copy of it, shuffled.
     In our context it's used to force different patterns of traversals for our determinstic algorithms.
     Without shuffling, the order of the neighbors in the returned array is always the same, which can cause similair behavior between different
     runs of the same traversal algorithm.

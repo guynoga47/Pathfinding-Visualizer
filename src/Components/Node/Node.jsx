@@ -13,7 +13,6 @@ export default class Node extends PureComponent {
       onMouseUp,
     } = this.props;
     const extraClassName = isStart ? "node-start" : "";
-
     /* The pattern of sending the handlers for the node from the parent could be costly performance wise, because
     the functions recreates on every re-render. we avoid it because we use direct DOM access to change styles, and barely rerendering the 
     Node components with react. */

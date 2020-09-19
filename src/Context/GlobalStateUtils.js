@@ -1,7 +1,7 @@
 import { MAX_DISTANCE } from "../Algorithms/algorithmUtils";
 
-export const DEFAULT_GRID_HEIGHT = 25;
-export const DEFAULT_GRID_WIDTH = 50;
+export const DEFAULT_GRID_HEIGHT = 20;
+export const DEFAULT_GRID_WIDTH = 40;
 
 export const calculateDefaultDockingStation = (height, width) => {
   const defaultDockingStation = {

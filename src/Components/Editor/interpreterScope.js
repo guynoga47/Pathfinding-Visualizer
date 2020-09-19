@@ -13,7 +13,6 @@ import {
   removeDuplicateNodes,
 } from "../../Algorithms/algorithmUtils";
 import { astar } from "../../Algorithms/pathfindingAlgorithms";
-import { randomOptimized } from "../../Algorithms/mappingAlgorithms";
 
 export const INTERPRETER_resetGridSearchProperties = (grid) => {
   resetGridSearchProperties(grid);
@@ -70,7 +69,6 @@ export default [
   {name: isValidCoordinates.name, func: isValidCoordinates},
   {name: getNeighbors.name, func: getNeighbors},
   {name: getGridDeepCopy.name, func: getGridDeepCopy},
-  {name: randomOptimized.name, func: randomOptimized},
   {name: shuffle.name, func: INTERPRETER_shuffle},
   {name: adjustRobotPathToBatteryAndInsertReturnPath.name, func: INTERPRETER_adjustRobotPathToBatteryAndInsertReturnPath},
   {name: astar.name, func: INTERPRETER_astar},

@@ -21,40 +21,22 @@ import BatterySlider from "./SliderBattery/BatterySlider";
 import ToolsStyles from "./Tools.Styles";
 
 const useStyles = ToolsStyles;
-
+//prettier-ignore
 const Tools = () => {
   const context = useContext(GridContext);
 
   const { isRunning, isFinished, drawItem, drawMethod } = context.state;
 
-  const [anchorElDrawingItemDust, setAnchorElDrawingItemDust] = React.useState(
-    null
-  );
-  const [anchorElDrawingItemWall, setAnchorElDrawingItemWall] = React.useState(
-    null
-  );
+  const [anchorElDrawingItemDust, setAnchorElDrawingItemDust] = React.useState(null);
+  const [anchorElDrawingItemWall, setAnchorElDrawingItemWall] = React.useState(null);
   const [anchorElDrawFree, setAnchorElDrawFree] = React.useState(null);
-  const [anchorElDrawRectangle, setAnchorElDrawRectangle] = React.useState(
-    null
-  );
-  const [
-    anchorElSaveConfiguration,
-    setAnchorElSaveConfiguration,
-  ] = React.useState(null);
-  const [
-    anchorElLoadConfiguration,
-    setAnchorElLoadConfiguration,
-  ] = React.useState(null);
+  const [anchorElDrawRectangle, setAnchorElDrawRectangle] = React.useState(null);
+  const [anchorElSaveConfiguration,setAnchorElSaveConfiguration] = React.useState(null);
+  const [anchorElLoadConfiguration,setAnchorElLoadConfiguration] = React.useState(null);
   const [anchorElHighlightMap, setAnchorElHighlightMap] = React.useState(null);
   const [anchorElDrawObstacle, setAnchorElDrawObstacle] = React.useState(null);
-  const [
-    anchorElBatteryCapacityClick,
-    setAnchorElBatteryCapacityClick,
-  ] = React.useState(null);
-  const [
-    anchorElBatteryCapacityHover,
-    setAnchorElBatteryCapacityHover,
-  ] = React.useState(null);
+  const [anchorElBatteryCapacityClick,setAnchorElBatteryCapacityClick] = React.useState(null);
+  const [anchorElBatteryCapacityHover,setAnchorElBatteryCapacityHover] = React.useState(null);
 
   const handleBatteryCapacityButtonClicked = (event) => {
     setAnchorElBatteryCapacityClick(event.currentTarget);
@@ -256,7 +238,7 @@ const Tools = () => {
           onMouseOver={handlePopoverOpen}
           onMouseLeave={handlePopoverClose}
           disabled={isRunning}
-          component={"span"}
+          component={!isRunning ? "span" : undefined}
           htmlFor="icon-button-load-config"
         >
           <IconLoad />
@@ -299,19 +281,11 @@ const Tools = () => {
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
-        classes={{
-          paper: classes.paper,
-        }}
+        classes={{paper: classes.paper}}
         open={Boolean(anchorElSaveConfiguration)}
         anchorEl={anchorElSaveConfiguration}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
+        anchorOrigin={{vertical: "bottom",horizontal: "left"}}
+        transformOrigin={{vertical: "top",horizontal: "left"}}
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
@@ -322,19 +296,11 @@ const Tools = () => {
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
-        classes={{
-          paper: classes.paper,
-        }}
+        classes={{paper: classes.paper,}}
         open={Boolean(anchorElDrawingItemDust)}
         anchorEl={anchorElDrawingItemDust}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
+        anchorOrigin={{vertical: "bottom",horizontal: "left"}}
+        transformOrigin={{vertical: "top",horizontal: "left"}}
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
@@ -343,19 +309,11 @@ const Tools = () => {
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
-        classes={{
-          paper: classes.paper,
-        }}
+        classes={{paper: classes.paper}}
         open={Boolean(anchorElDrawingItemWall)}
         anchorEl={anchorElDrawingItemWall}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
+        anchorOrigin={{vertical: "bottom",horizontal: "left"}}
+        transformOrigin={{vertical: "top",horizontal: "left"}}
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
@@ -364,19 +322,11 @@ const Tools = () => {
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
-        classes={{
-          paper: classes.paper,
-        }}
+        classes={{paper: classes.paper,}}
         open={Boolean(anchorElLoadConfiguration)}
         anchorEl={anchorElLoadConfiguration}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
+        anchorOrigin={{vertical: "bottom",horizontal: "left"}}
+        transformOrigin={{vertical: "top",horizontal: "left"}}
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
@@ -387,19 +337,11 @@ const Tools = () => {
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
-        classes={{
-          paper: classes.paper,
-        }}
+        classes={{paper: classes.paper}}
         open={Boolean(anchorElDrawFree)}
         anchorEl={anchorElDrawFree}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
+        anchorOrigin={{vertical: "bottom",horizontal: "left"}}
+        transformOrigin={{vertical: "top",horizontal: "left"}}
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
@@ -408,19 +350,11 @@ const Tools = () => {
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
-        classes={{
-          paper: classes.paper,
-        }}
+        classes={{paper: classes.paper}}
         open={Boolean(anchorElDrawObstacle)}
         anchorEl={anchorElDrawObstacle}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
+        anchorOrigin={{vertical: "bottom",horizontal: "left"}}
+        transformOrigin={{vertical: "top",horizontal: "left"}}
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
@@ -431,19 +365,11 @@ const Tools = () => {
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
-        classes={{
-          paper: classes.paper,
-        }}
+        classes={{paper: classes.paper}}
         open={Boolean(anchorElDrawRectangle)}
         anchorEl={anchorElDrawRectangle}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
+        anchorOrigin={{vertical: "bottom",horizontal: "left"}}
+        transformOrigin={{vertical: "top",horizontal: "left"}}
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
@@ -453,22 +379,13 @@ const Tools = () => {
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
-        classes={{
-          paper: classes.paper,
-        }}
+        classes={{paper: classes.paper}}
         open={Boolean(anchorElHighlightMap)}
         anchorEl={anchorElHighlightMap}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
+        anchorOrigin={{vertical: "bottom",horizontal: "left"}}
+        transformOrigin={{vertical: "top",horizontal: "left"}}
         onClose={handlePopoverClose}
-        disableRestoreFocus
-      >
+        disableRestoreFocus>
         <Typography className={classes.popoverText}>
           Highlight Robot Map
         </Typography>
@@ -477,22 +394,13 @@ const Tools = () => {
       <Popover
         id="mouse-over-popover"
         className={classes.popover}
-        classes={{
-          paper: classes.paper,
-        }}
+        classes={{paper: classes.paper,}}
         open={Boolean(anchorElBatteryCapacityHover)}
         anchorEl={anchorElBatteryCapacityHover}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
+        anchorOrigin={{vertical: "bottom",horizontal: "left"}}
+        transformOrigin={{vertical: "top",horizontal: "left"}}
         onClose={handlePopoverClose}
-        disableRestoreFocus
-      >
+        disableRestoreFocus>
         <Typography className={classes.popoverText}>
           Battery: {context.convertAvailableStepsToBatteryCapacity()}%
         </Typography>
@@ -503,15 +411,8 @@ const Tools = () => {
         open={Boolean(anchorElBatteryCapacityClick)}
         anchorEl={anchorElBatteryCapacityClick}
         onClose={handleBatteryCapacityButtonClosed}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "center",
-        }}
-      >
+        anchorOrigin={{vertical: "bottom",horizontal: "center"}}
+        transformOrigin={{vertical: "top",horizontal: "center"}}>
         <BatterySlider />
       </Popover>
     </div>

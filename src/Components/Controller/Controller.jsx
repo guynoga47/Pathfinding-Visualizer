@@ -4,10 +4,10 @@ import AppBar from "@material-ui/core/AppBar";
 import Grid from "@material-ui/core/Grid";
 import Toolbar from "@material-ui/core/Toolbar";
 import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
 import ListItemText from "@material-ui/core/ListItemText";
 import MenuItem from "@material-ui/core/MenuItem";
 import CodeIcon from "@material-ui/icons/Code";
+import Typography from "@material-ui/core/Typography";
 
 import Editor from "../Editor/Editor";
 
@@ -81,12 +81,12 @@ const Controller = () => {
   return (
     <AppBar position="relative" className={classes.appBar}>
       <Toolbar className={classes.toolbar}>
-        {/* <img className={classes.logo} src={logo} alt="pathfinding logo" /> */}
         <Grid container justify="space-between" alignItems="center">
           <Grid item>
             <Typography variant="h4" className={classes.logoPlaceholder}>
-              Pathfinder
+              Sweepify
             </Typography>
+            {/* <img className={classes.logo} src={logo} alt="pathfinding logo" /> */}
           </Grid>
           <Grid item>
             <Button

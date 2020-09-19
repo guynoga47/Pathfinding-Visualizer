@@ -153,9 +153,6 @@ export default class Visualizer extends Component {
       ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList.remove(
         `node-start`
       );
-      console.log(
-        "removed node-start in handleMouseLeave from node" + row + "-" + col
-      );
     } else if (this.mouseDown) {
       if (drawMethod === "rectangle") {
         this.createAndRenderRectangle(row, col, {
@@ -204,12 +201,6 @@ export default class Visualizer extends Component {
     const { updateState } = this.context;
     const node = grid[row][col];
     const nodeDOM = ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]);
-
-    console.log(this.context.state.grid[row][col]);
-    console.log(
-      ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]).classList
-    );
-    console.log(this.context.state.grid[row][col].dust);
 
     if (isFinished || isRunning) return;
     if (this.startNodeMouseDown) {
