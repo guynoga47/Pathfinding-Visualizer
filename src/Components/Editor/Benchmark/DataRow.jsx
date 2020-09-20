@@ -16,7 +16,7 @@ import PlayCircleOutlineIcon from "@material-ui/icons/PlayCircleOutline";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 
-import GridContext from "../../../Context/grid-context";
+import GlobalContext from "../../../Context/global-context";
 
 const useStyles = makeStyles({
   root: {
@@ -30,7 +30,7 @@ const useStyles = makeStyles({
 const DataRow = ({ row, onBenchmarkReplay }) => {
   const [open, setOpen] = useState(false);
   const classes = useStyles();
-  const context = useContext(GridContext);
+  const context = useContext(GlobalContext);
   const {convertAvailableStepsToBatteryCapacity} = context;
 
   return (

@@ -42,6 +42,35 @@ export const baseMap = (grid, map, dockingStation, availableSteps, step) => {
 };
 
 const spiralMap = (grid, map, dockingStation, availableSteps) => {
+  const calculateSpiralTraversalOffsets = (grid, availableSteps) => {
+    const offsets = [];
+    let [row, col] = [0, 0];
+    let [dirRow, dirCol] = [0, -1];
+    let [numRows, numCols] = [grid.length, grid[0].length];
+    for (let i = 0; i < availableSteps; i++) {
+      if (
+        -numRows / 2 < row &&
+        row <= numRows / 2 &&
+        -numCols / 2 < col &&
+        col <= numCols / 2
+      ) {
+        offsets.push({
+          row,
+          col,
+        });
+      }
+      if (
+        row === col ||
+        (row < 0 && row === -col) ||
+        (row > 0 && row === 1 - col)
+      ) {
+        [dirRow, dirCol] = [-dirCol, dirRow];
+      }
+      [row, col] = [row + dirRow, col + dirCol];
+    }
+    return offsets;
+  };
+
   const visitedNodesInOrder = [];
 
   let [startNode, pathToBorderNode] = extendToMapCurrentBorder(
@@ -103,35 +132,6 @@ const spiralMap = (grid, map, dockingStation, availableSteps) => {
     }
   }
   return robotPath;
-};
-
-const calculateSpiralTraversalOffsets = (grid, availableSteps) => {
-  const offsets = [];
-  let [row, col] = [0, 0];
-  let [dirRow, dirCol] = [0, -1];
-  let [numRows, numCols] = [grid.length, grid[0].length];
-  for (let i = 0; i < availableSteps; i++) {
-    if (
-      -numRows / 2 < row &&
-      row <= numRows / 2 &&
-      -numCols / 2 < col &&
-      col <= numCols / 2
-    ) {
-      offsets.push({
-        row,
-        col,
-      });
-    }
-    if (
-      row === col ||
-      (row < 0 && row === -col) ||
-      (row > 0 && row === 1 - col)
-    ) {
-      [dirRow, dirCol] = [-dirCol, dirRow];
-    }
-    [row, col] = [row + dirRow, col + dirCol];
-  }
-  return offsets;
 };
 
 export const randomOptimized = (currNode, map, grid) => {
@@ -259,12 +259,12 @@ const getRandomBufferNode = (map, grid) => {
     : false;
 };
 
-const depthMap = (grid, robotMap, startNode, availableSteps) => {
+const depthMap = (grid, map, startNode, availableSteps) => {
   const visitedNodesInOrder = [];
 
   let [currStartNode, pathFromDockToStartNode] = extendToMapCurrentBorder(
-    robotMap,
-    robotMap,
+    grid,
+    map,
     startNode,
     visitedNodesInOrder,
     availableSteps
@@ -272,14 +272,14 @@ const depthMap = (grid, robotMap, startNode, availableSteps) => {
 
   availableSteps = availableSteps - pathFromDockToStartNode.length;
 
-  let dfsResult = dfs(robotMap, currStartNode);
+  let dfsResult = dfs(map, currStartNode);
 
   const robotPath = [];
-  fillPathGapsInNodeList(robotMap, dfsResult, robotPath);
+  fillPathGapsInNodeList(map, dfsResult, robotPath);
 
   visitedNodesInOrder.push(...robotPath);
 
-  resetGridSearchProperties(robotMap);
+  resetGridSearchProperties(map);
   /*
   we reset grid properties because modifyVisitedNodes tries to deepcopy the map it gets. after astar the previousNodes
   in some nodes of the map are pointing to other nodes, so we actually deep copying much more objects then we intend to, 
@@ -287,7 +287,7 @@ const depthMap = (grid, robotMap, startNode, availableSteps) => {
    */
   let visitedConsideringBattery = adjustRobotPathToBatteryAndInsertReturnPath(
     visitedNodesInOrder,
-    robotMap,
+    map,
     startNode,
     availableSteps
   );

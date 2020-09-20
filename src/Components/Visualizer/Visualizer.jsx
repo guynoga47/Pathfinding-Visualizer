@@ -6,10 +6,10 @@ import Playback, { DEFAULT_SPEED } from "../Playback/Playback";
 
 import "./Visualizer.css";
 
-import GridContext from "../../Context/grid-context";
+import GlobalContext from "../../Context/global-context";
 
 export default class Visualizer extends Component {
-  static contextType = GridContext;
+  static contextType = GlobalContext;
 
   constructor(props) {
     super(props);

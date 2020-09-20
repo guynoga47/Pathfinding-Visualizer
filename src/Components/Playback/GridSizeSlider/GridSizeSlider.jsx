@@ -1,23 +1,16 @@
 import React, { useState, useEffect, useContext } from "react";
 
-import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import Slider from "../Sliders/Base";
 
-import GridContext from "../../../Context/grid-context";
+import GlobalContext from "../../../Context/global-context";
+import GridSizeSliderStyles from "./GridSizeSlider.Styles";
 
 const MIN = 15;
 const MAX = 25;
 const DEFAULT_VALUE = 20;
 
-const useStyles = makeStyles({
-  root: {
-    width: 200,
-    marginRight: "2em",
-    marginLeft: "4em",
-    textAlign: "center",
-  },
-});
+const useStyles = GridSizeSliderStyles;
 
 const marks = [
   {
@@ -43,7 +36,7 @@ function valueLabelFormat(value) {
 }
 
 export default function GridSizeSlider({ disabled, onGridSizeChange }) {
-  const context = useContext(GridContext);
+  const context = useContext(GlobalContext);
   const classes = useStyles();
   const [value, setValue] = useState(DEFAULT_VALUE);
 

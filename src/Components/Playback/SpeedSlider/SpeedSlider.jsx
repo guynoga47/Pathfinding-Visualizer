@@ -1,16 +1,11 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
+
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Slider from "../Sliders/Base";
+import SpeedSliderStyles from "./SpeedSlider.Styles";
 
-const useStyles = makeStyles({
-  root: {
-    width: 200,
-    marginLeft: "2em",
-    textAlign: "center",
-  },
-});
+const useStyles = SpeedSliderStyles;
 
 export default function SpeedSlider({ disabled, min, max, onSpeedChange }) {
   const classes = useStyles();

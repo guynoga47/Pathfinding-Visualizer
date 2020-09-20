@@ -8,7 +8,7 @@ import ResetIcon from "@material-ui/icons/RotateLeftTwoTone";
 import Spinner from "./Spinner/Spinner";
 
 import ControlStyles from "./Playback.Styles";
-import GridContext from "../../Context/grid-context";
+import GlobalContext from "../../Context/global-context";
 
 export const DEFAULT_SPEED = 200;
 
@@ -18,7 +18,7 @@ const MAX_SPEED = 270;
 const useStyles = ControlStyles;
 
 const Controls = ({ onReset, onPlay, onSpeedChange, onGridSizeChange }) => {
-  const context = useContext(GridContext);
+  const context = useContext(GlobalContext);
   const classes = useStyles();
 
   return (

@@ -9,9 +9,10 @@ import IconBattery80 from "@material-ui/icons/Battery80";
 import IconBattery90 from "@material-ui/icons/Battery90";
 import IconBatteryFull from "@material-ui/icons/BatteryFull";
 
-import GridContext from "../../Context/grid-context";
+import GlobalContext from "../../Context/global-context";
+
 const InteractiveBattery = () => {
-  const context = useContext(GridContext);
+  const context = useContext(GlobalContext);
   const currentCapacity = context.convertAvailableStepsToBatteryCapacity();
   switch (true) {
     case currentCapacity >= 90:

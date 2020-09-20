@@ -39,7 +39,7 @@ import {
 
 import { DEFAULT_EDITOR_MARKUP } from "./code";
 
-import GridContext from "../../Context/grid-context";
+import GlobalContext from "../../Context/global-context";
 
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/theme-monokai";
@@ -52,7 +52,7 @@ const useStyles = editorStyles;
 const Editor = ({ open, setCodeEditorOpen }) => {
   const classes = useStyles();
 
-  const context = useContext(GridContext);
+  const context = useContext(GlobalContext);
 
   const [firstMount, setFirstMount] = useState(true);
   const [showError, setShowError] = useState(false);

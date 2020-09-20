@@ -159,22 +159,15 @@ export const adjustRobotPathToBatteryAndInsertReturnPath = (
   availableSteps,
   search = astar
 ) => {
-  const runningMap = getGridDeepCopy(map);
-
-  const startNodeRef = runningMap[dockingStation.row][dockingStation.col];
-  /*     visitedNodesInOrder.forEach((visitedNode) => {
-    const { row, col } = visitedNode;
-    runningMap[row][col].isMapped = true;
-  }); */
   /* 
   visitedNodes is calculated regardless of battery size (using the algorithm callback).
   we want to minimize the amount of iterations of this loop, so we start searching for a path
   back to the docking station starting from the node that corresponds to our current battery, backwards,
   until we find a complete path (mapping/sweeping + return to docking station).
-
-  TODO:
-  1. Consider removing isMapped consideration. we update the robot map in handlePlay function on visualizer.
   */
+  const runningMap = getGridDeepCopy(map);
+
+  const startNodeRef = runningMap[dockingStation.row][dockingStation.col];
 
   const visitedNodesConsideringBattery = visitedNodesInOrder.slice(
     0,

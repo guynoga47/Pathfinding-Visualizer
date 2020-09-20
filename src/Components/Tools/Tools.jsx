@@ -14,16 +14,16 @@ import IconWall from "@material-ui/icons/ViewQuilt";
 import Popover from "@material-ui/core/Popover";
 import Typography from "@material-ui/core/Typography";
 
-import GridContext from "../../Context/grid-context";
+import GlobalContext from "../../Context/global-context";
 import InteractiveBattery from "../Tools/InteractiveBattery";
-import BatterySlider from "./SliderBattery/BatterySlider";
+import BatterySlider from "./BatterySlider/BatterySlider";
 
 import ToolsStyles from "./Tools.Styles";
 
 const useStyles = ToolsStyles;
 //prettier-ignore
 const Tools = () => {
-  const context = useContext(GridContext);
+  const context = useContext(GlobalContext);
 
   const { isRunning, isFinished, drawItem, drawMethod } = context.state;
 

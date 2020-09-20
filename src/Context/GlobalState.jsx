@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import GridContext from "./grid-context";
+import GlobalContext from "./global-context";
 import {
   DEFAULT_GRID_HEIGHT,
   DEFAULT_GRID_WIDTH,
@@ -193,7 +193,7 @@ class GlobalState extends Component {
 
   render() {
     return (
-      <GridContext.Provider
+      <GlobalContext.Provider
         value={{
           state: this.state,
           robot: this.robot,
@@ -216,7 +216,7 @@ class GlobalState extends Component {
         }}
       >
         {this.props.children}
-      </GridContext.Provider>
+      </GlobalContext.Provider>
     );
   }
 }

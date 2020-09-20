@@ -16,7 +16,7 @@ import Tools from "../Tools/Tools";
 import StyledMenu from "./StyledMenu";
 import controllerStyles from "./Controller.Styles";
 
-import GridContext from "../../Context/grid-context";
+import GlobalContext from "../../Context/global-context";
 
 import * as mappingAlgorithms from "../../Algorithms/mappingAlgorithms";
 import * as cleaningAlgorithms from "../../Algorithms/cleaningAlgorithms";
@@ -31,7 +31,7 @@ const Controller = () => {
     setAnchorElSimulationType,
   ] = React.useState(null);
   const [codeEditorOpen, setCodeEditorOpen] = React.useState(false);
-  const context = useContext(GridContext);
+  const context = useContext(GlobalContext);
   const classes = useStyles();
   const { drawItem } = context.state;
 

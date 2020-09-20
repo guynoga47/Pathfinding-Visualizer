@@ -6,11 +6,11 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Typography from "@material-ui/core/Typography";
 
-import APIDescriptorStyles, {
+import DraggableDialogStyles, {
   PaperComponent,
-} from "../APIDescriptor/APIDescriptor.Styles.jsx";
+} from "./DialogContainer.Styles.jsx";
 
-const useStyles = APIDescriptorStyles;
+const useStyles = DraggableDialogStyles;
 
 const DialogContainer = ({ title, showDialog, setShowDialog, children }) => {
   const classes = useStyles();

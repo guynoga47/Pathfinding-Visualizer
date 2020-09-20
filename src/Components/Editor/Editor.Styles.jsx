@@ -39,7 +39,6 @@ export default makeStyles((theme) => ({
     justifyContent: "center",
   },
   paper: {
-    /*border: "2px solid #000", */
     boxShadow: theme.shadows[5],
   },
   msgBtn: {
