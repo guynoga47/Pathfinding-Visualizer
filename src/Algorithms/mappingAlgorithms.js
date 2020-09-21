@@ -2,7 +2,6 @@ import { dfs, bfs, astar } from "./pathfindingAlgorithms";
 import {
   getAllNodes,
   getNeighbors,
-  getShortestPathNodesInOrder,
   resetGridSearchProperties,
   isNeighbors,
   isValidCoordinates,
@@ -210,33 +209,28 @@ const isBorderNodeRequiredAndAccesible = (
 
 const plotPathToBorderNode = (grid, map, dockingStation) => {
   let pathToBufferNode = [];
+  const filters = [
+    {
+      attribute: "isVisited",
+      evaluation: false,
+    },
+    {
+      attribute: "isWall",
+      evaluation: false,
+    },
+    {
+      attribute: "isMapped",
+      evaluation: true,
+    },
+  ];
   const unmappedAreaBufferNode = getRandomBufferNode(map, grid);
   if (unmappedAreaBufferNode) {
-    const astarToBufferNodeResult = astar(
+    pathToBufferNode = astar(
       map,
       dockingStation,
       unmappedAreaBufferNode,
-      [
-        {
-          attribute: "isVisited",
-          evaluation: false,
-        },
-        {
-          attribute: "isWall",
-          evaluation: false,
-        },
-        {
-          attribute: "isMapped",
-          evaluation: true,
-        },
-      ]
+      filters
     );
-    pathToBufferNode = [];
-    if (astarToBufferNodeResult) {
-      pathToBufferNode = getShortestPathNodesInOrder(
-        astarToBufferNodeResult[astarToBufferNodeResult.length - 1]
-      );
-    }
   }
   resetGridSearchProperties(map);
   return pathToBufferNode;

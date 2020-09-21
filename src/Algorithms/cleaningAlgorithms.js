@@ -2,7 +2,6 @@ import { astar } from "./pathfindingAlgorithms";
 import Stack from "../Classes/Stack";
 import {
   getNeighbors,
-  getShortestPathNodesInOrder,
   adjustRobotPathToBatteryAndInsertReturnPath,
   shuffle,
   adjList,
@@ -81,32 +80,24 @@ const greedyCleaning = (grid, map, dockingStation, availableSteps) => {
 
   while (true) {
     const bestCandidate = findBestCandidate(currNode, robotPath, map);
-    let astarRes = astar(
+    let returnPath = astar(
       map,
       bestCandidate,
       map[dockingStation.row][dockingStation.col],
       filters
     );
-    const shortestPathFromBestCandidateToDockingStation = getShortestPathNodesInOrder(
-      astarRes[astarRes.length - 1]
-    );
-    const startThroughBestToDockingLength =
-      shortestPathFromBestCandidateToDockingStation.length + robotPath.length;
 
-    if (startThroughBestToDockingLength < availableSteps) {
+    if (returnPath && returnPath.length + robotPath.length < availableSteps) {
       robotPath.push(bestCandidate);
       bestCandidate.visitCount++;
     } else {
-      astarRes = astar(
+      returnPath = astar(
         map,
         currNode,
         map[dockingStation.row][dockingStation.col],
         filters
       );
-      const shortestPathBackToDockingStation = getShortestPathNodesInOrder(
-        astarRes[astarRes.length - 1]
-      );
-      robotPath.push(...shortestPathBackToDockingStation);
+      robotPath.push(...returnPath);
       break;
     }
     currNode = bestCandidate;
@@ -122,7 +113,7 @@ export const data = [
     func: greedyCleaning,
   },
   {
-    name: "Euler Cleaning",
+    name: "Euler Circuit Cleaning",
     shortened: "Euler",
     func: findEulerCircuit,
   },

@@ -62,39 +62,25 @@ console.log(temporaryGrid===grid);/*false*/`,
   },
   {
     name: "[...nodes] astar(grid, startNode, finishNode, ?filters)",
-    snippet: `const astarResult = astar(map, currNode, dockingStation, 
+    snippet: `const path = astar(map, currNode, dockingStation, 
     [{attribute: "isVisited", evaluation: false}, 
     {attribute: "isWall", evaluation: false},
     {attribute: "isMapped", evaluation: true}]);
-if(astarResult){
+if(path){
   /*...*/
 }`,
     description: `
          Performs an astar search from 'startNode' to 'finishNode'.
          'filters' indicates the properties which we filter out each node neighbors by. if its not defined, the default is to look only at nodes which
          are not visited yet and are not walls.
-         The returned value is an array of the searched nodes (a copy of them), in the order of the search.
-         To extract the path, you need to use 'getShortestPathNodesInOrder' on the last searched node, which should be 'finishNode', if a path was found.
-         in case no path was found, the algorithm returns false.
+         The returned value is an array of nodes which forms the shortest path found from 'startNode' to 'finishNode'.
+         in case no path was found, the function returns false.
     `,
   },
   {
-    name: "[...nodes] getShortestPathNodesInOrder(finishNode)",
-    snippet: `const astarResult = astar(grid, grid[i][j], grid[k][p]);
-if(astarResult){
-  const path = getShortestPathNodesInOrder(astarResult[astarResult.length-1])
-  /*...*/`,
-    description: `
-           Retrieves a path of nodes to the 'finishNode', based on a previous run of 'astar' 
-           (or any other algorithm which uses the 'previousNode' property of the node).
-           if 'finishNode' is not a node, returns false.
-      `,
-  },
-  {
     name: "[...[...grid[0], grid] resetGridSearchProperties(grid)",
-    snippet: `const astarResult = astar(grid, grid[i][j], grid[k][p]);
-if(astarResult){
-  const path = getShortestPathNodesInOrder(astarResult[astarResult.length-1])
+    snippet: `const path = astar(grid, grid[i][j], grid[k][p]);
+if(path){
   /*...*/
 }
 grid = resetGridSearchProperties(grid);`,

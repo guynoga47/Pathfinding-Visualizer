@@ -1,5 +1,4 @@
 import {
-  getShortestPathNodesInOrder,
   getAllNodes,
   isNeighbors,
   resetGridSearchProperties,
@@ -62,7 +61,6 @@ export const INTERPRETER_adjustRobotPathToBatteryAndInsertReturnPath = (
 
 //prettier-ignore
 export default [
-  {name: getShortestPathNodesInOrder.name, func: getShortestPathNodesInOrder},
   {name: getAllNodes.name, func: getAllNodes},
   {name: isNeighbors.name, func: isNeighbors},
   {name: isEqual.name, func: isEqual },

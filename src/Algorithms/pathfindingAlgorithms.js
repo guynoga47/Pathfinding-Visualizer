@@ -3,6 +3,7 @@ import {
   getNeighbors,
   MAX_DISTANCE,
   isEqual,
+  getShortestPathNodesInOrder,
   resetGridSearchProperties,
 } from "./algorithmUtils";
 
@@ -26,7 +27,7 @@ export const bfs = (grid, startNode, finishNode) => {
     //need to find more elegant way to work on a copy of the array, maybe move grid to 1d array instead of 2d.
     if (closestNode === finishNode) {
       visitedNodesInOrder.forEach((node) => (node.isVisited = false));
-      return visitedNodesInOrder;
+      return getShortestPathNodesInOrder(finishNode);
     }
     updateUnvisitedNeighborsDistances(closestNode, grid);
   }
@@ -109,7 +110,7 @@ export const astar = (
     visitedNodesInOrder.push(closestNode);
 
     if (isEqual(closestNode, finishNode)) {
-      return visitedNodesInOrder;
+      return getShortestPathNodesInOrder(finishNode);
     }
 
     let neighbors = getNeighbors(closestNode, grid);

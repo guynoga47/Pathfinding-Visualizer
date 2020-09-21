@@ -79,10 +79,7 @@ export const fillPathGapsInNodeList = (
     const currNode = nodeList[i];
     const prevNode = i > 0 ? nodeList[i - 1] : currNode;
     if (!isNeighbors(currNode, prevNode)) {
-      const astarResult = astar(map, prevNode, currNode, filters);
-      const path = getShortestPathNodesInOrder(
-        astarResult[astarResult.length - 1]
-      );
+      const path = astar(map, prevNode, currNode, filters);
       if (path) {
         visitedNodesInOrder.push(...path);
       } else {
@@ -152,13 +149,9 @@ export const adjList = (
   return adjList;
 };
 
-export const adjustRobotPathToBatteryAndInsertReturnPath = (
-  visitedNodesInOrder,
-  map,
-  dockingStation,
-  availableSteps,
-  search = astar
-) => {
+//prettier-ignore
+
+export const adjustRobotPathToBatteryAndInsertReturnPath = (visitedNodesInOrder,map,dockingStation,availableSteps,search = astar) => {
   /* 
   visitedNodes is calculated regardless of battery size (using the algorithm callback).
   we want to minimize the amount of iterations of this loop, so we start searching for a path
@@ -168,56 +161,38 @@ export const adjustRobotPathToBatteryAndInsertReturnPath = (
   const runningMap = getGridDeepCopy(map);
 
   const startNodeRef = runningMap[dockingStation.row][dockingStation.col];
+  
+  const filters = [
+    {
+      attribute: "isVisited",
+      evaluation: false,
+    },
+    {
+      attribute: "isWall",
+      evaluation: false,
+    },
+    {
+      attribute: "isMapped",
+      evaluation: true,
+    },
+  ];
 
-  const visitedNodesConsideringBattery = visitedNodesInOrder.slice(
-    0,
-    availableSteps
-  );
-  visitedNodesConsideringBattery.forEach(
-    (node) => (runningMap[node.row][node.col].isMapped = true)
-  );
+  const visitedNodesConsideringBattery = visitedNodesInOrder.slice(0,availableSteps);
 
-  for (
-    let i = Math.min(
-      availableSteps - 1,
-      visitedNodesConsideringBattery.length - 1
-    );
-    i >= 1;
-    i--
-  ) {
-    const node =
-      runningMap[visitedNodesConsideringBattery[i].row][
-        visitedNodesConsideringBattery[i].col
-      ];
-    const searchResult = search(runningMap, node, startNodeRef, [
-      {
-        attribute: "isVisited",
-        evaluation: false,
-      },
-      {
-        attribute: "isWall",
-        evaluation: false,
-      },
-      {
-        attribute: "isMapped",
-        evaluation: true,
-      },
-    ]);
+  visitedNodesConsideringBattery.forEach((node) => (runningMap[node.row][node.col].isMapped = true));
 
-    if (searchResult) {
-      const pathToDockingStation = getShortestPathNodesInOrder(
-        searchResult[searchResult.length - 1]
-      );
-      if (pathToDockingStation.length + i <= availableSteps) {
+  for (let i = Math.min(availableSteps - 1,visitedNodesConsideringBattery.length - 1); i >= 1; i--) {
+    const node = runningMap[visitedNodesConsideringBattery[i].row][visitedNodesConsideringBattery[i].col];
+    const pathToDockingStation = search(runningMap, node, startNodeRef, filters);
+
+    if (pathToDockingStation && (pathToDockingStation.length + i <= availableSteps)) {
         const robotPath = visitedNodesInOrder
           .slice(0, i)
           .concat(pathToDockingStation);
         removeDuplicateNodes(robotPath);
         return robotPath;
       }
-    }
   }
-
   console.log(
     "error in adjustRobotPathToBatteryAndInsertReturnPath in GlobalContext"
   );

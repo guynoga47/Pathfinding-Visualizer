@@ -270,23 +270,24 @@ export default class Visualizer extends Component {
     const node = this.context.state.grid[row][col];
     if (node.isWall) return;
     const nodeDOM = ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]);
-
+    const MAX_DUST = 9;
+    const MIN_DUST = 0;
     if (!this.context.isStartNode(row, col)) {
       const dust = node.dust;
       if (add) {
-        if (node.dust < 9) {
+        if (node.dust < MAX_DUST) {
           nodeDOM.classList.add(`dust-${dust + 1}`);
-          if (dust > 0) {
+          if (dust > MIN_DUST) {
             nodeDOM.classList.remove(`dust-${dust}`);
           }
           node.dust++;
-        } else if (node.dust === 9) {
-          nodeDOM.classList.remove(`dust-9`);
-          node.dust = 0;
+        } else if (node.dust === MAX_DUST) {
+          nodeDOM.classList.remove(`dust-${MAX_DUST}`);
+          node.dust = MIN_DUST;
         }
       } else if (remove) {
         nodeDOM.classList.remove(`dust-${dust}`);
-        node.dust = 0;
+        node.dust = MIN_DUST;
       }
     }
   };
@@ -338,7 +339,8 @@ export default class Visualizer extends Component {
     const set = new Set();
     const visualizationArray = [];
     visitedNodesInOrder.forEach((node) => {
-      const setComparableNode = JSON.stringify(node);
+      const { row, col } = node;
+      const setComparableNode = JSON.stringify({ row, col });
       if (!set.has(setComparableNode)) {
         set.add(setComparableNode);
         for (let i = 0; i < node.dust + 1; i++) {
@@ -398,8 +400,6 @@ export default class Visualizer extends Component {
       this.context.updateState("editorSimulation", false);
     }
     this.visualize(robotPath);
-    /*     this.context.updateState("isRunning", false);
-    this.context.updateState("isFinished", true); */
   };
 
   handleClearWalls = () => {
