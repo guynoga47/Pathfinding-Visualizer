@@ -165,8 +165,6 @@ const Editor = ({ open, setCodeEditorOpen }) => {
 
       interpreter.run();
 
-      const result = interpreter.pseudoToNative(interpreter.value);
-
       validate(result, context);
 
       setShowSuccess(SUCCESS_MSG);
