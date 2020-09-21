@@ -270,8 +270,7 @@ export default class Visualizer extends Component {
     const node = this.context.state.grid[row][col];
     if (node.isWall) return;
     const nodeDOM = ReactDOM.findDOMNode(this.refs[`node-${row}-${col}`]);
-    const MAX_DUST = 9;
-    const MIN_DUST = 0;
+    const [MIN_DUST, MAX_DUST] = [0, 9];
     if (!this.context.isStartNode(row, col)) {
       const dust = node.dust;
       if (add) {
