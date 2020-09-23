@@ -60,11 +60,6 @@ cursor: `url(${importAssetName}, auto` for example.
   cursor: url("../../assets/cursors/move.cur"), pointer;
 }
 
-.node-finish {
-  background-image: url("../../assets/icons/door.svg");
-  cursor: url("../../assets/cursors/move.cur"), pointer;
-}
-
 .node-wall {
   background-color: #1f2833;
   border-color: #1f2833;

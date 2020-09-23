@@ -2,6 +2,7 @@ import Exception from "../../Classes/Exception";
 import {
   isValidCoordinates,
   isNeighbors,
+  isEqual,
 } from "../../Algorithms/algorithmUtils";
 
 import * as MSG from "./Message/messages";
@@ -36,11 +37,12 @@ const validateIsGridNodes = (result, context) => {
     }
   }
 };
+//prettier-ignore
 const validateContinuousPath = (result, context) => {
   for (let i = 0; i < result.length; i++) {
     const currNode = result[i];
     const prevNode = i > 0 ? result[i - 1] : currNode;
-    if (!isNeighbors(currNode, prevNode)) {
+    if (!isNeighbors(currNode, prevNode) || (isEqual(currNode, prevNode) && i > 0)) {
       throw new Exception(MSG.VALIDATE_NON_ADJACENT(currNode, prevNode, i));
     }
   }

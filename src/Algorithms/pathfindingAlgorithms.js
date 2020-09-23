@@ -110,7 +110,10 @@ export const astar = (
     visitedNodesInOrder.push(closestNode);
 
     if (isEqual(closestNode, finishNode)) {
-      return getShortestPathNodesInOrder(finishNode);
+      /*       return finishNode; */
+      /* return visitedNodesInOrder; */
+
+      return getShortestPathNodesInOrder(closestNode);
     }
 
     let neighbors = getNeighbors(closestNode, grid);

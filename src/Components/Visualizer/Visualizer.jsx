@@ -33,16 +33,16 @@ export default class Visualizer extends Component {
   handleGridSizeChange = (height) => {
     if (height === this.context.gridHeight) return;
     this.context.resizeGrid(height, this.applyNodesStyles, {
-      resetWalls: true,
-      resetDust: true,
-      resetHighlight: true,
+      removeWalls: true,
+      removeDust: true,
+      removeHighlight: true,
     });
   };
 
   applyNodesStyles = ({
-    resetHighlight,
-    resetWalls,
-    resetDust,
+    removeHighlight,
+    removeWalls,
+    removeDust,
     setWalls,
     setDust,
     setHighlight,
@@ -55,16 +55,16 @@ export default class Visualizer extends Component {
       const gridNode = grid[row][col];
       const mapNode = robot.map[row][col];
       const nodeDOM = ReactDOM.findDOMNode(this.refs[nodeRef]);
-      if (resetWalls) {
+      if (removeWalls) {
         nodeDOM.classList.remove("node-wall");
       }
-      if (resetDust) {
+      if (removeDust) {
         if (nodeDOM.classList.length > 1) {
           const dust = nodeDOM.classList[1];
           nodeDOM.classList.remove(`${dust}`);
         }
       }
-      if (resetHighlight) {
+      if (removeHighlight) {
         if (mapNode.isMapped) {
           nodeDOM.classList.remove("highlight");
           if (gridNode.dust) {
@@ -355,6 +355,9 @@ export default class Visualizer extends Component {
   unlockControls = () => {
     this.context.updateState("isRunning", false);
     this.context.updateState("isFinished", true);
+    if (this.context.state.editorSimulation) {
+      this.context.updateState("editorSimulation", false);
+    }
   };
 
   handlePlay = () => {
@@ -384,7 +387,7 @@ export default class Visualizer extends Component {
     robot.syncMapLayoutWithGrid(grid);
 
     const robotPath = editorSimulation
-      ? editorSimulation
+      ? editorSimulation.path
       : activeAlgorithmCallback(
           grid,
           robot.map,
@@ -396,7 +399,10 @@ export default class Visualizer extends Component {
       robot.updateMap(robotPath);
     }
     if (editorSimulation) {
-      this.context.updateState("editorSimulation", false);
+      this.context.updateState("editorSimulation", {
+        ...editorSimulation,
+        path: undefined,
+      });
     }
     this.visualize(robotPath);
   };
@@ -436,7 +442,7 @@ export default class Visualizer extends Component {
   componentDidUpdate() {
     const { request, editorSimulation, configLoaded } = this.context.state;
 
-    if (editorSimulation) {
+    if (editorSimulation.path) {
       this.handlePlay();
     }
     if (request === "clearWalls") {
@@ -447,8 +453,8 @@ export default class Visualizer extends Component {
     }
     if (configLoaded) {
       this.applyNodesStyles({
-        resetWalls: true,
-        resetDust: true,
+        removeWalls: true,
+        removeDust: true,
         setWalls: true,
         setDust: true,
       });
@@ -458,7 +464,7 @@ export default class Visualizer extends Component {
       this.applyNodesStyles({ setHighlight: true });
     }
     if (request === "removeHighlightMap") {
-      this.applyNodesStyles({ resetHighlight: true });
+      this.applyNodesStyles({ removeHighlight: true });
     }
   }
 

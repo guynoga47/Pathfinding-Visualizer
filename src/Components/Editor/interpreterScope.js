@@ -13,6 +13,14 @@ import {
 } from "../../Algorithms/algorithmUtils";
 import { astar } from "../../Algorithms/pathfindingAlgorithms";
 
+/*
+We are wrapping the functions with INTERPRETER... version because the function is based on inplace modification of it's received parameter,
+but modifying variables inplace is not fully supported by the interpreter. 
+The interpreter wraps every parameter with another object when sending it to a function in the scope, so the side effect is we must use 
+by-value functions only.
+The functions which are not by-reference based are exported in their original version.
+*/
+
 export const INTERPRETER_resetGridSearchProperties = (grid) => {
   resetGridSearchProperties(grid);
   return grid;

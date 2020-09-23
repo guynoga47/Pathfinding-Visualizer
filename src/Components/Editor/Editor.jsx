@@ -207,7 +207,10 @@ const Editor = ({ open, setCodeEditorOpen }) => {
 
   const handleRun = () => {
     setTimeout(() => {
-      context.updateState("editorSimulation", validatedResult);
+      context.updateState("editorSimulation", {
+        path: validatedResult,
+        isActive: "user",
+      });
     }, 500);
     setShowSuccess(false);
     handleClose();
@@ -225,8 +228,12 @@ const Editor = ({ open, setCodeEditorOpen }) => {
       return { ...config, map, simulationType };
     };
     const { loadConfiguration } = context;
-    loadConfiguration(adjustBenchmarkConfigToLoaderRequirements(config));
-    context.updateState("editorSimulation", replay);
+    context.updateState(
+      "editorSimulation",
+      { path: replay, isActive: "replay" },
+      loadConfiguration,
+      adjustBenchmarkConfigToLoaderRequirements(config)
+    );
     setShowBenchmark(false);
     setShowSuccess(false);
     handleClose();

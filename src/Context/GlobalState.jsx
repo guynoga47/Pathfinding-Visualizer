@@ -11,9 +11,13 @@ import { DEFAULT_EDITOR_MARKUP } from "../Components/Editor/code";
 import Robot from "../Classes/Robot";
 import { resetGridSearchProperties } from "../Algorithms/algorithmUtils";
 
+import * as mappingAlgorithms from "../Algorithms/mappingAlgorithms";
+import * as cleaningAlgorithms from "../Algorithms/cleaningAlgorithms";
+
 import { saveAs } from "file-saver";
-//Grid logical context, everything related to visualizing it is sitting
-//in visualizer.jsx
+
+/* Grid logical context, everything related to visualizing it is sitting in visualizer.jsx */
+
 class GlobalState extends Component {
   constructor(props) {
     super(props);
@@ -70,7 +74,13 @@ class GlobalState extends Component {
   };
 
   saveConfiguration = () => {
-    const { grid, availableSteps, startNode, simulationType } = this.state;
+    const {
+      grid,
+      availableSteps,
+      startNode,
+      simulationType,
+      activeAlgorithm,
+    } = this.state;
     const { map } = this.robot;
     const blob = new Blob([
       JSON.stringify({
@@ -79,6 +89,7 @@ class GlobalState extends Component {
         availableSteps,
         startNode,
         simulationType,
+        activeAlgorithm,
       }),
     ]);
     const [rows, cols] = [this.gridHeight, this.gridWidth];
@@ -93,7 +104,20 @@ class GlobalState extends Component {
   };
 
   loadConfiguration = (config) => {
-    const { grid, map, startNode, availableSteps, simulationType } = config;
+    const {
+      grid,
+      map,
+      startNode,
+      availableSteps,
+      simulationType,
+      activeAlgorithm,
+    } = config;
+    const retrieveFunctionReference = (name) => {
+      const functions = mappingAlgorithms.data.concat(cleaningAlgorithms.data);
+      for (const funcObj of functions) {
+        if (funcObj.name === name) return funcObj.func;
+      }
+    };
     this.robot = new Robot(grid);
     this.robot.map = map;
     this.gridHeight = grid.length;
@@ -104,6 +128,12 @@ class GlobalState extends Component {
         availableSteps,
         startNode,
         simulationType,
+        activeAlgorithm: activeAlgorithm
+          ? {
+              ...activeAlgorithm,
+              func: retrieveFunctionReference(activeAlgorithm?.name),
+            }
+          : undefined,
         configLoaded: true,
       },
       () => {
@@ -163,13 +193,12 @@ class GlobalState extends Component {
   };
 
   updateState = (key, value, callback, param) => {
+    /* if the state update requires to run a function after state changes then we
+    will call this updateState with the callback, otherwise we wouldn't, so on
+    regular state updates we dont want to invoke undefined function. */
     this.setState({ [key]: value }, () => {
       callback && callback(param);
     });
-
-    //if the state update requires to run a function after state changes then we
-    //will call this updateState with the callback, otherwise we wouldn't, so on
-    //regular state updates we dont want to invoke undefined function.
   };
 
   isStartNode = (row, col) => {

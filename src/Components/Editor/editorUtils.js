@@ -119,19 +119,20 @@ export const restrictEditingSegment = (editor) => {
 };
 
 export const extendAutocomplete = (editor) => {
-  const funcProtoString = (func) => {
+  const funcProtoString = (funcObj) => {
+    const { name, func } = funcObj;
     const parsedFunc = func.toString();
     const args = parsedFunc.substring(0, parsedFunc.indexOf("=") - 1);
     const numArgs = args.split(",").length - 1;
     const resArgs = numArgs ? args : `(${args})`;
-    return `${func.name}${resArgs};`;
+    return `${name}${resArgs};`;
   };
 
   const createWordsArray = (session, scopeFunctions, localKeywords) => [
-    ...scopeFunctions.map((func) => {
+    ...scopeFunctions.map((funcObj) => {
       return {
-        caption: func.name,
-        value: funcProtoString(func),
+        caption: funcObj.name,
+        value: funcProtoString(funcObj),
         meta: "function",
       };
     }),

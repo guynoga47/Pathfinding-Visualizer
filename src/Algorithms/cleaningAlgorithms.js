@@ -52,19 +52,19 @@ const greedyCleaning = (grid, map, dockingStation, availableSteps) => {
       );
       return nodesByVisitCount[0];
     };
-    let currNeighbours = getNeighbors(currNode, map).filter(
+    let neighbors = getNeighbors(currNode, map).filter(
       (neighbour) => neighbour.isMapped
     );
-    shuffle(currNeighbours);
-    const sortedNeighboursByWeight = currNeighbours.sort(
+    shuffle(neighbors);
+    const sortedNeighborsByWeight = neighbors.sort(
       (neigbour1, neigbour2) => neigbour2.dust - neigbour1.dust
     );
-    for (let i = 0; i < sortedNeighboursByWeight.length - 1; i++) {
-      if (!robotPath.includes(sortedNeighboursByWeight[i])) {
-        return sortedNeighboursByWeight[i];
+    for (let i = 0; i < sortedNeighborsByWeight.length - 1; i++) {
+      if (sortedNeighborsByWeight[i].visitCount === 0) {
+        return sortedNeighborsByWeight[i];
       }
     }
-    return getLeastVisitedNode(currNeighbours);
+    return getLeastVisitedNode(neighbors);
   };
 
   const robotPath = [];

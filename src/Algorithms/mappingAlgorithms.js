@@ -275,7 +275,7 @@ const depthMap = (grid, map, startNode, availableSteps) => {
 
   resetGridSearchProperties(map);
   /*
-  we reset grid properties because modifyVisitedNodes tries to deepcopy the map it gets. after astar the previousNodes
+  we reset grid properties because adjustRobotPath... tries to deep copy the map it gets. after astar the previousNodes
   in some nodes of the map are pointing to other nodes, so we actually deep copying much more objects then we intend to, 
   causing a huge unnessecary delay.
    */

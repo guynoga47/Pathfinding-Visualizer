@@ -86,7 +86,6 @@ const Controller = () => {
             <Typography variant="h4" className={classes.logoPlaceholder}>
               Sweepify
             </Typography>
-            {/* <img className={classes.logo} src={logo} alt="pathfinding logo" /> */}
           </Grid>
           <Grid item>
             <Button
@@ -124,10 +123,12 @@ const Controller = () => {
                 disabled={context.state.isRunning}
                 onClick={handleAlgorithmSelectionMenuClicked}
               >
-                {context.state.activeAlgorithm
-                  ? context.state.activeAlgorithm.shortened
-                  : context.state.editorSimulation
+                {context.state.editorSimulation?.isActive === "user"
                   ? "USER SCRIPT"
+                  : context.state.editorSimulation?.isActive === "replay"
+                  ? "PLAYBACK"
+                  : context.state.activeAlgorithm
+                  ? context.state.activeAlgorithm.shortened
                   : "SELECT"}
               </Button>
             )}

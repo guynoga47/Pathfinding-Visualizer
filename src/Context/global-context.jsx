@@ -7,7 +7,7 @@ export default createContext({
     simulationType: "",
     activeAlgorithm: undefined,
     editorScript: "",
-    editorSimulation: [],
+    editorSimulation: {},
     isFinished: false,
     isRunning: false,
     startNode: undefined,

@@ -19,7 +19,8 @@ export const TIME_LIMIT_EXCEEDED = `Time limit exceeded, check for infinite loop
 
 export const NO_BATTERY = `Please charge the robot's battery before attempting to validate the code!`;
 
-export const COMPILATION_FAILED = `Code compilation failed, please check your internet connection!`;
+export const COMPILATION_FAILED = `'Babel' Code compilation failed.
+Check your code for syntax errors, and verify that you are connected to the internet!`;
 
 export const VALIDATE_RETURN_TYPE = (
   result
@@ -35,7 +36,7 @@ export const VALIDATE_PROPERTIES = (i) => `Invalid properties in Array[${i}].`;
 export const VALIDATE_COORDINATES = (i) =>
   `Invalid coordinates in Array[${i}].`;
 export const VALIDATE_NON_ADJACENT = (currNode, prevNode, i) => `Invalid path.
-  Non-adjacent nodes detected at indices [${i}], [${i - 1}].
+  Non-adjacent nodes detected at indices [${i - 1}], [${i}].
 
   Array[${i - 1}] = [${prevNode.row}, ${prevNode.col}]
   Array[${i}] = [${currNode.row}, ${currNode.col}]`;
