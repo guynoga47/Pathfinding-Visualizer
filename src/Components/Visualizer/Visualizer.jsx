@@ -317,6 +317,9 @@ export default class Visualizer extends Component {
       );
       setTimeout(() => {
         let { availableSteps } = this.context.state;
+        if (nodeDOM === null) {
+          console.log([nodeDOM, node]);
+        }
         nodeDOM.classList.add("node-visited");
         if (simulationType === "sweep")
           this.changeNodeDust(row, col, { remove: true });
@@ -395,13 +398,13 @@ export default class Visualizer extends Component {
           availableSteps
         );
 
-    if (simulationType === "map") {
+    if (simulationType === "map" && editorSimulation?.type !== "replay") {
       robot.updateMap(robotPath);
     }
     if (editorSimulation) {
       this.context.updateState("editorSimulation", {
         ...editorSimulation,
-        path: undefined,
+        path: null,
       });
     }
     this.visualize(robotPath);
@@ -442,7 +445,15 @@ export default class Visualizer extends Component {
   componentDidUpdate() {
     const { request, editorSimulation, configLoaded } = this.context.state;
 
-    if (editorSimulation.path) {
+    if (editorSimulation.path && configLoaded) {
+      /*
+      We require that the config loading process as part of the playback would be finished as well, before calling visualize.
+      This is necessary because in order to access some DOM node elemnts we need the Visualizer component to sense a change in the "grid" 
+      state parameter, so it would rerender it in it's correct size and also assign refs values to all of its nodes. the grid changes only 
+      after loading the config, but the editorSimulation state update is not coupled with the config state update so the asynchronity of setState
+      allows that editorSimulation.path can be updated before it's associated config has loaded.
+      so here we actually verify that both state changes happened and only then we call visualize that relies on DOM access using refs. 
+      */
       this.handlePlay();
     }
     if (request === "clearWalls") {

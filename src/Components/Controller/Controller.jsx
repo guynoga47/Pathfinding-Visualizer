@@ -123,10 +123,10 @@ const Controller = () => {
                 disabled={context.state.isRunning}
                 onClick={handleAlgorithmSelectionMenuClicked}
               >
-                {context.state.editorSimulation?.isActive === "user"
+                {context.state.editorSimulation?.type === "user"
                   ? "USER SCRIPT"
-                  : context.state.editorSimulation?.isActive === "replay"
-                  ? "PLAYBACK"
+                  : context.state.editorSimulation?.type === "replay"
+                  ? "REPLAY"
                   : context.state.activeAlgorithm
                   ? context.state.activeAlgorithm.shortened
                   : "SELECT"}

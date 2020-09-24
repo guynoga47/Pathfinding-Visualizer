@@ -209,7 +209,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
     setTimeout(() => {
       context.updateState("editorSimulation", {
         path: validatedResult,
-        isActive: "user",
+        type: "user",
       });
     }, 500);
     setShowSuccess(false);
@@ -230,7 +230,7 @@ const Editor = ({ open, setCodeEditorOpen }) => {
     const { loadConfiguration } = context;
     context.updateState(
       "editorSimulation",
-      { path: replay, isActive: "replay" },
+      { path: replay, type: "replay" },
       loadConfiguration,
       adjustBenchmarkConfigToLoaderRequirements(config)
     );
