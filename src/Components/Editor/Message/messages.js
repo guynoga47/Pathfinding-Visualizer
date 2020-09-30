@@ -60,3 +60,6 @@ export const VALIDATE_ACYCLIC_LAST = (
 
 Expected ending position: [${startNode.row},${startNode.col}] 
 Received ending position: [${lastNode.row},${lastNode.col}]`;
+
+export const VALIDATE_MAPPED_AREA_IN_SWEEP = () =>
+  `Can't perform a sweep operation on an unmapped grid.`;

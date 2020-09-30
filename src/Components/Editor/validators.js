@@ -73,6 +73,17 @@ const validateCyclicPath = (result, context) => {
   }
 };
 
+const validateMappedAreaOnSweepingAlgorithm = (result, context) => {
+  const { robot, state } = context;
+  const { simulationType } = state;
+  if (
+    simulationType === "sweep" &&
+    robot.map.filter((node) => node.isMapped).length === 0
+  ) {
+    throw new Exception(MSG.VALIDATE_MAPPED_AREA_IN_SWEEP());
+  }
+};
+
 /* 
 The order of validators is important:
 we want the less demanding checks to be done first, so the editor would feel more responsive when throwing error messages
@@ -81,6 +92,7 @@ exported as array so we can iterate over the validators in the designated functi
 */
 export default [
   validateReturnType,
+  validateMappedAreaOnSweepingAlgorithm,
   validateIsEmpty,
   validateIsGridNodes,
   validateStepLimitExceeded,

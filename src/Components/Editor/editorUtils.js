@@ -27,6 +27,7 @@ export const createSandboxedInterpreter = (code, context) => {
 
     const { grid, availableSteps, startNode } = context.state;
     const { robot } = context;
+
     if (isBatteryEmpty()) {
       throw new Exception(NO_BATTERY);
     }
