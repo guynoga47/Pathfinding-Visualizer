@@ -1242,11 +1242,11 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/sweepify/feff703ce532f20391dfed8199b6971e.js"
   },
   {
-    "revision": "4f56c4b7e89f813d1f8e99d91c149cb7",
+    "revision": "3ec340464b6e340734b6330cf51add2c",
     "url": "/sweepify/index.html"
   },
   {
-    "revision": "2fbcbf5a73296974eac6",
+    "revision": "29b90e9983165dbf6868",
     "url": "/sweepify/static/css/main.cc045da7.chunk.css"
   },
   {
@@ -1258,8 +1258,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/sweepify/static/js/2.d0d86828.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "2fbcbf5a73296974eac6",
-    "url": "/sweepify/static/js/main.18edcad1.chunk.js"
+    "revision": "29b90e9983165dbf6868",
+    "url": "/sweepify/static/js/main.a282fda7.chunk.js"
   },
   {
     "revision": "2fe25eafb6f2619b7429",

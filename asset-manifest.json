@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/sweepify/static/css/main.cc045da7.chunk.css",
-    "main.js": "/sweepify/static/js/main.18edcad1.chunk.js",
-    "main.js.map": "/sweepify/static/js/main.18edcad1.chunk.js.map",
+    "main.js": "/sweepify/static/js/main.a282fda7.chunk.js",
+    "main.js.map": "/sweepify/static/js/main.a282fda7.chunk.js.map",
     "runtime-main.js": "/sweepify/static/js/runtime-main.7bb65d0d.js",
     "runtime-main.js.map": "/sweepify/static/js/runtime-main.7bb65d0d.js.map",
     "static/js/2.d0d86828.chunk.js": "/sweepify/static/js/2.d0d86828.chunk.js",
@@ -422,7 +422,7 @@
     "mode-groovy.js": "/sweepify/fe6efc8bf7b948aa275d980518b286b7.js",
     "theme-gruvbox.js": "/sweepify/feff703ce532f20391dfed8199b6971e.js",
     "index.html": "/sweepify/index.html",
-    "precache-manifest.8dc35988fce43d9c5fd6c83ca7e8aaf5.js": "/sweepify/precache-manifest.8dc35988fce43d9c5fd6c83ca7e8aaf5.js",
+    "precache-manifest.fa6bdc9d702f3f5793b75a315a5a0ab9.js": "/sweepify/precache-manifest.fa6bdc9d702f3f5793b75a315a5a0ab9.js",
     "service-worker.js": "/sweepify/service-worker.js",
     "static/css/main.cc045da7.chunk.css.map": "/sweepify/static/css/main.cc045da7.chunk.css.map",
     "static/js/2.d0d86828.chunk.js.LICENSE.txt": "/sweepify/static/js/2.d0d86828.chunk.js.LICENSE.txt",
@@ -434,6 +434,6 @@
     "static/js/runtime-main.7bb65d0d.js",
     "static/js/2.d0d86828.chunk.js",
     "static/css/main.cc045da7.chunk.css",
-    "static/js/main.18edcad1.chunk.js"
+    "static/js/main.a282fda7.chunk.js"
   ]
 }
