@@ -444,8 +444,7 @@ export default class Visualizer extends Component {
 
   componentDidUpdate() {
     const { request, editorSimulation, configLoaded } = this.context.state;
-
-    if (editorSimulation.path && configLoaded) {
+    const isEditorSimulationRequired = () =>
       /*
       We require that the config loading process as part of the playback would be finished as well, before calling visualize.
       This is necessary because in order to access some DOM node elemnts we need the Visualizer component to sense a change in the "grid" 
@@ -454,6 +453,10 @@ export default class Visualizer extends Component {
       allows that editorSimulation.path can be updated before it's associated config has loaded.
       so here we actually verify that both state changes happened and only then we call visualize that relies on DOM access using refs. 
       */
+      editorSimulation.path &&
+      (configLoaded || editorSimulation.type === "user");
+
+    if (isEditorSimulationRequired()) {
       this.handlePlay();
     }
     if (request === "clearWalls") {
